@@ -1,278 +1,88 @@
-import { auth } from "@clerk/nextjs/server";
-import {
-  ArrowRight,
-  Home,
-  MessageSquare,
-  Plus,
-  TrendingUp,
-} from "lucide-react";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { sanityFetch } from "@/lib/sanity/live";
-import {
-  AGENT_DASHBOARD_QUERY,
-  DASHBOARD_LEADS_COUNT_QUERY,
-  DASHBOARD_LISTINGS_COUNT_QUERY,
-  DASHBOARD_NEW_LEADS_COUNT_QUERY,
-} from "@/lib/sanity/queries";
-
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Manage your listings and leads from your agent dashboard.",
-};
+import { BUSINESSES_BY_OWNER_QUERY } from "@/lib/sanity/queries";
+import { BarChart3, Users, Eye, DollarSign } from "lucide-react";
+import type { Business } from "@/types";
 
 export default async function DashboardPage() {
-  // Middleware guarantees: authenticated + has agent plan + onboarding complete
-  const { userId } = await auth();
+  const user = await currentUser();
+  if (!user) redirect("/sign-in");
 
-  const { data: agent } = await sanityFetch({
-    query: AGENT_DASHBOARD_QUERY,
-    params: { userId },
+  const { data: businesses } = await sanityFetch({
+    query: BUSINESSES_BY_OWNER_QUERY,
+    params: { clerkId: user.id },
   });
 
-  // Get stats
-  const [
-    { data: listingsCount },
-    { data: leadsCount },
-    { data: newLeadsCount },
-  ] = await Promise.all([
-    sanityFetch({
-      query: DASHBOARD_LISTINGS_COUNT_QUERY,
-      params: { agentId: agent._id },
-    }),
-    sanityFetch({
-      query: DASHBOARD_LEADS_COUNT_QUERY,
-      params: { agentId: agent._id },
-    }),
-    sanityFetch({
-      query: DASHBOARD_NEW_LEADS_COUNT_QUERY,
-      params: { agentId: agent._id },
-    }),
-  ]);
-
-  // Get time of day for greeting
-  const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const bizList = (businesses as Business[]) || [];
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-heading">
-            {greeting}, {agent.name}!
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Here&apos;s an overview of your activity
-          </p>
-        </div>
-        <Button asChild size="lg">
-          <Link href="/dashboard/listings/new">
-            <Plus className="h-5 w-5 mr-2" aria-hidden="true" />
-            Add New Listing
-          </Link>
-        </Button>
-      </div>
+    <div>
+      <h1 className="font-heading text-2xl font-bold text-white">Dashboard Overview</h1>
+      <p className="mt-1 text-gray-400">Welcome back, {user.firstName || "there"}!</p>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Total Listings */}
-        <div className="bg-background rounded-2xl border border-border/50 p-6 shadow-warm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Home className="h-6 w-6 text-primary" aria-hidden="true" />
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="glass-card p-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-pd-blue/20 p-2"><Eye className="h-5 w-5 text-pd-blue" /></div>
+            <div>
+              <p className="text-2xl font-bold text-white">0</p>
+              <p className="text-xs text-gray-400">Profile Views</p>
             </div>
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Listings
-            </span>
           </div>
-          <div className="text-4xl font-bold font-heading tabular-nums">
-            {listingsCount}
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Active properties
-          </p>
         </div>
-
-        {/* Total Leads */}
-        <div className="bg-background rounded-2xl border border-border/50 p-6 shadow-warm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center">
-              <MessageSquare
-                className="h-6 w-6 text-secondary"
-                aria-hidden="true"
-              />
+        <div className="glass-card p-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-green-500/20 p-2"><Users className="h-5 w-5 text-green-400" /></div>
+            <div>
+              <p className="text-2xl font-bold text-white">0</p>
+              <p className="text-xs text-gray-400">Leads This Month</p>
             </div>
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Leads
-            </span>
           </div>
-          <div className="text-4xl font-bold font-heading tabular-nums">
-            {leadsCount}
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">Total inquiries</p>
         </div>
-
-        {/* New Leads */}
-        <div className="bg-background rounded-2xl border border-border/50 p-6 shadow-warm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-success" aria-hidden="true" />
+        <div className="glass-card p-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-pd-purple/20 p-2"><BarChart3 className="h-5 w-5 text-pd-purple" /></div>
+            <div>
+              <p className="text-2xl font-bold text-white">0%</p>
+              <p className="text-xs text-gray-400">Response Rate</p>
             </div>
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              New
-            </span>
           </div>
-          <div className="text-4xl font-bold font-heading tabular-nums">
-            {newLeadsCount}
+        </div>
+        <div className="glass-card p-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-pd-gold/20 p-2"><DollarSign className="h-5 w-5 text-pd-gold" /></div>
+            <div>
+              <p className="text-2xl font-bold text-white">$0</p>
+              <p className="text-xs text-gray-400">Revenue</p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Awaiting response
-          </p>
         </div>
       </div>
 
-      {/* Action Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Quick Actions */}
-        <Card className="shadow-warm">
-          <CardHeader>
-            <CardTitle className="font-heading">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button
-              variant="outline"
-              className="w-full justify-between h-auto py-4"
-              asChild
-            >
-              <Link href="/dashboard/listings/new">
-                <span className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Plus className="h-5 w-5 text-primary" aria-hidden="true" />
-                  </div>
-                  <span>
-                    <span className="block font-semibold">
-                      Create New Listing
-                    </span>
-                    <span className="block text-xs text-muted-foreground">
-                      Add a new property to your portfolio
-                    </span>
-                  </span>
-                </span>
-                <ArrowRight
-                  className="h-5 w-5 text-muted-foreground"
-                  aria-hidden="true"
-                />
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-between h-auto py-4"
-              asChild
-            >
-              <Link href="/dashboard/listings">
-                <span className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center">
-                    <Home
-                      className="h-5 w-5 text-secondary"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <span>
-                    <span className="block font-semibold">
-                      View All Listings
-                    </span>
-                    <span className="block text-xs text-muted-foreground">
-                      Manage your property listings
-                    </span>
-                  </span>
-                </span>
-                <ArrowRight
-                  className="h-5 w-5 text-muted-foreground"
-                  aria-hidden="true"
-                />
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-between h-auto py-4"
-              asChild
-            >
-              <Link href="/dashboard/leads">
-                <span className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <MessageSquare
-                      className="h-5 w-5 text-primary"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <span>
-                    <span className="block font-semibold">View Lead Inbox</span>
-                    <span className="block text-xs text-muted-foreground">
-                      Respond to buyer inquiries
-                    </span>
-                  </span>
-                </span>
-                <ArrowRight
-                  className="h-5 w-5 text-muted-foreground"
-                  aria-hidden="true"
-                />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Action Required */}
-        {newLeadsCount > 0 ? (
-          <Card className="shadow-warm border-primary/50 bg-primary/5">
-            <CardHeader>
-              <CardTitle className="font-heading text-primary flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-primary" />
-                </span>
-                Action Required
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg mb-6">
-                You have{" "}
-                <span className="font-bold text-primary tabular-nums">
-                  {newLeadsCount} new lead{newLeadsCount !== 1 ? "s" : ""}
-                </span>{" "}
-                waiting for your response.
-              </p>
-              <Button asChild size="lg">
-                <Link href="/dashboard/leads">
-                  View Leads
-                  <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+      <div className="mt-8">
+        <h2 className="font-heading text-lg font-bold text-white">My Listings</h2>
+        {bizList.length === 0 ? (
+          <div className="mt-4 glass-card p-8 text-center">
+            <p className="text-gray-400">You haven&apos;t claimed any businesses yet.</p>
+            <a href="/claim" className="mt-4 inline-block rounded-lg bg-pd-blue px-4 py-2 text-sm font-medium text-white hover:bg-pd-blue-dark">
+              Claim Your Business
+            </a>
+          </div>
         ) : (
-          <Card className="shadow-warm bg-accent/30">
-            <CardHeader>
-              <CardTitle className="font-heading text-muted-foreground">
-                All Caught Up!
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-6">
-                You have no pending leads. Keep your listings updated to attract
-                more buyers.
-              </p>
-              <Button variant="outline" asChild>
-                <Link href="/dashboard/listings">
-                  Review Listings
-                  <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="mt-4 space-y-3">
+            {bizList.map((biz) => (
+              <div key={biz._id} className="glass-card flex items-center justify-between p-4">
+                <div>
+                  <p className="font-medium text-white">{biz.name}</p>
+                  <p className="text-sm text-gray-400">{biz.city}, {biz.state} &middot; {biz.tier?.replace(/_/g, " ")}</p>
+                </div>
+                <span className={`rounded-full px-2 py-0.5 text-xs ${biz.status === "active" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
+                  {biz.status}
+                </span>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

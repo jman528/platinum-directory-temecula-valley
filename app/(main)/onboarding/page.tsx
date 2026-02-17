@@ -1,55 +1,62 @@
-import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { OnboardingForm } from "@/components/forms/OnboardingForm";
-import { sanityFetch } from "@/lib/sanity/live";
-import { USER_EXISTS_QUERY } from "@/lib/sanity/queries";
+"use client";
 
-export default async function OnboardingPage() {
-  const { userId } = await auth();
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
-  if (!userId) {
-    redirect("/sign-in");
-  }
+export default function OnboardingPage() {
+  const { user } = useUser();
+  const router = useRouter();
+  const [isBusinessOwner, setIsBusinessOwner] = useState(false);
 
-  // Check if user already completed onboarding
-  const { data: existingUser } = await sanityFetch({
-    query: USER_EXISTS_QUERY,
-    params: { clerkId: userId },
-  });
-
-  if (existingUser) {
-    // User exists in Sanity - ensure Clerk metadata is synced
-    const clerk = await clerkClient();
-    const clerkUser = await clerk.users.getUser(userId);
-
-    if (!clerkUser.publicMetadata?.onboardingComplete) {
-      // Sync Clerk metadata with Sanity state
-      await clerk.users.updateUser(userId, {
-        publicMetadata: {
-          ...clerkUser.publicMetadata,
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    if (user) {
+      await user.update({
+        unsafeMetadata: {
+          phone: formData.get("phone"),
+          isBusinessOwner,
           onboardingComplete: true,
         },
       });
     }
 
-    redirect("/");
+    if (isBusinessOwner) {
+      router.push("/claim");
+    } else {
+      router.push("/");
+    }
   }
 
-  const clerkUser = await currentUser();
-  const email = clerkUser?.emailAddresses[0]?.emailAddress || "";
-  const name =
-    `${clerkUser?.firstName || ""} ${clerkUser?.lastName || ""}`.trim();
-
   return (
-    <div className="container max-w-md py-16">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">Welcome to HomeFind!</h1>
-        <p className="text-muted-foreground">
-          Let's set up your profile to get started.
-        </p>
+    <div className="container flex min-h-[60vh] items-center justify-center py-16">
+      <div className="glass-card w-full max-w-md p-8">
+        <h1 className="font-heading text-2xl font-bold text-white">Welcome to Platinum Directory</h1>
+        <p className="mt-2 text-gray-400">Tell us a bit about yourself.</p>
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <div>
+            <label className="mb-1 block text-sm text-gray-400">Phone Number</label>
+            <input type="tel" name="phone" className="w-full rounded-lg border border-pd-purple/20 bg-pd-dark/80 px-4 py-2 text-white focus:border-pd-blue focus:outline-none" />
+          </div>
+          <label className="flex items-center gap-3 rounded-lg border border-pd-purple/20 bg-pd-dark/50 p-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isBusinessOwner}
+              onChange={(e) => setIsBusinessOwner(e.target.checked)}
+              className="rounded"
+            />
+            <div>
+              <p className="text-sm font-medium text-white">I&apos;m a business owner</p>
+              <p className="text-xs text-gray-400">I want to list or claim my business</p>
+            </div>
+          </label>
+          <button type="submit" className="w-full rounded-lg bg-pd-blue py-2 font-medium text-white hover:bg-pd-blue-dark">
+            Continue
+          </button>
+        </form>
       </div>
-
-      <OnboardingForm defaultName={name} email={email} />
     </div>
   );
 }

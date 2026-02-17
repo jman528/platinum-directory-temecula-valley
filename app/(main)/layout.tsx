@@ -1,5 +1,6 @@
-import { Footer } from "@/components/layout/Footer";
-import { Navbar } from "@/components/layout/Navbar";
+import { SanityLive } from "@/lib/sanity/live";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 export default function MainLayout({
   children,
@@ -7,12 +8,13 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
       <Navbar />
-      <main id="main" className="flex-1">
+      <main id="main" className="min-h-screen">
         {children}
       </main>
       <Footer />
-    </div>
+      <SanityLive />
+    </>
   );
 }

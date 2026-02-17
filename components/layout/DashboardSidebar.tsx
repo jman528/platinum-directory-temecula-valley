@@ -1,121 +1,88 @@
 "use client";
 
-import {
-  ArrowLeft,
-  CreditCard,
-  Home,
-  LayoutDashboard,
-  ListPlus,
-  MessageSquare,
-  User,
-} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  Store,
+  Users,
+  MessageSquare,
+  BarChart3,
+  Tag,
+  CreditCard,
+  Settings,
+  ArrowLeft,
+  Shield,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  {
-    href: "/dashboard",
-    label: "Overview",
-    icon: LayoutDashboard,
-    description: "Dashboard summary",
-  },
-  {
-    href: "/dashboard/listings",
-    label: "My Listings",
-    icon: Home,
-    description: "Manage your properties",
-  },
-  {
-    href: "/dashboard/listings/new",
-    label: "Add Listing",
-    icon: ListPlus,
-    description: "Create new listing",
-  },
-  {
-    href: "/dashboard/leads",
-    label: "Lead Inbox",
-    icon: MessageSquare,
-    description: "Buyer inquiries",
-  },
-  {
-    href: "/dashboard/profile",
-    label: "Agent Profile",
-    icon: User,
-    description: "Your public profile",
-  },
-  {
-    href: "/dashboard/billing",
-    label: "Billing",
-    icon: CreditCard,
-    description: "Manage subscription",
-  },
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/listings", label: "My Listings", icon: Store },
+  { href: "/dashboard/leads", label: "Leads", icon: Users },
+  { href: "/dashboard/messages", label: "Messages", icon: MessageSquare },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/promotions", label: "Smart Offers", icon: Tag },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
-export function DashboardSidebar() {
+export default function DashboardSidebar({ tier }: { tier: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-72 border-r border-border/50 bg-sidebar min-h-screen sticky top-0">
-      <div className="p-6">
-        {/* Back Link */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 group"
-        >
-          <ArrowLeft
-            className="h-4 w-4 transition-transform group-hover:-translate-x-1"
-            aria-hidden="true"
-          />
-          <span className="text-sm font-medium">Back to Nestwell</span>
-        </Link>
-
-        {/* Dashboard Header */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold font-heading">Agent Dashboard</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your listings and leads
-          </p>
+    <aside className="hidden w-64 flex-shrink-0 border-r border-pd-purple/20 bg-[#0D1321] lg:block">
+      <div className="flex h-full flex-col">
+        <div className="border-b border-pd-purple/20 p-4">
+          <Link href="/" className="flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Directory
+          </Link>
+          <h2 className="mt-3 font-heading text-lg font-bold text-white">Dashboard</h2>
+          <div className="mt-1 flex items-center gap-1">
+            <Shield className="h-3 w-3 text-pd-gold" />
+            <span className="text-xs text-pd-gold capitalize">
+              {tier.replace(/_/g, " ")}
+            </span>
+          </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="space-y-1" aria-label="Dashboard navigation">
+        <nav className="flex-1 space-y-1 p-3">
           {navItems.map((item) => {
-            // Check for exact match first
-            const isExactMatch = pathname === item.href;
-            // For startsWith matching, ensure no other nav item is a more specific match
-            const isStartsWithMatch =
-              item.href !== "/dashboard" &&
-              pathname.startsWith(item.href) &&
-              !navItems.some(
-                (other) =>
-                  other.href !== item.href &&
-                  other.href.startsWith(item.href) &&
-                  pathname.startsWith(other.href),
-              );
-            const isActive = isExactMatch || isStartsWithMatch;
-
+            const isActive = pathname === item.href ||
+              (item.href !== "/dashboard" && pathname.startsWith(item.href));
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-[background-color,color,transform] duration-200",
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                   isActive
-                    ? "bg-primary text-primary-foreground shadow-warm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent",
+                    ? "bg-pd-purple/15 text-white"
+                    : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"
                 )}
-                aria-current={isActive ? "page" : undefined}
               >
-                <item.icon
-                  className="h-5 w-5 flex-shrink-0"
-                  aria-hidden="true"
-                />
-                <span>{item.label}</span>
+                <item.icon className="h-4 w-4" />
+                {item.label}
               </Link>
             );
           })}
         </nav>
+
+        {tier === "free" && (
+          <div className="m-3 rounded-lg border border-pd-gold/30 bg-pd-gold/5 p-3">
+            <p className="text-xs font-medium text-pd-gold">Upgrade Your Plan</p>
+            <p className="mt-1 text-xs text-gray-400">
+              Get verified, unlock features, and attract more customers.
+            </p>
+            <Link
+              href="/pricing"
+              className="mt-2 block rounded-md bg-pd-gold px-3 py-1.5 text-center text-xs font-medium text-pd-dark transition-colors hover:bg-pd-gold-light"
+            >
+              View Plans
+            </Link>
+          </div>
+        )}
       </div>
     </aside>
   );

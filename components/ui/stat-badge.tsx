@@ -1,6 +1,15 @@
 import type { LucideIcon } from "lucide-react";
-import { type ColorVariant, colorVariants } from "@/lib/styles";
 import { cn } from "@/lib/utils";
+
+type ColorVariant = "primary" | "secondary" | "accent" | "destructive" | "success";
+
+const colorVariants: Record<ColorVariant, string> = {
+  primary: "bg-primary/10 text-primary",
+  secondary: "bg-secondary/10 text-secondary",
+  accent: "bg-accent/10 text-accent",
+  destructive: "bg-destructive/10 text-destructive",
+  success: "bg-green-500/10 text-green-500",
+};
 
 interface StatBadgeProps {
   icon: LucideIcon;
@@ -20,7 +29,7 @@ function StatBadge({
   return (
     <div
       className={cn(
-        "bg-background rounded-2xl border border-border/50 p-5 shadow-warm",
+        "bg-background rounded-2xl border border-border/50 p-5",
         className,
       )}
     >

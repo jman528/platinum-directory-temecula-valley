@@ -1,176 +1,64 @@
-import { auth } from "@clerk/nextjs/server";
-import { MoreHorizontal, Pencil, Plus } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { DeleteListingButton } from "@/components/dashboard/DeleteListingButton";
-import { ListingStatusSelect } from "@/components/dashboard/ListingStatusSelect";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { EmptyState } from "@/components/ui/empty-state";
-import { SectionHeader } from "@/components/ui/section-header";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { urlFor } from "@/lib/sanity/image";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { sanityFetch } from "@/lib/sanity/live";
-import {
-  AGENT_ID_BY_USER_QUERY,
-  AGENT_LISTINGS_QUERY,
-} from "@/lib/sanity/queries";
-import type { Property } from "@/types";
+import { BUSINESSES_BY_OWNER_QUERY } from "@/lib/sanity/queries";
+import Link from "next/link";
+import { Plus, Shield, ExternalLink } from "lucide-react";
+import type { Business } from "@/types";
 
 export default async function ListingsPage() {
-  // Middleware guarantees: authenticated + has agent plan + onboarding complete
-  const { userId } = await auth();
+  const user = await currentUser();
+  if (!user) redirect("/sign-in");
 
-  const { data: agent } = await sanityFetch({
-    query: AGENT_ID_BY_USER_QUERY,
-    params: { userId },
+  const { data: businesses } = await sanityFetch({
+    query: BUSINESSES_BY_OWNER_QUERY,
+    params: { clerkId: user.id },
   });
 
-  const { data: listings } = await sanityFetch({
-    query: AGENT_LISTINGS_QUERY,
-    params: { agentId: agent._id },
-  });
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
+  const bizList = (businesses as Business[]) || [];
 
   return (
     <div>
-      <SectionHeader
-        title="My Listings"
-        subtitle="Manage your property listings"
-        action={
-          <Button asChild>
-            <Link href="/dashboard/listings/new">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Listing
-            </Link>
-          </Button>
-        }
-      />
+      <div className="flex items-center justify-between">
+        <h1 className="font-heading text-2xl font-bold text-white">My Listings</h1>
+        <Link href="/claim" className="flex items-center gap-2 rounded-lg bg-pd-blue px-4 py-2 text-sm font-medium text-white hover:bg-pd-blue-dark">
+          <Plus className="h-4 w-4" /> Claim Business
+        </Link>
+      </div>
 
-      {listings && listings.length > 0 ? (
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Property</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Details</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="w-[70px]" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {listings.map((listing: Property) => (
-                <TableRow key={listing._id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      {listing.image?.asset ? (
-                        <Image
-                          src={urlFor(listing.image).width(80).height(60).url()}
-                          alt={listing.title}
-                          width={80}
-                          height={60}
-                          className="rounded object-cover"
-                        />
-                      ) : (
-                        <div className="w-20 h-15 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                          No image
-                        </div>
-                      )}
-                      <div>
-                        <Link
-                          href={`/properties/${listing._id}`}
-                          className="font-medium hover:underline"
-                        >
-                          {listing.title}
-                        </Link>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-semibold">
-                    {formatPrice(listing.price)}
-                  </TableCell>
-                  <TableCell>
-                    <ListingStatusSelect
-                      listingId={listing._id}
-                      currentStatus={listing.status}
-                    />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {listing.bedrooms} beds • {listing.bathrooms} baths
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {formatDate(listing.createdAt)}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/dashboard/listings/${listing._id}`}>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/properties/${listing._id}`}>View</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DeleteListingButton listingId={listing._id} />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {bizList.length === 0 ? (
+        <div className="mt-8 glass-card p-12 text-center">
+          <p className="text-gray-400">No listings yet. Claim your business to get started.</p>
         </div>
       ) : (
-        <EmptyState
-          title="No listings yet"
-          description="Create your first property listing to get started."
-          action={
-            <Button asChild>
-              <Link href="/dashboard/listings/new">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Listing
-              </Link>
-            </Button>
-          }
-        />
+        <div className="mt-6 space-y-4">
+          {bizList.map((biz) => (
+            <div key={biz._id} className="glass-card p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pd-purple/10 text-lg font-bold text-pd-purple-light">
+                    {biz.name?.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-heading font-semibold text-white">{biz.name}</h3>
+                      {biz.isVerified && <Shield className="h-4 w-4 text-pd-gold" />}
+                    </div>
+                    <p className="text-sm text-gray-400">{biz.primaryCategory?.name} &middot; {biz.city}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`rounded-full px-3 py-1 text-xs ${biz.status === "active" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
+                    {biz.status}
+                  </span>
+                  <Link href={`/business/${biz.slug?.current}`} className="text-gray-400 hover:text-white">
+                    <ExternalLink className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

@@ -1,120 +1,68 @@
-import { auth } from "@clerk/nextjs/server";
-import { ExternalLink, MessageSquare } from "lucide-react";
-import Link from "next/link";
-import { LeadStatusSelect } from "@/components/dashboard/LeadStatusSelect";
-import { EmptyState } from "@/components/ui/empty-state";
-import { SectionHeader } from "@/components/ui/section-header";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { sanityFetch } from "@/lib/sanity/live";
-import {
-  AGENT_ID_BY_USER_QUERY,
-  AGENT_LEADS_QUERY,
-} from "@/lib/sanity/queries";
-import type { Lead } from "@/types";
+import { BUSINESSES_BY_OWNER_QUERY, LEADS_BY_BUSINESS_QUERY } from "@/lib/sanity/queries";
+import { Users, Mail, Phone } from "lucide-react";
+import type { Business, Lead } from "@/types";
 
 export default async function LeadsPage() {
-  // Middleware guarantees: authenticated + has agent plan + onboarding complete
-  const { userId } = await auth();
+  const user = await currentUser();
+  if (!user) redirect("/sign-in");
 
-  const { data: agent } = await sanityFetch({
-    query: AGENT_ID_BY_USER_QUERY,
-    params: { userId },
+  const { data: businesses } = await sanityFetch({
+    query: BUSINESSES_BY_OWNER_QUERY,
+    params: { clerkId: user.id },
   });
 
-  const { data: leads } = await sanityFetch({
-    query: AGENT_LEADS_QUERY,
-    params: { agentId: agent._id },
-  });
+  const bizList = (businesses as Business[]) || [];
+  let allLeads: Lead[] = [];
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+  for (const biz of bizList) {
+    const { data: leads } = await sanityFetch({
+      query: LEADS_BY_BUSINESS_QUERY,
+      params: { businessId: biz._id },
     });
+    allLeads = [...allLeads, ...((leads as Lead[]) || [])];
+  }
+
+  const statusColors: Record<string, string> = {
+    new: "bg-blue-500/20 text-blue-400",
+    contacted: "bg-yellow-500/20 text-yellow-400",
+    qualified: "bg-purple-500/20 text-purple-400",
+    converted: "bg-green-500/20 text-green-400",
+    lost: "bg-red-500/20 text-red-400",
   };
 
   return (
     <div>
-      <SectionHeader
-        title="Leads Inbox"
-        subtitle="Manage inquiries from potential buyers"
-      />
+      <h1 className="font-heading text-2xl font-bold text-white">Leads</h1>
+      <p className="mt-1 text-gray-400">{allLeads.length} total leads</p>
 
-      {leads && leads.length > 0 ? (
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Buyer</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Property</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {leads.map((lead: Lead) => (
-                <TableRow key={lead._id}>
-                  <TableCell>
-                    <div className="font-medium">{lead.buyerName}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <a
-                        href={`mailto:${lead.buyerEmail}`}
-                        className="text-sm text-primary hover:underline block"
-                      >
-                        {lead.buyerEmail}
-                      </a>
-                      {lead.buyerPhone && (
-                        <a
-                          href={`tel:${lead.buyerPhone}`}
-                          className="text-sm text-muted-foreground hover:text-primary block"
-                        >
-                          {lead.buyerPhone}
-                        </a>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/properties/${lead.property?._id}`}
-                      className="flex items-center gap-1 text-sm hover:underline"
-                    >
-                      {lead.property?.title}
-                      <ExternalLink className="h-3 w-3" />
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <LeadStatusSelect
-                      leadId={lead._id}
-                      currentStatus={lead.status}
-                    />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {formatDate(lead.createdAt)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {allLeads.length === 0 ? (
+        <div className="mt-8 glass-card p-12 text-center">
+          <Users className="mx-auto h-12 w-12 text-gray-600" />
+          <p className="mt-4 text-gray-400">No leads yet. They&apos;ll show up here when customers contact you.</p>
         </div>
       ) : (
-        <EmptyState
-          icon={MessageSquare}
-          title="No leads yet"
-          description="When buyers contact you about your listings, their inquiries will appear here."
-        />
+        <div className="mt-6 space-y-3">
+          {allLeads.map((lead) => (
+            <div key={lead._id} className="glass-card p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-white">{lead.customerName}</p>
+                  <div className="mt-1 flex items-center gap-4 text-sm text-gray-400">
+                    {lead.customerEmail && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{lead.customerEmail}</span>}
+                    {lead.customerPhone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{lead.customerPhone}</span>}
+                  </div>
+                  {lead.message && <p className="mt-2 text-sm text-gray-500 line-clamp-1">{lead.message}</p>}
+                </div>
+                <span className={`rounded-full px-2 py-0.5 text-xs ${statusColors[lead.status] || ""}`}>
+                  {lead.status}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

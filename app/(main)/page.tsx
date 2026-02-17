@@ -1,363 +1,253 @@
-import {
-  ArrowRight,
-  Heart,
-  Home,
-  MapPin,
-  Search,
-  Shield,
-  Users,
-} from "lucide-react";
 import Link from "next/link";
-import { PropertyGrid } from "@/components/property/PropertyGrid";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { sanityFetch } from "@/lib/sanity/live";
-import { FEATURED_PROPERTIES_QUERY } from "@/lib/sanity/queries";
+import { CATEGORIES_QUERY, FEATURED_BUSINESSES_QUERY } from "@/lib/sanity/queries";
+import { Search, Gift, Trophy, MapPin, Star, Shield } from "lucide-react";
+import type { Business, Category } from "@/types";
 
 export default async function HomePage() {
-  const { data: featuredProperties } = await sanityFetch({
-    query: FEATURED_PROPERTIES_QUERY,
+  const { data: categories } = await sanityFetch({ query: CATEGORIES_QUERY });
+  const { data: featuredBusinesses } = await sanityFetch({
+    query: FEATURED_BUSINESSES_QUERY,
   });
+
+  const homepageCategories = [
+    "wineries-vineyards", "old-town-dining", "luxury-accommodations",
+    "automotive", "real-estate-property", "health-wellness",
+    "home-services", "professional-services", "arts-entertainment",
+    "shopping-retail", "local-artisans-crafts", "business-to-business",
+  ];
+
+  const displayCategories = categories
+    ? (categories as Category[]).filter((c) =>
+        homepageCategories.includes(c.slug?.current || "")
+      )
+    : [];
+
+  const CATEGORY_LABELS: Record<string, string> = {
+    "home-services": "Home Improvement",
+    "automotive": "Auto Services & Detailing",
+    "arts-entertainment": "Events & Entertainment",
+  };
 
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-accent via-accent/50 to-background py-24 md:py-32 lg:py-40">
-        {/* Decorative Elements */}
-        <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-          <div className="absolute -top-1/2 -right-1/4 w-[800px] h-[800px] rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute -bottom-1/2 -left-1/4 w-[600px] h-[600px] rounded-full bg-secondary/10 blur-3xl" />
-        </div>
+      <section className="wine-gradient relative overflow-hidden py-20 lg:py-28">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+        <div className="container relative text-center">
+          <h1 className="font-heading text-4xl font-extrabold text-white md:text-5xl lg:text-6xl">
+            Temecula Valley&apos;s{" "}
+            <span className="text-pd-gold">Verified</span> Business Directory
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-300">
+            Wine Country &bull; Old Town &bull; Premium Local Services
+          </p>
 
-        <div className="container relative">
-          <div className="max-w-3xl mx-auto text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              <Home className="h-4 w-4" aria-hidden="true" />
-              <span>Perfect for First-Time Buyers</span>
+          {/* Search Bar */}
+          <div className="mx-auto mt-8 flex max-w-2xl overflow-hidden rounded-xl border border-pd-purple/30 bg-pd-dark/80 backdrop-blur-md">
+            <div className="flex flex-1 items-center gap-2 px-4">
+              <Search className="h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="What are you looking for?"
+                className="w-full bg-transparent py-3 text-white placeholder:text-gray-500 focus:outline-none"
+              />
             </div>
-
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-heading tracking-tight mb-6">
-              Find Your <span className="text-primary">Perfect Nest</span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Making your first home journey simple and stress-free. Browse
-              curated properties, save your favorites, and connect with trusted
-              agents.
-            </p>
-
-            {/* Search Bar */}
-            <form
-              action="/properties"
-              method="GET"
-              className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto"
+            <div className="hidden items-center border-l border-pd-purple/20 px-4 md:flex">
+              <MapPin className="mr-2 h-4 w-4 text-gray-400" />
+              <span className="text-sm text-gray-400">Temecula, CA 92590</span>
+            </div>
+            <Link
+              href="/search"
+              className="flex items-center bg-pd-blue px-6 py-3 font-medium text-white transition-colors hover:bg-pd-blue-dark"
             >
-              <div className="flex-1 relative">
-                <label htmlFor="city-search" className="sr-only">
-                  Search by city, neighborhood, or ZIP code
-                </label>
-                <MapPin
-                  className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <Input
-                  id="city-search"
-                  name="city"
-                  placeholder="Enter city, neighborhood, or ZIP…"
-                  autoComplete="address-level2"
-                  className="h-14 pl-12 text-base"
-                />
-              </div>
-              <Button type="submit" size="xl" className="h-14">
-                <Search className="h-5 w-5" aria-hidden="true" />
-                <span className="ml-2">Search Properties</span>
-              </Button>
-            </form>
+              Search
+            </Link>
+          </div>
 
-            {/* Quick Stats */}
-            <div className="flex flex-wrap items-center justify-center gap-8 mt-12 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-2 w-2 rounded-full bg-success"
-                  aria-hidden="true"
-                />
-                <span>1,000+ Active Listings</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-2 w-2 rounded-full bg-primary"
-                  aria-hidden="true"
-                />
-                <span>500+ Happy Homeowners</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-2 w-2 rounded-full bg-secondary"
-                  aria-hidden="true"
-                />
-                <span>50+ Trusted Agents</span>
-              </div>
-            </div>
+          {/* Trending Tags */}
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {["Wine Tasting", "Auto Detailing", "Real Estate", "Restaurants"].map(
+              (tag) => (
+                <Link
+                  key={tag}
+                  href={`/search?q=${encodeURIComponent(tag)}`}
+                  className="rounded-full border border-pd-purple/30 bg-pd-dark/50 px-3 py-1 text-xs text-gray-300 transition-colors hover:border-pd-gold hover:text-pd-gold"
+                >
+                  {tag}
+                </Link>
+              )
+            )}
           </div>
         </div>
       </section>
 
-      {/* Featured Listings */}
-      <section className="py-20 md:py-28">
-        <div className="container">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+      {/* Weekly Giveaway Banner */}
+      <section className="border-y border-pd-gold/30 bg-gradient-to-r from-pd-purple-dark/30 via-pd-dark to-pd-gold/10 py-6">
+        <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pd-gold/20">
+              <Gift className="h-6 w-6 text-pd-gold" />
+            </div>
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold font-heading">
-                Featured Properties
-              </h2>
-              <p className="text-muted-foreground mt-2">
-                Hand-picked homes curated just for you
+              <p className="font-heading text-lg font-bold text-white">
+                Win $250 This Week!
+              </p>
+              <p className="text-sm text-gray-400">
+                Enter our weekly giveaway — gift cards, dining, &amp; more
               </p>
             </div>
-            <Button variant="outline" asChild className="w-fit">
-              <Link href="/properties">
-                View All Properties
-                <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/giveaway"
+              className="rounded-lg bg-pd-gold px-5 py-2.5 font-medium text-pd-dark transition-colors hover:bg-pd-gold-light"
+            >
+              Enter to Win →
+            </Link>
+            <Link
+              href="/giveaway/business"
+              className="flex items-center gap-1 text-sm text-pd-purple-light hover:text-pd-purple"
+            >
+              <Trophy className="h-4 w-4" />
+              Business: Win $3,500
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Categories Grid */}
+      <section className="py-16">
+        <div className="container">
+          <h2 className="font-heading text-3xl font-bold text-white">
+            Browse by Category
+          </h2>
+          <p className="mt-2 text-gray-400">
+            Discover trusted businesses across Temecula Valley
+          </p>
+
+          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            {displayCategories.map((cat) => (
+              <Link
+                key={cat._id}
+                href={`/category/${cat.slug?.current}`}
+                className="glass-card group relative flex h-36 items-end overflow-hidden p-4"
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-pd-dark via-pd-dark/60 to-transparent" />
+                <div className="relative">
+                  <p className="font-heading text-sm font-semibold text-white">
+                    {CATEGORY_LABELS[cat.slug?.current || ""] || cat.name}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {cat.businessCount || 0} businesses
+                  </p>
+                </div>
               </Link>
-            </Button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Premium Listings */}
+      <section className="border-t border-pd-purple/20 py-16">
+        <div className="container">
+          <div className="flex items-center gap-2">
+            <Shield className="h-6 w-6 text-pd-gold" />
+            <h2 className="font-heading text-3xl font-bold text-white">
+              Verified Premium Businesses
+            </h2>
+          </div>
+          <p className="mt-2 text-gray-400">
+            Platinum-verified businesses you can trust
+          </p>
+
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            {(featuredBusinesses as Business[] || []).map((biz) => (
+              <Link
+                key={biz._id}
+                href={`/business/${biz.slug?.current}`}
+                className="glass-card group flex gap-4 p-4 transition-all hover:border-pd-gold"
+              >
+                <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-pd-purple/10">
+                  <div className="flex h-full items-center justify-center text-2xl font-bold text-pd-purple-light">
+                    {biz.name?.charAt(0)}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-heading font-semibold text-white group-hover:text-pd-gold">
+                      {biz.name}
+                    </h3>
+                    <span className="flex items-center gap-1 rounded-full bg-pd-gold/20 px-2 py-0.5 text-xs text-pd-gold">
+                      <Shield className="h-3 w-3" /> Verified
+                    </span>
+                  </div>
+                  {biz.primaryCategory && (
+                    <span className="mt-1 inline-block rounded-full bg-pd-blue/20 px-2 py-0.5 text-xs text-pd-blue-light">
+                      {biz.primaryCategory.name}
+                    </span>
+                  )}
+                  <div className="mt-1 flex items-center gap-2 text-sm text-gray-400">
+                    {(biz.averageRating > 0 || biz.googleRating) && (
+                      <span className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-pd-gold text-pd-gold" />
+                        {biz.averageRating || biz.googleRating}
+                      </span>
+                    )}
+                    {biz.city && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {biz.city}, {biz.state}
+                      </span>
+                    )}
+                  </div>
+                  {biz.description && (
+                    <p className="mt-1 line-clamp-2 text-sm text-gray-500">
+                      {biz.description}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            ))}
           </div>
 
-          {featuredProperties && featuredProperties.length > 0 ? (
-            <PropertyGrid properties={featuredProperties} />
-          ) : (
-            <div className="text-center py-16 bg-accent/50 rounded-2xl border border-border/50">
-              <Home
-                className="h-12 w-12 text-muted-foreground mx-auto mb-4"
-                aria-hidden="true"
-              />
-              <p className="text-muted-foreground text-lg">
-                No featured properties available at the moment.
+          {(!featuredBusinesses || (featuredBusinesses as Business[]).length === 0) && (
+            <div className="mt-8 rounded-xl border border-pd-purple/20 bg-pd-dark/50 p-12 text-center">
+              <Shield className="mx-auto h-12 w-12 text-pd-purple/50" />
+              <p className="mt-4 text-lg text-gray-400">
+                Premium businesses coming soon
               </p>
-              <Button variant="outline" asChild className="mt-4">
-                <Link href="/properties">Browse All Properties</Link>
-              </Button>
+              <Link href="/pricing" className="mt-4 inline-block text-sm text-pd-blue hover:text-pd-blue-light">
+                Become a verified business →
+              </Link>
             </div>
           )}
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-20 md:py-28 bg-accent/30">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold font-heading">
-              How Nestwell Works
-            </h2>
-            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-              Finding your first home has never been easier. Follow these simple
-              steps to start your journey.
+      {/* Advertise CTA */}
+      <section className="wine-gradient py-16">
+        <div className="container text-center">
+          <h2 className="font-heading text-3xl font-bold text-white">
+            Grow Your Business with Platinum Directory
+          </h2>
+          <div className="mx-auto mt-6 flex max-w-lg flex-col items-start gap-3 text-left text-gray-300">
+            <p className="flex items-center gap-2">
+              <span className="text-pd-gold">✓</span> Reach Temecula&apos;s Premium Audience
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-pd-gold">✓</span> Featured Placement &amp; Insights
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-pd-gold">✓</span> Smart Offers That Drive Real Traffic
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-            {/* Step 1 */}
-            <div className="relative text-center group">
-              <div className="w-20 h-20 bg-background border-2 border-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-warm transition-[transform,box-shadow] duration-300 group-hover:-translate-y-1 group-hover:shadow-warm-md group-hover:border-primary/40">
-                <Search className="h-9 w-9 text-primary" aria-hidden="true" />
-              </div>
-              <div
-                className="absolute top-10 left-[60%] right-0 h-px bg-border hidden md:block"
-                aria-hidden="true"
-              />
-              <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-3">
-                Step 1
-              </span>
-              <h3 className="text-xl font-semibold font-heading mb-3">
-                Search Properties
-              </h3>
-              <p className="text-muted-foreground">
-                Browse our curated catalog with advanced filters, map view, and
-                neighborhood insights.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="relative text-center group">
-              <div className="w-20 h-20 bg-background border-2 border-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-warm transition-[transform,box-shadow] duration-300 group-hover:-translate-y-1 group-hover:shadow-warm-md group-hover:border-secondary/40">
-                <Heart className="h-9 w-9 text-secondary" aria-hidden="true" />
-              </div>
-              <div
-                className="absolute top-10 left-[60%] right-0 h-px bg-border hidden md:block"
-                aria-hidden="true"
-              />
-              <span className="inline-block px-3 py-1 rounded-full bg-secondary/10 text-secondary-foreground text-sm font-medium mb-3">
-                Step 2
-              </span>
-              <h3 className="text-xl font-semibold font-heading mb-3">
-                Save Favorites
-              </h3>
-              <p className="text-muted-foreground">
-                Save properties you love and compare them side by side to find
-                your perfect match.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="relative text-center group">
-              <div className="w-20 h-20 bg-background border-2 border-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-warm transition-[transform,box-shadow] duration-300 group-hover:-translate-y-1 group-hover:shadow-warm-md group-hover:border-primary/40">
-                <Users className="h-9 w-9 text-primary" aria-hidden="true" />
-              </div>
-              <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-3">
-                Step 3
-              </span>
-              <h3 className="text-xl font-semibold font-heading mb-3">
-                Connect with Agents
-              </h3>
-              <p className="text-muted-foreground">
-                Reach out to trusted agents, schedule viewings, and get expert
-                guidance throughout your journey.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Section */}
-      <section className="py-20 md:py-28">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div>
-              <span className="inline-block px-3 py-1 rounded-full bg-secondary/10 text-secondary-foreground text-sm font-medium mb-4">
-                Why Choose Nestwell
-              </span>
-              <h2 className="text-3xl md:text-4xl font-bold font-heading mb-6">
-                Built for First-Time Homebuyers
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8">
-                We understand that buying your first home can be overwhelming.
-                That&apos;s why we&apos;ve designed Nestwell to make the process
-                as simple and stress-free as possible.
-              </p>
-
-              <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Shield
-                      className="h-6 w-6 text-primary"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold font-heading mb-1">
-                      Verified Listings
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      Every property is verified by our team to ensure accuracy
-                      and quality.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
-                    <Users
-                      className="h-6 w-6 text-secondary"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold font-heading mb-1">
-                      Trusted Agents
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      Connect with experienced agents who specialize in helping
-                      first-time buyers.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Heart
-                      className="h-6 w-6 text-primary"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold font-heading mb-1">
-                      Personalized Experience
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      Save favorites, get recommendations, and track your home
-                      search journey.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats Card */}
-            <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-8 md:p-12 text-primary-foreground">
-              <h3 className="text-2xl md:text-3xl font-bold font-heading mb-8">
-                Trusted by Thousands
-              </h3>
-              <div className="grid grid-cols-2 gap-8">
-                <div>
-                  <div className="text-4xl md:text-5xl font-bold tabular-nums mb-2">
-                    500+
-                  </div>
-                  <p className="text-primary-foreground/80">Happy Homeowners</p>
-                </div>
-                <div>
-                  <div className="text-4xl md:text-5xl font-bold tabular-nums mb-2">
-                    1,000+
-                  </div>
-                  <p className="text-primary-foreground/80">Active Listings</p>
-                </div>
-                <div>
-                  <div className="text-4xl md:text-5xl font-bold tabular-nums mb-2">
-                    50+
-                  </div>
-                  <p className="text-primary-foreground/80">Trusted Agents</p>
-                </div>
-                <div>
-                  <div className="text-4xl md:text-5xl font-bold tabular-nums mb-2">
-                    4.9
-                  </div>
-                  <p className="text-primary-foreground/80">Average Rating</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA - Become an Agent */}
-      <section className="py-20 md:py-28 bg-accent/30">
-        <div className="container">
-          <div className="bg-gradient-to-r from-secondary/90 to-secondary rounded-3xl p-8 md:p-12 lg:p-16">
-            <div className="max-w-3xl">
-              <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4 text-secondary-foreground">
-                Are You a Real Estate Agent?
-              </h2>
-              <p className="text-lg text-secondary-foreground/80 mb-8">
-                Join our platform to list properties, connect with motivated
-                buyers, and grow your business. Get started with our agent
-                subscription today.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild>
-                  <Link href="/pricing">
-                    View Pricing Plans
-                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  asChild
-                  className="bg-background/10 border-secondary-foreground/20 text-secondary-foreground hover:bg-background/20"
-                >
-                  <Link href="/dashboard">Go to Agent Dashboard</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
+          <Link
+            href="/pricing"
+            className="mt-8 inline-block rounded-lg bg-pd-gold px-8 py-3 font-heading font-semibold text-pd-dark transition-colors hover:bg-pd-gold-light"
+          >
+            Become a Partner Today
+          </Link>
         </div>
       </section>
     </div>
