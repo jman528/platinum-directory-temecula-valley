@@ -4,10 +4,13 @@ export const BUSINESS_SEARCH_QUERY = `
   && ($category == "" || primaryCategory->slug.current == $category)
   && ($city == "" || city == $city)
 ] | order(
-  tier == "platinum_elite" desc,
-  tier == "platinum_partner" desc,
+  select(
+    tier == "platinum_elite" => 0,
+    tier == "platinum_partner" => 1,
+    tier == "verified_platinum" => 2,
+    true => 3
+  ) asc,
   isFeatured desc,
-  tier == "verified_platinum" desc,
   averageRating desc,
   reviewCount desc
 ) [$start...$end] {
@@ -27,8 +30,12 @@ export const BUSINESS_SEARCH_QUERY = `
 
 export const FEATURED_BUSINESSES_QUERY = `
 *[_type == "business" && status == "active" && (tier == "verified_platinum" || tier == "platinum_partner" || tier == "platinum_elite") && isVerified == true] | order(
-  tier == "platinum_elite" desc,
-  tier == "platinum_partner" desc,
+  select(
+    tier == "platinum_elite" => 0,
+    tier == "platinum_partner" => 1,
+    tier == "verified_platinum" => 2,
+    true => 3
+  ) asc,
   averageRating desc
 ) [0...6] {
   _id, name, slug, description,
@@ -69,10 +76,13 @@ export const CATEGORIES_QUERY = `
 
 export const BUSINESSES_BY_CATEGORY_QUERY = `
 *[_type == "business" && status == "active" && primaryCategory->slug.current == $categorySlug] | order(
-  tier == "platinum_elite" desc,
-  tier == "platinum_partner" desc,
+  select(
+    tier == "platinum_elite" => 0,
+    tier == "platinum_partner" => 1,
+    tier == "verified_platinum" => 2,
+    true => 3
+  ) asc,
   isFeatured desc,
-  tier == "verified_platinum" desc,
   averageRating desc
 ) [$start...$end] {
   _id, name, slug, description,
@@ -87,8 +97,12 @@ export const BUSINESSES_BY_CATEGORY_QUERY = `
 
 export const BUSINESSES_BY_CITY_QUERY = `
 *[_type == "business" && status == "active" && city == $city] | order(
-  tier == "platinum_elite" desc,
-  tier == "platinum_partner" desc,
+  select(
+    tier == "platinum_elite" => 0,
+    tier == "platinum_partner" => 1,
+    tier == "verified_platinum" => 2,
+    true => 3
+  ) asc,
   isFeatured desc,
   averageRating desc
 ) [$start...$end] {
