@@ -67,7 +67,7 @@ export default function RootLayout({
           <link rel="preconnect" href="https://cdn.sanity.io" />
           <link rel="preconnect" href="https://api.mapbox.com" />
         </head>
-        <body className="font-sans antialiased">
+        <body className="font-sans antialiased" suppressHydrationWarning>
           <a href="#main" className="skip-link">
             Skip to main content
           </a>

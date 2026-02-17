@@ -11,8 +11,8 @@
     "format": "biome format --write",
     "typegen": "sanity schema extract --path=./schema.json && sanity typegen generate",
     "update-types": "pnpm run typegen",
-    "seed": "npx tsx scripts/seed/seed.ts",
-    "seed:clean": "npx tsx scripts/seed/seed.ts --clean"
+    "seed": "npx tsx scripts/seed.ts",
+    "seed:clean": "npx tsx scripts/seed.ts --clean"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.10",

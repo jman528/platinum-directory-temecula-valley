@@ -10,7 +10,7 @@ export default function MainLayout({
   return (
     <>
       <Navbar />
-      <main id="main" className="min-h-screen">
+      <main id="main" className="premium-bg min-h-screen">
         {children}
       </main>
       <Footer />

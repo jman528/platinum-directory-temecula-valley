@@ -150,7 +150,9 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: linear-gradient(180deg, #0A0F1A 0%, #0D1321 50%, #0A0F1A 100%);
+    background-attachment: fixed;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -220,10 +222,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 0.01ms;
-    animation-iteration-count: 1;
-    transition-duration: 0.01ms;
-    scroll-behavior: auto;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -253,20 +255,66 @@ button, a, [role="button"], input[type="submit"], input[type="button"] {
 }
 
 /* ============================================
-   Glassmorphism Card
+   Premium Glassmorphism Cards
    ============================================ */
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(124, 58, 237, 0.15);
   border-radius: 16px;
-  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  border-color: #D4AF37;
-  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 0 12px 48px rgba(212, 175, 55, 0.1), 0 4px 24px rgba(124, 58, 237, 0.1);
+  transform: translateY(-2px);
+}
+
+.glass-card-premium {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-premium:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 16px 64px rgba(212, 175, 55, 0.15), 0 8px 32px rgba(124, 58, 237, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateY(-3px);
+}
+
+/* Subtle animated gradient glow on hover */
+.glow-effect {
+  transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glow-effect:hover {
+  box-shadow: 0 0 30px rgba(124, 58, 237, 0.15), 0 0 60px rgba(212, 175, 55, 0.08);
+}
+
+/* ============================================
+   Gold Shimmer Text
+   ============================================ */
+
+.text-gold-shimmer {
+  background: linear-gradient(90deg, #D4AF37, #F5D060, #D4AF37);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
 }
 
 /* ============================================
@@ -275,6 +323,10 @@ button, a, [role="button"], input[type="submit"], input[type="button"] {
 
 .wine-gradient {
   background: linear-gradient(135deg, #5B21B6 0%, #1D4ED8 50%, #0A0F1A 100%);
+}
+
+.wine-hero-gradient {
+  background: linear-gradient(135deg, rgba(91, 33, 182, 0.3) 0%, rgba(29, 78, 216, 0.2) 50%, rgba(10, 15, 26, 0.9) 100%);
 }
 
 .wine-accent-gradient {
@@ -287,6 +339,56 @@ button, a, [role="button"], input[type="submit"], input[type="button"] {
 
 .giveaway-gradient {
   background: linear-gradient(135deg, #7C3AED 0%, #D4AF37 100%);
+}
+
+/* ============================================
+   Premium Background with Radial Glows
+   ============================================ */
+
+.premium-bg {
+  position: relative;
+}
+
+.premium-bg::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(124, 58, 237, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.premium-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================
+   Animated Gradient Borders
+   ============================================ */
+
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.5), rgba(212, 175, 55, 0.5), rgba(59, 130, 246, 0.5));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* ============================================
@@ -306,7 +408,7 @@ button, a, [role="button"], input[type="submit"], input[type="button"] {
 }
 
 .hover-lift {
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-lift:hover {
@@ -318,12 +420,217 @@ button, a, [role="button"], input[type="submit"], input[type="button"] {
 }
 
 /* Gold border animation for featured cards */
-@keyframes gold-shimmer {
+@keyframes gold-shimmer-border {
   0% { border-color: rgba(212, 175, 55, 0.3); }
   50% { border-color: rgba(212, 175, 55, 0.6); }
   100% { border-color: rgba(212, 175, 55, 0.3); }
 }
 
 .gold-border-animated {
-  animation: gold-shimmer 3s ease-in-out infinite;
+  animation: gold-shimmer-border 3s ease-in-out infinite;
+}
+
+/* ============================================
+   Scroll Reveal Animations
+   ============================================ */
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered children */
+.scroll-reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal-stagger.revealed > *:nth-child(1) { transition-delay: 0ms; }
+.scroll-reveal-stagger.revealed > *:nth-child(2) { transition-delay: 80ms; }
+.scroll-reveal-stagger.revealed > *:nth-child(3) { transition-delay: 160ms; }
+.scroll-reveal-stagger.revealed > *:nth-child(4) { transition-delay: 240ms; }
+.scroll-reveal-stagger.revealed > *:nth-child(5) { transition-delay: 320ms; }
+.scroll-reveal-stagger.revealed > *:nth-child(6) { transition-delay: 400ms; }
+
+.scroll-reveal-stagger.revealed > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================
+   Button Hover Glow
+   ============================================ */
+
+.btn-glow {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-glow:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+/* ============================================
+   Glass Shimmer Skeleton (Loading States)
+   ============================================ */
+
+@keyframes glass-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-glass {
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0.4) 25%,
+    rgba(124, 58, 237, 0.08) 50%,
+    rgba(30, 41, 59, 0.4) 75%
+  );
+  background-size: 200% 100%;
+  animation: glass-shimmer 1.5s ease-in-out infinite;
+  border-radius: 12px;
+}
+
+/* ============================================
+   Countdown Timer Digit Boxes
+   ============================================ */
+
+.countdown-digit {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   Featured Ribbon
+   ============================================ */
+
+.featured-ribbon {
+  position: absolute;
+  top: 12px;
+  right: -8px;
+  padding: 4px 16px 4px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #0A0F1A;
+  background: linear-gradient(90deg, #D4AF37, #F5D060);
+  border-radius: 4px 0 0 4px;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+  z-index: 10;
+}
+
+.featured-ribbon::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 0;
+  border-style: solid;
+  border-width: 0 8px 6px 0;
+  border-color: transparent #8B7220 transparent transparent;
+}
+
+/* ============================================
+   Verified Badge Pulse
+   ============================================ */
+
+@keyframes verified-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(212, 175, 55, 0); }
+}
+
+.verified-pulse {
+  animation: verified-pulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   Floating Animation (for gift icons etc.)
+   ============================================ */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ============================================
+   Category Card Icon Scale
+   ============================================ */
+
+.category-icon-scale {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.group:hover .category-icon-scale {
+  transform: scale(1.15);
+}
+
+/* ============================================
+   Horizontal Scroll (Category Pills, Carousel)
+   ============================================ */
+
+.horizontal-scroll {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.horizontal-scroll > * {
+  scroll-snap-align: start;
+}
+
+/* ============================================
+   Tier Badge Styles
+   ============================================ */
+
+.tier-badge-elite {
+  background: linear-gradient(135deg, #7C3AED, #D4AF37);
+  color: white;
+}
+
+.tier-badge-partner {
+  background: linear-gradient(135deg, #059669, #34D399);
+  color: white;
+}
+
+.tier-badge-verified {
+  background: linear-gradient(135deg, #2563EB, #60A5FA);
+  color: white;
+}
+
+/* ============================================
+   Glass Input Focus
+   ============================================ */
+
+.glass-input {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-input:focus-within {
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.1), 0 0 40px rgba(124, 58, 237, 0.05);
 }

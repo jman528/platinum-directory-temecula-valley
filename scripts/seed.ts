@@ -34,36 +34,43 @@ const CATEGORIES = [
 ];
 
 const SAMPLE_BUSINESSES = [
-  { name: "Ponte Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "platinum_elite", description: "Award-winning winery featuring Italian-inspired cuisine and stunning vineyard views.", address: "35053 Rancho California Rd", phone: "9516940400", priceRange: "$$$", rating: 4.7, reviews: 2850 },
-  { name: "Wilson Creek Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "platinum_partner", description: "Family-owned winery known for its Almond Champagne and beautiful grounds.", address: "35960 Rancho California Rd", phone: "9516999463", priceRange: "$$$", rating: 4.6, reviews: 3200 },
-  { name: "South Coast Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "verified_platinum", description: "Resort and spa surrounded by vineyards, offering premium wine experiences.", address: "34843 Rancho California Rd", phone: "9515870700", priceRange: "$$$$", rating: 4.5, reviews: 1890 },
-  { name: "The Gambling Cowboy", category: "old-town-dining", city: "Temecula", zip: "92590", tier: "platinum_partner", description: "Classic American chophouse in the heart of Old Town Temecula.", address: "28721 Old Town Front St", phone: "9516940990", priceRange: "$$$", rating: 4.5, reviews: 1240 },
-  { name: "1909 Temecula", category: "restaurants-dining", city: "Temecula", zip: "92590", tier: "verified_platinum", description: "Hip craft cocktail bar and restaurant in a historic 1909 building.", address: "28636 Old Town Front St", phone: "9516947782", priceRange: "$$", rating: 4.4, reviews: 980 },
-  { name: "Prestige Auto Spa", category: "automotive", city: "Temecula", zip: "92590", tier: "platinum_partner", description: "Premium auto detailing and car care services.", address: "27407 Ynez Rd", phone: "9515061234", priceRange: "$$", rating: 4.8, reviews: 340 },
-  { name: "Keller Williams Realty Temecula", category: "real-estate-property", city: "Temecula", zip: "92590", tier: "verified_platinum", description: "Full-service real estate brokerage serving Temecula Valley.", address: "40990 California Oaks Rd", phone: "9516944700", priceRange: "$$$$", rating: 4.3, reviews: 120 },
-  { name: "Temecula Creek Inn", category: "hotels-lodging", city: "Temecula", zip: "92591", tier: "platinum_elite", description: "Resort-style hotel with golf course and spa in wine country.", address: "44501 Rainbow Canyon Rd", phone: "9516941000", priceRange: "$$$$", rating: 4.4, reviews: 1560 },
-  { name: "Pechanga Resort Casino", category: "luxury-accommodations", city: "Temecula", zip: "92592", tier: "platinum_elite", description: "World-class casino resort with spa, dining, and entertainment.", address: "45000 Pechanga Pkwy", phone: "9516931819", priceRange: "$$$$", rating: 4.5, reviews: 8900 },
-  { name: "Temecula Olive Oil Company", category: "shopping-retail", city: "Temecula", zip: "92590", tier: "verified_platinum", description: "Artisanal olive oils and gourmet foods in Old Town.", address: "28653 Old Town Front St", phone: "9516937500", priceRange: "$$", rating: 4.7, reviews: 410 },
-  { name: "Pennypickle's Workshop", category: "tours-attractions", city: "Temecula", zip: "92590", tier: "verified_platinum", description: "Interactive children's museum in Old Town Temecula.", address: "42081 Main St", phone: "9513082580", priceRange: "$", rating: 4.6, reviews: 520 },
-  { name: "Murrieta Day Spa", category: "health-wellness", city: "Murrieta", zip: "92562", tier: "platinum_partner", description: "Full-service day spa offering massage, facials, and body treatments.", address: "25220 Hancock Ave", phone: "9516982780", priceRange: "$$", rating: 4.7, reviews: 230 },
-  { name: "Spanos Barber Shop", category: "beauty-personal-care", city: "Temecula", zip: "92590", tier: "verified_platinum", description: "Traditional barbershop with modern styling in Old Town.", address: "28636 Old Town Front St Ste 100", phone: "9516940501", priceRange: "$", rating: 4.9, reviews: 180 },
-  { name: "Temecula Valley Plumbing", category: "home-services", city: "Temecula", zip: "92590", tier: "free", description: "Licensed plumbing services for residential and commercial.", phone: "9517682345", priceRange: "$$", rating: 4.2, reviews: 85 },
-  { name: "Valley Tax & Accounting", category: "professional-services", city: "Murrieta", zip: "92562", tier: "free", description: "Tax preparation and bookkeeping for small businesses.", address: "24910 Las Brisas Rd", phone: "9516980123", priceRange: "$$", rating: 4.1, reviews: 42 },
-  { name: "Temecula Music Academy", category: "education-childcare", city: "Temecula", zip: "92590", tier: "free", description: "Music lessons for all ages — piano, guitar, drums, and voice.", phone: "9516940567", priceRange: "$$", rating: 4.8, reviews: 95 },
-  { name: "Promenade in Temecula", category: "shopping-retail", city: "Temecula", zip: "92591", tier: "verified_platinum", description: "Premier outdoor shopping center with dining and entertainment.", address: "40820 Winchester Rd", phone: "9512961222", priceRange: "$$", rating: 4.2, reviews: 1340 },
-  { name: "Old Town Sweets", category: "old-town-dining", city: "Temecula", zip: "92590", tier: "free", description: "Candy shop and ice cream parlor in Old Town Temecula.", address: "28636 Old Town Front St", phone: "9516939888", priceRange: "$", rating: 4.6, reviews: 320 },
-  { name: "Temecula Valley Animal Hospital", category: "pets-animals", city: "Temecula", zip: "92590", tier: "verified_platinum", description: "Full-service veterinary hospital for dogs, cats, and exotic pets.", address: "31555 Rancho California Rd", phone: "9516762601", priceRange: "$$", rating: 4.5, reviews: 275 },
-  { name: "Craft Coffee Collective", category: "restaurants-dining", city: "Murrieta", zip: "92562", tier: "free", description: "Specialty coffee roaster and cafe.", address: "24660 Washington Ave", phone: "9516010234", priceRange: "$", rating: 4.7, reviews: 190 },
-  { name: "TechVault IT Solutions", category: "technology-it", city: "Temecula", zip: "92590", tier: "free", description: "Managed IT services and cybersecurity for local businesses.", phone: "9519225678", priceRange: "$$$", rating: 4.3, reviews: 28 },
-  { name: "Heart & Soul Pottery", category: "local-artisans-crafts", city: "Temecula", zip: "92590", tier: "free", description: "Handmade pottery and ceramic art studio.", phone: "9516949012", priceRange: "$$", rating: 4.8, reviews: 67 },
-  { name: "Valley Business Alliance", category: "business-to-business", city: "Temecula", zip: "92590", tier: "free", description: "B2B networking and consulting for Temecula Valley businesses.", phone: "9516943456", priceRange: "$$", rating: 4.0, reviews: 15 },
-  { name: "Hope Community Center", category: "nonprofit-community", city: "Murrieta", zip: "92562", tier: "free", description: "Community center providing youth programs and social services.", phone: "9516987890", priceRange: "$", rating: 4.9, reviews: 110 },
-  { name: "Rosa's Authentic Mexican", category: "restaurants-dining", city: "Hemet", zip: "92543", tier: "free", description: "Traditional Mexican cuisine made with family recipes.", address: "125 E Florida Ave", phone: "9517652345", priceRange: "$", rating: 4.5, reviews: 450 },
-  { name: "Lake Elsinore Outlet Center", category: "shopping-retail", city: "Lake Elsinore", zip: "92530", tier: "free", description: "Outlet shopping center with brand name stores.", address: "17600 Collier Ave", phone: "9512456789", priceRange: "$", rating: 3.9, reviews: 680 },
-  { name: "Menifee Auto Group", category: "automotive", city: "Menifee", zip: "92584", tier: "free", description: "New and pre-owned vehicles with full service center.", address: "28000 Bradley Rd", phone: "9516720123", priceRange: "$$$", rating: 4.1, reviews: 210 },
-  { name: "Wildomar Wellness Center", category: "health-wellness", city: "Wildomar", zip: "92595", tier: "free", description: "Chiropractic care and wellness services.", phone: "9516780456", priceRange: "$$", rating: 4.4, reviews: 45 },
-  { name: "Canyon Lake Country Club", category: "arts-entertainment", city: "Canyon Lake", zip: "92587", tier: "verified_platinum", description: "Private country club with golf, tennis, and dining.", phone: "9512440941", priceRange: "$$$$", rating: 4.3, reviews: 95 },
-  { name: "Fallbrook Winery", category: "wineries-vineyards", city: "Fallbrook", zip: "92028", tier: "verified_platinum", description: "Boutique winery in the rolling hills of Fallbrook.", address: "2554 Via Rancheros", phone: "7607234500", priceRange: "$$", rating: 4.6, reviews: 340 },
+  // === PLATINUM ELITE (4) ===
+  { name: "Ponte Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "platinum_elite", description: "Award-winning winery featuring Italian-inspired cuisine, vineyard views, and a full-service inn nestled in wine country.", address: "35053 Rancho California Rd", phone: "9516940400", website: "https://www.pontewinery.com", priceRange: "$$$", rating: 4.7, reviews: 2850, neighborhood: "Wine Country" },
+  { name: "Pechanga Resort Casino", category: "luxury-accommodations", city: "Temecula", zip: "92592", tier: "platinum_elite", description: "World-class casino resort with luxury spa, championship golf, five-star dining, and top entertainment.", address: "45000 Pechanga Pkwy", phone: "9516931819", website: "https://www.pechanga.com", priceRange: "$$$$", rating: 4.5, reviews: 8900, neighborhood: "Pechanga" },
+  { name: "Leoness Cellars", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "platinum_elite", description: "Stunning hilltop winery with panoramic vineyard views, award-winning wines, and The Restaurant at Leoness.", address: "38311 De Portola Rd", phone: "9513027601", website: "https://www.leonesscellars.com", priceRange: "$$$", rating: 4.7, reviews: 1920, neighborhood: "Wine Country" },
+  { name: "Europa Village", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "platinum_elite", description: "European-inspired winery village featuring Spanish, French, and Italian estates with boutique inn and bistro.", address: "33475 La Serena Way", phone: "9515060600", website: "https://www.europavillage.com", priceRange: "$$$$", rating: 4.6, reviews: 1650, neighborhood: "Wine Country" },
+
+  // === PLATINUM PARTNER (7) ===
+  { name: "Wilson Creek Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "platinum_partner", description: "Family-owned winery famous for its Almond Champagne, beautiful picnic grounds, and wedding venue.", address: "35960 Rancho California Rd", phone: "9516999463", website: "https://www.wilsoncreekwinery.com", priceRange: "$$$", rating: 4.6, reviews: 3200, neighborhood: "Wine Country" },
+  { name: "Thornton Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "platinum_partner", description: "Premier sparkling wine producer with acclaimed Champagne Jazz concert series and fine dining.", address: "32575 Rancho California Rd", phone: "9516990099", website: "https://www.thorntonwine.com", priceRange: "$$$", rating: 4.5, reviews: 1780, neighborhood: "Wine Country" },
+  { name: "Callaway Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "platinum_partner", description: "One of Temecula's original wineries offering premium wines, gourmet dining, and breathtaking views.", address: "32720 Rancho California Rd", phone: "9516760503", website: "https://www.callawaywinery.com", priceRange: "$$$", rating: 4.4, reviews: 1560, neighborhood: "Wine Country" },
+  { name: "South Coast Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "platinum_partner", description: "Resort and spa surrounded by vineyards offering premium wine experiences, luxury villas, and fine dining.", address: "34843 Rancho California Rd", phone: "9515870700", website: "https://www.southcoastwinery.com", priceRange: "$$$$", rating: 4.5, reviews: 1890, neighborhood: "Wine Country" },
+  { name: "Robert Renzoni Vineyards", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "platinum_partner", description: "Italian-inspired winery bringing old-world Fano traditions to Temecula with handcrafted wines and Tuscan architecture.", address: "37350 De Portola Rd", phone: "9513021919", website: "https://www.robertrenzoni.com", priceRange: "$$$", rating: 4.6, reviews: 1340, neighborhood: "Wine Country" },
+  { name: "Carol's Restaurant", category: "old-town-dining", city: "Temecula", zip: "92590", tier: "platinum_partner", description: "Beloved Old Town breakfast and brunch spot known for generous portions and welcoming atmosphere.", address: "28636 Old Town Front St", phone: "9516940656", website: "https://www.carolsrestaurant.com", priceRange: "$$", rating: 4.5, reviews: 1120, neighborhood: "Old Town" },
+  { name: "Bushfire Kitchen", category: "restaurants-dining", city: "Temecula", zip: "92591", tier: "platinum_partner", description: "Farm-to-table restaurant featuring wood-fired cuisine, craft cocktails, and a vibrant patio atmosphere.", address: "41923 2nd St", phone: "9513028500", website: "https://www.bushfirekitchen.com", priceRange: "$$$", rating: 4.4, reviews: 890, neighborhood: "Promenade" },
+
+  // === VERIFIED PLATINUM (9) ===
+  { name: "Briar Rose Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "verified_platinum", description: "Charming boutique winery with a fairy-tale cottage setting and intimate tasting experiences.", address: "41720 Calle Cabrillo", phone: "9513081098", website: "https://www.briarrosewinery.com", priceRange: "$$", rating: 4.8, reviews: 520, neighborhood: "Wine Country" },
+  { name: "Lorimar Vineyards", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "verified_platinum", description: "Art-focused winery combining wine tasting with live music, art galleries, and a vibrant social scene.", address: "39990 Anza Rd", phone: "9516946699", website: "https://www.lorimarwinery.com", priceRange: "$$", rating: 4.5, reviews: 1340, neighborhood: "Wine Country" },
+  { name: "Miramonte Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "verified_platinum", description: "Mediterranean-style winery with Blind Tasting experiences, live music, and artisan food pairings.", address: "33410 Rancho California Rd", phone: "9515060400", website: "https://www.miramontewinery.com", priceRange: "$$$", rating: 4.4, reviews: 980, neighborhood: "Wine Country" },
+  { name: "Avensole Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "verified_platinum", description: "Boutique winery featuring handcrafted small-lot wines, wood-fired pizza, and stunning sunset views.", address: "34567 Rancho California Rd", phone: "9513252510", website: "https://www.avensolewinery.com", priceRange: "$$", rating: 4.3, reviews: 670, neighborhood: "Wine Country" },
+  { name: "Baily Vineyard & Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "verified_platinum", description: "Pioneer Temecula winery with Carol's Restaurant on-site, known for Cabernet and Riesling.", address: "33440 La Serena Way", phone: "9516769463", website: "https://www.bailywinery.com", priceRange: "$$", rating: 4.4, reviews: 840, neighborhood: "Wine Country" },
+  { name: "The Goat & Vine", category: "old-town-dining", city: "Temecula", zip: "92590", tier: "verified_platinum", description: "Artisan pizzeria in Old Town serving wood-fired pizzas, craft beers, and inventive salads.", address: "41923 2nd St", phone: "9516940011", website: "https://www.thegoatandvine.com", priceRange: "$$", rating: 4.5, reviews: 760, neighborhood: "Old Town" },
+  { name: "Public House", category: "restaurants-dining", city: "Temecula", zip: "92590", tier: "verified_platinum", description: "Gastropub with craft cocktails, elevated comfort food, and a lively Old Town atmosphere.", address: "41971 Main St", phone: "9516760470", website: "https://www.publichousebyjameslane.com", priceRange: "$$", rating: 4.3, reviews: 640, neighborhood: "Old Town" },
+  { name: "Toast", category: "restaurants-dining", city: "Temecula", zip: "92590", tier: "verified_platinum", description: "Popular breakfast and brunch restaurant with a creative menu and locally sourced ingredients.", address: "28693 Old Town Front St", phone: "9516764222", website: "https://www.toasttemecula.com", priceRange: "$$", rating: 4.4, reviews: 580, neighborhood: "Old Town" },
+  { name: "Temecula Olive Oil Company", category: "shopping-retail", city: "Temecula", zip: "92590", tier: "verified_platinum", description: "Artisanal olive oils, balsamic vinegars, and gourmet foods — a must-visit in Old Town.", address: "28653 Old Town Front St", phone: "9516937500", website: "https://www.temeculaoliveoil.com", priceRange: "$$", rating: 4.7, reviews: 410, neighborhood: "Old Town" },
+
+  // === FREE TIER (10) ===
+  { name: "Old Town Spice & Tea Merchants", category: "shopping-retail", city: "Temecula", zip: "92590", tier: "free", description: "Unique spice shop and tea house offering hundreds of spice blends, loose-leaf teas, and custom mixes.", address: "28693 Old Town Front St", phone: "9516932569", website: "https://www.oldtownspiceandtea.com", priceRange: "$", rating: 4.8, reviews: 350, neighborhood: "Old Town" },
+  { name: "Danza del Sol Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "free", description: "Vibrant winery known for creative wine cocktails, live music weekends, and a fun social atmosphere.", address: "39050 De Portola Rd", phone: "9513020404", website: "https://www.danzadelsolwinery.com", priceRange: "$$", rating: 4.3, reviews: 720, neighborhood: "Wine Country" },
+  { name: "Akash Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "free", description: "Modern boutique winery with a rooftop lounge, innovative wines, and stunning valley panoramas.", address: "39750 De Portola Rd", phone: "9516990156", website: "https://www.akashwinery.com", priceRange: "$$$", rating: 4.5, reviews: 480, neighborhood: "Wine Country" },
+  { name: "Fazeli Cellars", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "free", description: "Persian-inspired winery fusing Middle Eastern art with Temecula terroir — truly one of a kind.", address: "37320 De Portola Rd", phone: "9513028466", website: "https://www.fazelicellars.com", priceRange: "$$$", rating: 4.5, reviews: 620, neighborhood: "Wine Country" },
+  { name: "Cougar Vineyard & Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "free", description: "Relaxed, dog-friendly winery with award-winning wines and a cozy tasting room.", address: "39870 De Portola Rd", phone: "9514910825", website: "https://www.cougarvineyards.com", priceRange: "$$", rating: 4.4, reviews: 510, neighborhood: "Wine Country" },
+  { name: "Wiens Family Cellars", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "free", description: "Family-operated winery with spacious grounds, live music, and consistently excellent wines.", address: "35055 Via Del Ponte", phone: "9516940670", website: "https://www.wienscellars.com", priceRange: "$$", rating: 4.4, reviews: 890, neighborhood: "Wine Country" },
+  { name: "Maurice Car'rie Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "free", description: "Victorian-style winery known for its Champagne brunch, lush gardens, and charming tasting room.", address: "34225 Rancho California Rd", phone: "9516765226", website: "https://www.mauricecarriewinery.com", priceRange: "$$", rating: 4.3, reviews: 1050, neighborhood: "Wine Country" },
+  { name: "Mount Palomar Winery", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "free", description: "Historic winery established in 1975, crafting estate-grown wines from one of Temecula's oldest vineyards.", address: "33820 Rancho California Rd", phone: "9516769047", website: "https://www.mountpalomar.com", priceRange: "$$", rating: 4.3, reviews: 780, neighborhood: "Wine Country" },
+  { name: "Palumbo Family Vineyards", category: "wineries-vineyards", city: "Temecula", zip: "92591", tier: "free", description: "Small-lot, handcrafted wines in an intimate tasting room — a hidden gem for serious wine lovers.", address: "40150 Barksdale Cir", phone: "9516760998", website: "https://www.palumbofamilyvineyards.com", priceRange: "$$", rating: 4.7, reviews: 290, neighborhood: "Wine Country" },
+  { name: "1909 Temecula", category: "old-town-dining", city: "Temecula", zip: "92590", tier: "free", description: "Hip craft cocktail bar and restaurant in a historic 1909 building with outdoor patio and live events.", address: "28636 Old Town Front St", phone: "9516947782", website: "https://www.1909temecula.com", priceRange: "$$", rating: 4.4, reviews: 980, neighborhood: "Old Town" },
 ];
 
 async function seedCategories() {
@@ -89,13 +96,13 @@ async function seedBusinesses() {
   for (const biz of SAMPLE_BUSINESSES) {
     const slugified = biz.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const catId = `category-${biz.category}`;
-    
+
     const smartOffers = [];
     if (biz.tier !== "free") {
       smartOffers.push({
         _key: `offer-${slugified}`,
         title: `Welcome Special at ${biz.name}`,
-        description: `Exclusive deal for Platinum Directory visitors`,
+        description: `Exclusive deal for Platinum Directory visitors at ${biz.name}`,
         originalPrice: biz.priceRange === "$" ? 25 : biz.priceRange === "$$" ? 50 : biz.priceRange === "$$$" ? 100 : 200,
         offerPrice: biz.priceRange === "$" ? 15 : biz.priceRange === "$$" ? 35 : biz.priceRange === "$$$" ? 75 : 150,
         isActive: true,
@@ -117,7 +124,9 @@ async function seedBusinesses() {
       city: biz.city,
       state: "CA",
       zip: biz.zip,
+      neighborhood: biz.neighborhood,
       phone: biz.phone,
+      website: biz.website,
       tier: biz.tier,
       status: "active",
       isVerified: biz.tier !== "free",
@@ -127,7 +136,7 @@ async function seedBusinesses() {
       googleReviewCount: biz.reviews,
       averageRating: biz.rating,
       reviewCount: biz.reviews,
-      seoTitle: `${biz.name} - Temecula Valley Business Directory`,
+      seoTitle: `${biz.name} — Temecula Valley | Platinum Directory`,
       smartOffers: smartOffers.length > 0 ? smartOffers : undefined,
     });
     console.log(`  ✓ ${biz.name} (${biz.tier})`);
@@ -137,8 +146,8 @@ async function seedBusinesses() {
 
 async function seedGiveaways() {
   console.log("\nSeeding giveaways...");
-  
-  // Consumer giveaway
+
+  // Consumer weekly giveaway
   await client.createOrReplace({
     _id: "giveaway-consumer-weekly",
     _type: "giveaway",
@@ -178,7 +187,7 @@ async function seedGiveaways() {
 
 async function main() {
   const isClean = process.argv.includes("--clean");
-  
+
   if (isClean) {
     console.log("Cleaning existing data...");
     const types = ["business", "category", "subcategory", "review", "lead", "giveaway", "giveawayEntry"];
@@ -197,6 +206,19 @@ async function main() {
   await seedBusinesses();
   await seedGiveaways();
 
+  // Verify data
+  console.log("\nVerifying seeded data...");
+  const bizCount = await client.fetch(`count(*[_type == "business" && status == "active"])`);
+  const catCount = await client.fetch(`count(*[_type == "category" && isActive == true])`);
+  const giveCount = await client.fetch(`count(*[_type == "giveaway" && isActive == true])`);
+  const eliteCount = await client.fetch(`count(*[_type == "business" && tier == "platinum_elite"])`);
+  const partnerCount = await client.fetch(`count(*[_type == "business" && tier == "platinum_partner"])`);
+  const verifiedCount = await client.fetch(`count(*[_type == "business" && tier == "verified_platinum"])`);
+  const freeCount = await client.fetch(`count(*[_type == "business" && tier == "free"])`);
+
+  console.log(`  Businesses: ${bizCount} (Elite: ${eliteCount}, Partner: ${partnerCount}, Verified: ${verifiedCount}, Free: ${freeCount})`);
+  console.log(`  Categories: ${catCount}`);
+  console.log(`  Active Giveaways: ${giveCount}`);
   console.log("\n✅ Seed complete!");
 }
 
