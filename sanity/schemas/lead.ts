@@ -1,79 +1,17 @@
-import { defineField, defineType } from "sanity";
+import { defineField, defineType } from 'sanity'
 
 export const lead = defineType({
-  name: "lead",
-  title: "Lead",
-  type: "document",
+  name: 'lead',
+  title: 'Lead',
+  type: 'document',
   fields: [
-    defineField({
-      name: "property",
-      title: "Property",
-      type: "reference",
-      to: [{ type: "property" }],
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "agent",
-      title: "Agent",
-      type: "reference",
-      to: [{ type: "agent" }],
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "buyerName",
-      title: "Buyer Name",
-      type: "string",
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "buyerEmail",
-      title: "Buyer Email",
-      type: "string",
-      validation: (Rule) => Rule.required().email(),
-    }),
-    defineField({
-      name: "buyerPhone",
-      title: "Buyer Phone",
-      type: "string",
-    }),
-    defineField({
-      name: "message",
-      title: "Message",
-      type: "text",
-      rows: 3,
-    }),
-    defineField({
-      name: "status",
-      title: "Status",
-      type: "string",
-      options: {
-        list: [
-          { title: "New", value: "new" },
-          { title: "Contacted", value: "contacted" },
-          { title: "Closed", value: "closed" },
-        ],
-      },
-      initialValue: "new",
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "createdAt",
-      title: "Created At",
-      type: "datetime",
-      initialValue: () => new Date().toISOString(),
-    }),
-  ],
-  preview: {
-    select: {
-      buyerName: "buyerName",
-      propertyTitle: "property.title",
-      status: "status",
-    },
-    prepare({ buyerName, propertyTitle, status }) {
-      return {
-        title: buyerName,
-        subtitle: `${propertyTitle} - ${status}`,
-      };
-    },
-  },
-});
+    defineField({ name: 'business', title: 'Business', type: 'reference', to: [{ type: 'business' }] }),
+    defineField({ name: 'customerName', title: 'Customer Name', type: 'string' }),
+    defineField({ name: 'customerEmail', title: 'Customer Email', type: 'string' }),
+    defineField({ name: 'customerPhone', title: 'Customer Phone', type: 'string' }),
+    defineField({ name: 'message', title: 'Message', type: 'text' }),
+    defineField({ name: 'service', title: 'Service', type: 'string' }),
+    defineField({ name: 'status', title: 'Status', type: 'string', options: { list: ['new', 'contacted', 'qualified', 'converted', 'lost'] }, initialValue: 'new' }),
+    defineField({ name: 'source', title: 'Source', type: 'string', options: { list: ['directory_listing', 'smart_offer', 'search', 'referral', 'direct', 'giveaway'] } }),
+  ]
+})

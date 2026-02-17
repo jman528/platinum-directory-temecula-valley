@@ -8,10 +8,9 @@ export const client = createClient({
   dataset,
   apiVersion: "2025-01-01",
   useCdn: process.env.NODE_ENV === "production",
-  token: process.env.SANITY_API_TOKEN,
+  token: process.env.SANITY_API_READ_TOKEN,
 });
 
-// Read-only client for public queries
 export const readClient = createClient({
   projectId,
   dataset,

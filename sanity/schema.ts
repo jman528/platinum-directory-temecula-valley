@@ -1,10 +1,13 @@
 import type { SchemaTypeDefinition } from "sanity";
-import { agent } from "./schemas/agent";
-import { amenity } from "./schemas/amenity";
+import { blockContent } from "./schemas/blockContent";
+import { business } from "./schemas/business";
+import { category } from "./schemas/category";
+import { giveaway } from "./schemas/giveaway";
+import { giveawayEntry } from "./schemas/giveawayEntry";
 import { lead } from "./schemas/lead";
-import { property } from "./schemas/property";
-import { user } from "./schemas/user";
+import { review } from "./schemas/review";
+import { subcategory } from "./schemas/subcategory";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [property, agent, lead, user, amenity],
+  types: [business, category, subcategory, review, lead, giveaway, giveawayEntry, blockContent],
 };

@@ -1,6 +1,7 @@
 {
-  "name": "zillow-clone-jan-sanity-clerk",
-  "version": "0.1.0",
+  "name": "platinum-directory-temecula",
+  "version": "1.0.0",
+  "description": "Platinum Directory — Temecula Valley's Verified Business Directory",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -32,6 +33,8 @@
     "@sanity/image-url": "^2.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "csv-parse": "^6.1.0",
+    "date-fns": "^4.1.0",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.563.0",
     "mapbox-gl": "^3.18.1",
@@ -45,6 +48,7 @@
     "react-map-gl": "^8.1.0",
     "recharts": "^3.7.0",
     "sanity": "^5.7.0",
+    "slugify": "^1.6.6",
     "sonner": "^2.0.7",
     "svix": "^1.84.1",
     "tailwind-merge": "^3.4.0",

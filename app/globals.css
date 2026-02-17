@@ -7,7 +7,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
-  --font-heading: var(--font-plus-jakarta);
+  --font-heading: var(--font-montserrat);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -47,6 +47,18 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
+  /* Platinum Directory Brand Colors */
+  --color-pd-dark: #0A0F1A;
+  --color-pd-card: rgba(30, 41, 59, 0.8);
+  --color-pd-gold: #D4AF37;
+  --color-pd-gold-light: #F59E0B;
+  --color-pd-blue: #3B82F6;
+  --color-pd-blue-dark: #1D4ED8;
+  --color-pd-blue-light: #60A5FA;
+  --color-pd-purple: #7C3AED;
+  --color-pd-purple-light: #A78BFA;
+  --color-pd-purple-dark: #5B21B6;
+
   /* Container configuration */
   --container-sm: 640px;
   --container-md: 768px;
@@ -56,132 +68,71 @@
 }
 
 /* ============================================
-   NESTWELL - Earth Tone Design System
+   PLATINUM DIRECTORY - Dark Premium Design System
+   Wine Country Premium Theme
    ============================================ */
 
 :root {
-  /* Base radius - friendlier, more rounded */
-  --radius: 0.75rem;
+  --radius: 1rem;
 
-  /* Earth Tone Color Palette - Light Mode */
-  /* Background: Warm Cream */
-  --background: oklch(0.98 0.01 90);
-  /* Foreground: Deep Espresso */
-  --foreground: oklch(0.25 0.02 50);
+  /* Dark Mode ALWAYS (premium dark theme) */
+  --background: #0A0F1A;
+  --foreground: #FFFFFF;
 
-  /* Cards: Slightly warmer white */
-  --card: oklch(0.995 0.005 90);
-  --card-foreground: oklch(0.25 0.02 50);
+  /* Cards: Glassmorphism */
+  --card: rgba(30, 41, 59, 0.8);
+  --card-foreground: #FFFFFF;
 
   /* Popover */
-  --popover: oklch(0.995 0.005 90);
-  --popover-foreground: oklch(0.25 0.02 50);
+  --popover: #111827;
+  --popover-foreground: #FFFFFF;
 
-  /* Primary: Terracotta */
-  --primary: oklch(0.55 0.12 35);
-  --primary-foreground: oklch(0.98 0.01 90);
+  /* Primary: Blue (trust/action) */
+  --primary: #3B82F6;
+  --primary-foreground: #FFFFFF;
 
-  /* Secondary: Sage Green */
-  --secondary: oklch(0.65 0.08 145);
-  --secondary-foreground: oklch(0.25 0.02 50);
-
-  /* Muted: Soft Clay */
-  --muted: oklch(0.94 0.015 80);
-  --muted-foreground: oklch(0.45 0.02 50);
-
-  /* Accent: Warm highlight */
-  --accent: oklch(0.92 0.02 55);
-  --accent-foreground: oklch(0.25 0.02 50);
-
-  /* Destructive: Warm red */
-  --destructive: oklch(0.55 0.2 25);
-
-  /* Success: Forest green */
-  --success: oklch(0.45 0.1 160);
-
-  /* Borders: Stone gray */
-  --border: oklch(0.88 0.015 80);
-  --input: oklch(0.88 0.015 80);
-  --ring: oklch(0.55 0.12 35);
-
-  /* Chart colors - earth tones */
-  --chart-1: oklch(0.55 0.12 35); /* Terracotta */
-  --chart-2: oklch(0.65 0.08 145); /* Sage */
-  --chart-3: oklch(0.45 0.1 160); /* Forest */
-  --chart-4: oklch(0.75 0.08 55); /* Clay */
-  --chart-5: oklch(0.7 0.02 80); /* Stone */
-
-  /* Sidebar - Warm cream */
-  --sidebar: oklch(0.96 0.01 85);
-  --sidebar-foreground: oklch(0.25 0.02 50);
-  --sidebar-primary: oklch(0.55 0.12 35);
-  --sidebar-primary-foreground: oklch(0.98 0.01 90);
-  --sidebar-accent: oklch(0.92 0.02 55);
-  --sidebar-accent-foreground: oklch(0.25 0.02 50);
-  --sidebar-border: oklch(0.88 0.015 80);
-  --sidebar-ring: oklch(0.55 0.12 35);
-}
-
-/* Dark Mode - Warm Charcoal */
-.dark {
-  color-scheme: dark;
-
-  /* Background: Warm charcoal */
-  --background: oklch(0.18 0.015 50);
-  /* Foreground: Warm cream */
-  --foreground: oklch(0.94 0.01 85);
-
-  /* Cards */
-  --card: oklch(0.22 0.015 50);
-  --card-foreground: oklch(0.94 0.01 85);
-
-  /* Popover */
-  --popover: oklch(0.22 0.015 50);
-  --popover-foreground: oklch(0.94 0.01 85);
-
-  /* Primary: Lighter terracotta for dark mode */
-  --primary: oklch(0.65 0.12 35);
-  --primary-foreground: oklch(0.18 0.015 50);
-
-  /* Secondary: Lighter sage */
-  --secondary: oklch(0.55 0.08 145);
-  --secondary-foreground: oklch(0.94 0.01 85);
+  /* Secondary: Purple (wine country) */
+  --secondary: #7C3AED;
+  --secondary-foreground: #FFFFFF;
 
   /* Muted */
-  --muted: oklch(0.28 0.015 50);
-  --muted-foreground: oklch(0.65 0.01 80);
+  --muted: rgba(30, 41, 59, 0.6);
+  --muted-foreground: #94A3B8;
 
-  /* Accent */
-  --accent: oklch(0.3 0.02 55);
-  --accent-foreground: oklch(0.94 0.01 85);
+  /* Accent: Gold (platinum/premium) */
+  --accent: #D4AF37;
+  --accent-foreground: #0A0F1A;
 
   /* Destructive */
-  --destructive: oklch(0.65 0.18 25);
+  --destructive: #EF4444;
 
   /* Success */
-  --success: oklch(0.55 0.1 160);
+  --success: #22C55E;
+
+  /* Warning */
+  --warning: #F59E0B;
 
   /* Borders */
-  --border: oklch(0.32 0.015 50);
-  --input: oklch(0.32 0.015 50);
-  --ring: oklch(0.65 0.12 35);
+  --border: rgba(124, 58, 237, 0.2);
+  --input: rgba(124, 58, 237, 0.2);
+  --ring: #3B82F6;
 
-  /* Chart colors - adjusted for dark */
-  --chart-1: oklch(0.65 0.12 35);
-  --chart-2: oklch(0.55 0.08 145);
-  --chart-3: oklch(0.55 0.1 160);
-  --chart-4: oklch(0.65 0.08 55);
-  --chart-5: oklch(0.6 0.02 80);
+  /* Chart colors */
+  --chart-1: #3B82F6;
+  --chart-2: #7C3AED;
+  --chart-3: #D4AF37;
+  --chart-4: #22C55E;
+  --chart-5: #60A5FA;
 
   /* Sidebar */
-  --sidebar: oklch(0.2 0.015 50);
-  --sidebar-foreground: oklch(0.94 0.01 85);
-  --sidebar-primary: oklch(0.65 0.12 35);
-  --sidebar-primary-foreground: oklch(0.18 0.015 50);
-  --sidebar-accent: oklch(0.28 0.02 55);
-  --sidebar-accent-foreground: oklch(0.94 0.01 85);
-  --sidebar-border: oklch(0.32 0.015 50);
-  --sidebar-ring: oklch(0.65 0.12 35);
+  --sidebar: #0D1321;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #3B82F6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(124, 58, 237, 0.15);
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(124, 58, 237, 0.2);
+  --sidebar-ring: #3B82F6;
 }
 
 /* ============================================
@@ -195,31 +146,22 @@
 
   html {
     scroll-behavior: smooth;
+    color-scheme: dark;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings:
-      "rlig" 1,
-      "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Balanced headings - prevent widows */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     text-wrap: balance;
   }
 
-  /* Tabular numbers for data */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
 
-  /* Container with proper max-width and padding */
   .container {
     width: 100%;
     margin-left: auto;
@@ -248,7 +190,6 @@
    Accessibility
    ============================================ */
 
-/* Skip link for keyboard navigation */
 .skip-link {
   @apply absolute left-4 z-[100] rounded-md px-4 py-2 font-medium;
   @apply bg-primary text-primary-foreground;
@@ -261,7 +202,6 @@
   top: 1rem;
 }
 
-/* Screen reader only */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -278,11 +218,8 @@
    Motion & Animation Preferences
    ============================================ */
 
-/* Respect user motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms;
     animation-iteration-count: 1;
     transition-duration: 0.01ms;
@@ -294,17 +231,11 @@
    Touch & Interaction
    ============================================ */
 
-/* Prevent double-tap zoom delay on mobile */
-button,
-a,
-[role="button"],
-input[type="submit"],
-input[type="button"] {
+button, a, [role="button"], input[type="submit"], input[type="button"] {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Contain overscroll in modals/sheets */
 .overscroll-contain {
   overscroll-behavior: contain;
 }
@@ -313,52 +244,86 @@ input[type="button"] {
    Typography Utilities
    ============================================ */
 
-/* Heading font */
 .font-heading {
-  font-family:
-    var(--font-plus-jakarta), var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-montserrat), var(--font-inter), system-ui, sans-serif;
 }
 
-/* Body font */
 .font-body {
   font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* ============================================
+   Glassmorphism Card
+   ============================================ */
+
+.glass-card {
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: #D4AF37;
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.15);
+}
+
+/* ============================================
+   Gradients
+   ============================================ */
+
+.wine-gradient {
+  background: linear-gradient(135deg, #5B21B6 0%, #1D4ED8 50%, #0A0F1A 100%);
+}
+
+.wine-accent-gradient {
+  background: linear-gradient(90deg, #7C3AED, #3B82F6);
+}
+
+.gold-accent-gradient {
+  background: linear-gradient(90deg, #D4AF37, #F59E0B);
+}
+
+.giveaway-gradient {
+  background: linear-gradient(135deg, #7C3AED 0%, #D4AF37 100%);
 }
 
 /* ============================================
    Component Utilities
    ============================================ */
 
-/* Warm shadow for cards */
-.shadow-warm {
-  box-shadow:
-    0 1px 3px 0 oklch(0.55 0.05 35 / 0.08),
-    0 1px 2px -1px oklch(0.55 0.05 35 / 0.08);
+.shadow-glow-gold {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
-.shadow-warm-md {
-  box-shadow:
-    0 4px 6px -1px oklch(0.55 0.05 35 / 0.08),
-    0 2px 4px -2px oklch(0.55 0.05 35 / 0.08);
+.shadow-glow-purple {
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
 }
 
-.shadow-warm-lg {
-  box-shadow:
-    0 10px 15px -3px oklch(0.55 0.05 35 / 0.08),
-    0 4px 6px -4px oklch(0.55 0.05 35 / 0.08);
+.shadow-glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
-/* Hover lift effect */
 .hover-lift {
-  transition:
-    transform 0.2s ease-out,
-    box-shadow 0.2s ease-out;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
 .hover-lift:hover {
   transform: translateY(-4px);
 }
 
-/* Button press effect */
 .press-effect:active {
   transform: scale(0.98);
+}
+
+/* Gold border animation for featured cards */
+@keyframes gold-shimmer {
+  0% { border-color: rgba(212, 175, 55, 0.3); }
+  50% { border-color: rgba(212, 175, 55, 0.6); }
+  100% { border-color: rgba(212, 175, 55, 0.3); }
+}
+
+.gold-border-animated {
+  animation: gold-shimmer 3s ease-in-out infinite;
 }
