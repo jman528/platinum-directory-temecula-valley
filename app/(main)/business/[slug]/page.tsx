@@ -63,10 +63,21 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
       {/* Header */}
       <div className="glass-card p-6">
         <div className="flex flex-col gap-6 md:flex-row">
-          <div className="h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-pd-purple/10">
-            <div className="flex h-full items-center justify-center text-4xl font-bold text-pd-purple-light">
-              {biz.name?.charAt(0)}
-            </div>
+          <div className="h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-pd-purple-dark/40 to-pd-blue-dark/30">
+            {biz.coverImageUrl ? (
+              <img
+                src={biz.coverImageUrl}
+                alt={biz.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <img
+                src={`https://picsum.photos/seed/${biz.slug?.current || biz._id}/256/256`}
+                alt={biz.name}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            )}
           </div>
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3">

@@ -17,7 +17,7 @@ export const BUSINESS_SEARCH_QUERY = `
   _id, name, slug, description,
   primaryCategory->{name, slug, icon},
   subcategories[]->{name, slug},
-  logo, coverImage,
+  logo, coverImage, coverImageUrl,
   address, city, state, zip, neighborhood, geopoint,
   phone, website,
   priceRange, amenities, cuisineTypes,
@@ -40,7 +40,7 @@ export const FEATURED_BUSINESSES_QUERY = `
 ) [0...6] {
   _id, name, slug, description,
   primaryCategory->{name, slug, icon},
-  logo, coverImage,
+  logo, coverImage, coverImageUrl,
   city, state, zip,
   phone, website,
   averageRating, reviewCount,
@@ -57,7 +57,7 @@ export const BUSINESS_BY_SLUG_QUERY = `
   address, city, state, zip, neighborhood, geopoint,
   phone, email, website,
   socialLinks,
-  logo, coverImage, gallery, videoUrl,
+  logo, coverImage, coverImageUrl, gallery, videoUrl,
   hours,
   priceRange, amenities, cuisineTypes, paymentMethods, languages,
   yearEstablished,
@@ -87,7 +87,7 @@ export const BUSINESSES_BY_CATEGORY_QUERY = `
 ) [$start...$end] {
   _id, name, slug, description,
   primaryCategory->{name, slug, icon},
-  logo, coverImage,
+  logo, coverImage, coverImageUrl,
   city, state, zip,
   phone, website,
   averageRating, reviewCount,
@@ -108,7 +108,7 @@ export const BUSINESSES_BY_CITY_QUERY = `
 ) [$start...$end] {
   _id, name, slug, description,
   primaryCategory->{name, slug, icon},
-  logo, coverImage,
+  logo, coverImage, coverImageUrl,
   address, city, state, zip,
   phone, website,
   averageRating, reviewCount,
@@ -138,7 +138,7 @@ export const BUSINESSES_BY_OWNER_QUERY = `
 *[_type == "business" && ownerClerkId == $clerkId] {
   _id, name, slug, description,
   primaryCategory->{name, slug, icon},
-  logo, coverImage,
+  logo, coverImage, coverImageUrl,
   city, state, zip,
   tier, status, isVerified, isFeatured,
   averageRating, reviewCount

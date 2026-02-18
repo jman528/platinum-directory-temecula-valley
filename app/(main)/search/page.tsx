@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   description: "Search verified businesses in Temecula Valley.",
 };
 
+const ALL_CITIES = [
+  "Temecula", "Murrieta", "Hemet", "Menifee", "Fallbrook",
+  "Lake Elsinore", "Perris", "Wildomar", "Sun City", "Winchester", "Canyon Lake",
+];
+
 function getTierBadge(tier: string) {
   switch (tier) {
     case "platinum_elite":
@@ -70,7 +75,7 @@ export default async function SearchPage({
       </div>
 
       <div className="flex gap-8">
-        {/* Filter Sidebar */}
+        {/* Filter Sidebar — Glass styled */}
         <aside className="hidden w-64 flex-shrink-0 lg:block">
           <div className="glass-card space-y-6 p-5">
             <div className="flex items-center gap-2">
@@ -99,7 +104,13 @@ export default async function SearchPage({
             <div>
               <h4 className="mb-2 text-sm font-medium text-gray-300">City</h4>
               <div className="space-y-0.5">
-                {["Temecula", "Murrieta", "Hemet", "Menifee", "Fallbrook", "Lake Elsinore"].map((c) => (
+                <Link
+                  href={`/search${query ? `?q=${query}` : ""}${category ? `${query ? "&" : "?"}category=${category}` : ""}`}
+                  className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${!city ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}
+                >
+                  All Cities
+                </Link>
+                {ALL_CITIES.map((c) => (
                   <Link
                     key={c}
                     href={`/search?city=${c}${query ? `&q=${query}` : ""}${category ? `&category=${category}` : ""}`}
@@ -131,56 +142,62 @@ export default async function SearchPage({
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              {bizList.map((biz) => (
-                <Link
-                  key={biz._id}
-                  href={`/business/${biz.slug?.current}`}
-                  className="glass-card glow-effect group relative flex gap-4 overflow-hidden p-4"
-                >
-                  {/* Featured ribbon */}
-                  {biz.isFeatured && <div className="featured-ribbon">FEATURED</div>}
+              {bizList.map((biz) => {
+                const imgUrl = biz.coverImageUrl || `https://picsum.photos/seed/${biz.slug?.current || biz._id}/800/400`;
+                return (
+                  <Link
+                    key={biz._id}
+                    href={`/business/${biz.slug?.current}`}
+                    className="glass-card glow-effect group relative flex gap-4 overflow-hidden p-4"
+                  >
+                    {/* Featured ribbon */}
+                    {biz.isFeatured && <div className="featured-ribbon">FEATURED</div>}
 
-                  {/* Avatar */}
-                  <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-pd-purple-dark/40 to-pd-blue-dark/30">
-                    <div className="flex h-full items-center justify-center text-2xl font-bold text-pd-purple-light">
-                      {biz.name?.charAt(0)}
+                    {/* Thumbnail image */}
+                    <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-pd-purple-dark/40 to-pd-blue-dark/30">
+                      <img
+                        src={imgUrl}
+                        alt={biz.name}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                      />
                     </div>
-                  </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="truncate font-heading text-sm font-semibold text-white group-hover:text-pd-gold">
-                        {biz.name}
-                      </h3>
-                      {getTierBadge(biz.tier)}
-                    </div>
-                    {biz.isVerified && (
-                      <span className="verified-pulse mt-0.5 inline-flex items-center gap-1 text-xs text-pd-gold">
-                        <Shield className="h-3 w-3" /> Platinum Verified
-                      </span>
-                    )}
-                    {biz.primaryCategory && (
-                      <span className="mt-1 inline-block rounded-full bg-pd-purple/20 px-2.5 py-0.5 text-[10px] text-pd-purple-light">
-                        {biz.primaryCategory.name}
-                      </span>
-                    )}
-                    <div className="mt-1 flex items-center gap-3 text-xs text-gray-400">
-                      {(biz.averageRating > 0 || biz.googleRating) && (
-                        <span className="flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-pd-gold text-pd-gold" />
-                          <span className="text-white">{biz.averageRating || biz.googleRating}</span>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="truncate font-heading text-sm font-semibold text-white group-hover:text-pd-gold">
+                          {biz.name}
+                        </h3>
+                        {getTierBadge(biz.tier)}
+                      </div>
+                      {biz.isVerified && (
+                        <span className="verified-pulse mt-0.5 inline-flex items-center gap-1 text-xs text-pd-gold">
+                          <Shield className="h-3 w-3" /> Platinum Verified
                         </span>
                       )}
-                      {biz.city && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" /> {biz.city}
+                      {biz.primaryCategory && (
+                        <span className="mt-1 inline-block rounded-full bg-pd-purple/20 px-2.5 py-0.5 text-[10px] text-pd-purple-light">
+                          {biz.primaryCategory.name}
                         </span>
                       )}
+                      <div className="mt-1 flex items-center gap-3 text-xs text-gray-400">
+                        {(biz.averageRating > 0 || biz.googleRating) && (
+                          <span className="flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-pd-gold text-pd-gold" />
+                            <span className="text-white">{biz.averageRating || biz.googleRating}</span>
+                          </span>
+                        )}
+                        {biz.city && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> {biz.city}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>

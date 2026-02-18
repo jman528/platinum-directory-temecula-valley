@@ -28,6 +28,7 @@ export interface Business {
   };
   logo?: SanityImage;
   coverImage?: SanityImage;
+  coverImageUrl?: string;
   gallery?: SanityImage[];
   videoUrl?: string;
   hours?: Record<string, { open?: string; close?: string; closed?: boolean }>;

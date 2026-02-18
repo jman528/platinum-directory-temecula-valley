@@ -45,6 +45,7 @@ export const business = defineType({
     // MEDIA
     defineField({ name: 'logo', title: 'Business Logo', type: 'image', options: { hotspot: true } }),
     defineField({ name: 'coverImage', title: 'Cover Image', type: 'image', options: { hotspot: true } }),
+    defineField({ name: 'coverImageUrl', title: 'Cover Image URL (Placeholder)', type: 'url', description: 'External image URL used as a placeholder until a Sanity image asset is uploaded' }),
     defineField({ name: 'gallery', title: 'Photo Gallery', type: 'array', of: [{ type: 'image', options: { hotspot: true } }] }),
     defineField({ name: 'videoUrl', title: 'Video URL', type: 'url' }),
 

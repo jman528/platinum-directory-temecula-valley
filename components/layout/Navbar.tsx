@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { Search, Menu, X, Gift } from "lucide-react";
+import { Search, Menu, X, Gift, Home } from "lucide-react";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -24,6 +24,13 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <nav className="hidden items-center gap-6 md:flex">
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 text-sm text-gray-300 transition-colors hover:text-white"
+          >
+            <Home className="h-4 w-4" />
+            Home
+          </Link>
           <Link
             href="/search"
             className="flex items-center gap-1.5 text-sm text-gray-300 transition-colors hover:text-white"
@@ -86,6 +93,9 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="absolute inset-x-0 top-16 z-50 border-b border-pd-purple/20 bg-pd-dark/95 backdrop-blur-xl md:hidden">
           <nav className="container flex flex-col gap-1 py-4">
+            <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-gray-300 transition-colors hover:bg-pd-purple/10 hover:text-white">
+              <Home className="h-4 w-4" /> Home
+            </Link>
             <Link href="/search" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-gray-300 transition-colors hover:bg-pd-purple/10 hover:text-white">
               <Search className="h-4 w-4" /> Search
             </Link>
