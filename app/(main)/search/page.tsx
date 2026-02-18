@@ -4,6 +4,8 @@ import { BUSINESS_SEARCH_QUERY, CATEGORIES_QUERY } from "@/lib/sanity/queries";
 import { Search, SlidersHorizontal, Star, Shield, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import type { Business, Category } from "@/types";
+import { formatPhone } from "@/lib/utils/format-phone";
+import MobileFilterToggle from "@/components/ui/mobile-filter-toggle";
 
 export const metadata: Metadata = {
   title: "Search Businesses",
@@ -26,6 +28,61 @@ function getTierBadge(tier: string) {
     default:
       return null;
   }
+}
+
+function FilterContent({
+  catList,
+  query,
+  category,
+  city,
+}: {
+  catList: Category[];
+  query: string;
+  category: string;
+  city: string;
+}) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h4 className="mb-2 text-sm font-medium text-gray-300">Category</h4>
+        <div className="space-y-0.5">
+          <Link href="/search" className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${!category ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}>
+            All Categories
+          </Link>
+          {catList.map((cat) => (
+            <Link
+              key={cat._id}
+              href={`/search?category=${cat.slug?.current}${query ? `&q=${query}` : ""}`}
+              className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${category === cat.slug?.current ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}
+            >
+              {cat.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h4 className="mb-2 text-sm font-medium text-gray-300">City</h4>
+        <div className="space-y-0.5">
+          <Link
+            href={`/search${query ? `?q=${query}` : ""}${category ? `${query ? "&" : "?"}category=${category}` : ""}`}
+            className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${!city ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}
+          >
+            All Cities
+          </Link>
+          {ALL_CITIES.map((c) => (
+            <Link
+              key={c}
+              href={`/search?city=${c}${query ? `&q=${query}` : ""}${category ? `&category=${category}` : ""}`}
+              className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${city === c ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}
+            >
+              {c}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default async function SearchPage({
@@ -56,84 +113,50 @@ export default async function SearchPage({
   return (
     <div className="premium-bg container py-8">
       {/* Search Bar */}
-      <div className="mb-8">
+      <div className="mb-6">
         <form action="/search" method="GET" className="glass-input flex overflow-hidden">
-          <div className="flex flex-1 items-center gap-3 px-5">
-            <Search className="h-5 w-5 text-pd-purple-light" />
+          <div className="flex flex-1 items-center gap-3 px-4 sm:px-5">
+            <Search className="h-5 w-5 flex-shrink-0 text-pd-purple-light" />
             <input
               type="text"
               name="q"
               defaultValue={query}
-              placeholder="Search businesses..."
-              className="w-full bg-transparent py-3.5 text-white placeholder:text-gray-500 focus:outline-none"
+              placeholder="Search businesses, categories..."
+              className="w-full bg-transparent py-3 text-white placeholder:text-gray-500 focus:outline-none sm:py-3.5"
             />
           </div>
-          <button type="submit" className="btn-glow bg-pd-blue px-8 py-3.5 font-medium text-white hover:bg-pd-blue-dark">
+          <button type="submit" className="btn-glow bg-pd-blue px-6 py-3 font-medium text-white hover:bg-pd-blue-dark sm:px-8 sm:py-3.5">
             Search
           </button>
         </form>
       </div>
 
+      {/* Mobile filter button + results count */}
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <p className="text-sm text-gray-400">
+          {bizList.length} result{bizList.length !== 1 ? "s" : ""}
+          {query && <span> for &ldquo;{query}&rdquo;</span>}
+          {city && <span> in {city}</span>}
+        </p>
+        <MobileFilterToggle>
+          <FilterContent catList={catList} query={query} category={category} city={city} />
+        </MobileFilterToggle>
+      </div>
+
       <div className="flex gap-8">
-        {/* Filter Sidebar — Glass styled */}
+        {/* Filter Sidebar — Desktop only */}
         <aside className="hidden w-64 flex-shrink-0 lg:block">
-          <div className="glass-card space-y-6 p-5">
-            <div className="flex items-center gap-2">
+          <div className="glass-card p-5">
+            <div className="mb-4 flex items-center gap-2">
               <SlidersHorizontal className="h-4 w-4 text-pd-purple-light" />
               <h3 className="font-heading font-semibold text-white">Filters</h3>
             </div>
-
-            <div>
-              <h4 className="mb-2 text-sm font-medium text-gray-300">Category</h4>
-              <div className="space-y-0.5">
-                <Link href="/search" className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${!category ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}>
-                  All Categories
-                </Link>
-                {catList.map((cat) => (
-                  <Link
-                    key={cat._id}
-                    href={`/search?category=${cat.slug?.current}${query ? `&q=${query}` : ""}`}
-                    className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${category === cat.slug?.current ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}
-                  >
-                    {cat.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="mb-2 text-sm font-medium text-gray-300">City</h4>
-              <div className="space-y-0.5">
-                <Link
-                  href={`/search${query ? `?q=${query}` : ""}${category ? `${query ? "&" : "?"}category=${category}` : ""}`}
-                  className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${!city ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}
-                >
-                  All Cities
-                </Link>
-                {ALL_CITIES.map((c) => (
-                  <Link
-                    key={c}
-                    href={`/search?city=${c}${query ? `&q=${query}` : ""}${category ? `&category=${category}` : ""}`}
-                    className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${city === c ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}
-                  >
-                    {c}
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <FilterContent catList={catList} query={query} category={category} city={city} />
           </div>
         </aside>
 
         {/* Results */}
         <div className="flex-1">
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm text-gray-400">
-              {bizList.length} result{bizList.length !== 1 ? "s" : ""}
-              {query && <span> for &ldquo;{query}&rdquo;</span>}
-              {city && <span> in {city}</span>}
-            </p>
-          </div>
-
           {bizList.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <Search className="mx-auto h-12 w-12 text-gray-600" />
@@ -141,7 +164,7 @@ export default async function SearchPage({
               <p className="mt-2 text-sm text-gray-500">Try adjusting your search or filters</p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               {bizList.map((biz) => {
                 const imgUrl = biz.coverImageUrl || `https://picsum.photos/seed/${biz.slug?.current || biz._id}/800/400`;
                 return (
@@ -154,7 +177,7 @@ export default async function SearchPage({
                     {biz.isFeatured && <div className="featured-ribbon">FEATURED</div>}
 
                     {/* Thumbnail image */}
-                    <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-pd-purple-dark/40 to-pd-blue-dark/30">
+                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-pd-purple-dark/40 to-pd-blue-dark/30 sm:h-24 sm:w-24">
                       <img
                         src={imgUrl}
                         alt={biz.name}
@@ -181,7 +204,7 @@ export default async function SearchPage({
                           {biz.primaryCategory.name}
                         </span>
                       )}
-                      <div className="mt-1 flex items-center gap-3 text-xs text-gray-400">
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-400 sm:gap-3">
                         {(biz.averageRating > 0 || biz.googleRating) && (
                           <span className="flex items-center gap-1">
                             <Star className="h-3 w-3 fill-pd-gold text-pd-gold" />
@@ -192,6 +215,9 @@ export default async function SearchPage({
                           <span className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" /> {biz.city}
                           </span>
+                        )}
+                        {biz.phone && (
+                          <span className="hidden text-gray-500 sm:inline">{formatPhone(biz.phone)}</span>
                         )}
                       </div>
                     </div>

@@ -133,13 +133,38 @@ export const business = defineType({
     // TIER & STATUS
     defineField({
       name: 'tier', title: 'Subscription Tier', type: 'string',
-      options: { list: [
-        { title: 'Free', value: 'free' },
-        { title: 'Verified Platinum', value: 'verified_platinum' },
-        { title: 'Platinum Partner', value: 'platinum_partner' },
-        { title: 'Platinum Elite', value: 'platinum_elite' },
-      ]},
+      options: {
+        layout: 'dropdown',
+        list: [
+          { title: 'Free — $0/mo', value: 'free' },
+          { title: 'Verified Platinum — $99/mo', value: 'verified_platinum' },
+          { title: 'Platinum Partner — $249/mo', value: 'platinum_partner' },
+          { title: 'Platinum Elite — $499/mo', value: 'platinum_elite' },
+        ],
+      },
       initialValue: 'free'
+    }),
+    defineField({
+      name: 'features', title: 'Enabled Features', type: 'array',
+      of: [{ type: 'string' }],
+      options: {
+        list: [
+          { title: 'Verified Badge', value: 'verified_badge' },
+          { title: 'Featured Placement', value: 'featured_placement' },
+          { title: 'Photo Gallery', value: 'photo_gallery' },
+          { title: 'Video Embed', value: 'video_embed' },
+          { title: 'Smart Offers', value: 'smart_offers' },
+          { title: 'Google Reviews', value: 'google_reviews' },
+          { title: 'Google Map', value: 'google_map' },
+          { title: 'AI Assistant', value: 'ai_assistant' },
+          { title: 'AI Call Assistant', value: 'ai_call_assistant' },
+          { title: 'Email Campaigns', value: 'email_campaigns' },
+          { title: 'SMS Campaigns', value: 'sms_campaigns' },
+          { title: 'Category Exclusivity', value: 'category_exclusivity' },
+          { title: 'Dedicated Manager', value: 'dedicated_manager' },
+        ],
+      },
+      description: 'Override or manually enable features for this business',
     }),
     defineField({
       name: 'status', title: 'Listing Status', type: 'string',

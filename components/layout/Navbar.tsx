@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Search, Menu, X, Gift, Home } from "lucide-react";
 
@@ -16,6 +17,7 @@ export default function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
+          <Image src="/logo.png" alt="Platinum Directory" width={40} height={40} />
           <span className="font-heading text-xl font-bold">
             <span className="text-gold-shimmer">PLATINUM</span>{" "}
             <span className="text-white">DIRECTORY</span>

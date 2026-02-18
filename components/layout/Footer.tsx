@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const FOOTER_CITIES = [
   "Temecula", "Murrieta", "Hemet", "Menifee", "Fallbrook",
@@ -15,10 +16,13 @@ export default function Footer() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Branding */}
           <div>
-            <h3 className="font-heading text-lg font-bold">
-              <span className="text-gold-shimmer">PLATINUM</span>{" "}
-              <span className="text-white">DIRECTORY</span>
-            </h3>
+            <div className="flex items-center gap-2">
+              <Image src="/logo.png" alt="Platinum Directory" width={32} height={32} />
+              <h3 className="font-heading text-lg font-bold">
+                <span className="text-gold-shimmer">PLATINUM</span>{" "}
+                <span className="text-white">DIRECTORY</span>
+              </h3>
+            </div>
             <p className="mt-3 text-sm leading-relaxed text-gray-400">
               Temecula Valley&apos;s premier verified business directory.
               Connecting residents and visitors with trusted local businesses across 11 cities.

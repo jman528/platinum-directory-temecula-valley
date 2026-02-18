@@ -1,6 +1,6 @@
 export const BUSINESS_SEARCH_QUERY = `
 *[_type == "business" && status == "active"
-  && ($query == "" || name match $query + "*" || description match $query + "*" || $query in tags)
+  && ($query == "" || name match $query + "*" || description match $query + "*" || primaryCategory->name match $query + "*" || primaryCategory->slug.current match $query + "*" || $query in tags)
   && ($category == "" || primaryCategory->slug.current == $category)
   && ($city == "" || city == $city)
 ] | order(

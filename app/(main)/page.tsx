@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { sanityFetch } from "@/lib/sanity/live";
 import { CATEGORIES_QUERY, FEATURED_BUSINESSES_QUERY, BUSINESS_COUNT_QUERY } from "@/lib/sanity/queries";
 import { Search, Gift, Trophy, MapPin, Star, Shield, Phone, Globe, Navigation, ChevronRight, Wine, UtensilsCrossed, Car, Heart, ShoppingBag, Briefcase, Wrench, Sparkles, Home, Music, Crown, Store, Map } from "lucide-react";
@@ -62,6 +63,16 @@ export default async function HomePage() {
         <div className="absolute bottom-0 right-0 h-[400px] w-[400px] translate-x-1/4 translate-y-1/4 rounded-full bg-pd-gold/5 blur-3xl" />
 
         <div className="container relative text-center">
+          <div className="mx-auto mb-6 flex justify-center">
+            <Image
+              src="/logo.png"
+              alt="Platinum Directory"
+              width={80}
+              height={80}
+              className="logo-glow"
+              priority
+            />
+          </div>
           <h1 className="text-gold-shimmer font-heading text-5xl font-extrabold tracking-tight md:text-7xl lg:text-8xl">
             PLATINUM DIRECTORY
           </h1>

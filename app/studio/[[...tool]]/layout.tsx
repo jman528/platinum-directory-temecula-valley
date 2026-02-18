@@ -9,8 +9,8 @@ export default function StudioLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning={true}>
-      <body style={{ margin: 0 }} suppressHydrationWarning={true}>{children}</body>
-    </html>
+    <div id="sanity-studio" style={{ height: "100vh", width: "100vw" }}>
+      {children}
+    </div>
   );
 }

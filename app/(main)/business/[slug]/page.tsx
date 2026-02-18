@@ -1,14 +1,16 @@
 import Link from "next/link";
+import Image from "next/image";
 import { sanityFetch } from "@/lib/sanity/live";
 import { BUSINESS_BY_SLUG_QUERY, REVIEWS_BY_BUSINESS_QUERY } from "@/lib/sanity/queries";
 import { notFound } from "next/navigation";
 import {
   Star, Shield, MapPin, Phone, Globe, Mail, Clock,
-  Facebook, Instagram, Linkedin, Youtube, ExternalLink, Lock
+  Facebook, Instagram, Linkedin, Youtube, Lock, ImageIcon
 } from "lucide-react";
 import type { Metadata } from "next";
 import type { Business, Review } from "@/types";
 import { getTierFeatures } from "@/lib/features";
+import { formatPhone } from "@/lib/utils/format-phone";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -44,6 +46,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
 
   const features = getTierFeatures(biz.tier);
   const reviewList = (reviews as Review[]) || [];
+  const heroImg = biz.coverImageUrl || `https://picsum.photos/seed/${biz.slug?.current || biz._id}/1200/400`;
 
   return (
     <div className="container py-8">
@@ -60,63 +63,68 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
         <span className="text-white">{biz.name}</span>
       </div>
 
-      {/* Header */}
-      <div className="glass-card p-6">
-        <div className="flex flex-col gap-6 md:flex-row">
-          <div className="h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-pd-purple-dark/40 to-pd-blue-dark/30">
-            {biz.coverImageUrl ? (
-              <img
-                src={biz.coverImageUrl}
-                alt={biz.name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <img
-                src={`https://picsum.photos/seed/${biz.slug?.current || biz._id}/256/256`}
-                alt={biz.name}
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            )}
-          </div>
-          <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="font-heading text-3xl font-bold text-white">{biz.name}</h1>
+      {/* Hero Cover Image */}
+      <div className="relative mb-6 h-48 overflow-hidden rounded-2xl sm:h-64 md:h-72 lg:h-80">
+        <Image
+          src={heroImg}
+          alt={`${biz.name} cover`}
+          fill
+          className="object-cover"
+          priority
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1400px"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-pd-dark/80 via-transparent to-transparent" />
+        <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-end justify-between gap-2 sm:bottom-6 sm:left-6 sm:right-6">
+          <div>
+            <h1 className="font-heading text-2xl font-bold text-white drop-shadow-lg sm:text-3xl md:text-4xl">{biz.name}</h1>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
               {biz.isVerified && (
-                <span className="flex items-center gap-1 rounded-full bg-pd-gold/20 px-3 py-1 text-sm text-pd-gold">
-                  <Shield className="h-4 w-4" /> Platinum Verified
+                <span className="flex items-center gap-1 rounded-full bg-pd-gold/20 px-3 py-1 text-xs text-pd-gold backdrop-blur-sm sm:text-sm">
+                  <Shield className="h-3 w-3 sm:h-4 sm:w-4" /> Platinum Verified
                 </span>
               )}
               {biz.isFeatured && (
-                <span className="rounded-full bg-pd-gold/20 px-3 py-1 text-sm text-pd-gold">FEATURED</span>
+                <span className="rounded-full bg-pd-gold/20 px-3 py-1 text-xs text-pd-gold backdrop-blur-sm sm:text-sm">FEATURED</span>
+              )}
+              {biz.primaryCategory && (
+                <Link
+                  href={`/category/${biz.primaryCategory.slug?.current}`}
+                  className="rounded-full bg-pd-blue/20 px-3 py-1 text-xs text-pd-blue-light backdrop-blur-sm hover:bg-pd-blue/30 sm:text-sm"
+                >
+                  {biz.primaryCategory.name}
+                </Link>
               )}
             </div>
-            {biz.primaryCategory && (
-              <Link href={`/category/${biz.primaryCategory.slug?.current}`} className="mt-2 inline-block rounded-full bg-pd-blue/20 px-3 py-1 text-sm text-pd-blue-light hover:bg-pd-blue/30">
-                {biz.primaryCategory.name}
-              </Link>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-white/90">
+            {(biz.averageRating > 0 || biz.googleRating) && (
+              <span className="flex items-center gap-1 rounded-full bg-black/30 px-3 py-1 backdrop-blur-sm">
+                <Star className="h-4 w-4 fill-pd-gold text-pd-gold" />
+                {biz.averageRating || biz.googleRating}
+                <span className="text-white/60">({biz.reviewCount || biz.googleReviewCount || 0})</span>
+              </span>
             )}
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-400">
-              {(biz.averageRating > 0 || biz.googleRating) && (
-                <span className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-pd-gold text-pd-gold" />
-                  <span className="text-white">{biz.averageRating || biz.googleRating}</span>
-                  <span>({biz.reviewCount || biz.googleReviewCount || 0} reviews)</span>
-                </span>
-              )}
-              {biz.priceRange && <span>{biz.priceRange}</span>}
-              {biz.city && <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{biz.city}, {biz.state}</span>}
-            </div>
-            {features.showDescription ? (
-              biz.description && <p className="mt-3 text-gray-300">{biz.description}</p>
-            ) : (
-              <LockedField label="Business description" />
+            {biz.priceRange && (
+              <span className="rounded-full bg-black/30 px-3 py-1 backdrop-blur-sm">{biz.priceRange}</span>
             )}
           </div>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+      {/* Description */}
+      {features.showDescription ? (
+        biz.description && (
+          <div className="glass-card mb-6 p-6">
+            <p className="text-gray-300 leading-relaxed">{biz.description}</p>
+          </div>
+        )
+      ) : (
+        <div className="glass-card mb-6 p-6">
+          <LockedField label="Business description" />
+        </div>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
         <div className="space-y-6 lg:col-span-2">
           {/* Contact Info */}
@@ -126,23 +134,23 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
               {features.showPhone ? (
                 biz.phone && (
                   <div className="flex items-center gap-3 text-gray-300">
-                    <Phone className="h-4 w-4 text-pd-blue" />
-                    <a href={`tel:${biz.phone}`} className="hover:text-white">{biz.phone}</a>
+                    <Phone className="h-4 w-4 flex-shrink-0 text-pd-blue" />
+                    <a href={`tel:${biz.phone.replace(/\D/g, "")}`} className="hover:text-white">{formatPhone(biz.phone)}</a>
                   </div>
                 )
               ) : <LockedField label="Phone number" />}
               {features.showWebsite ? (
                 biz.website && (
                   <div className="flex items-center gap-3 text-gray-300">
-                    <Globe className="h-4 w-4 text-pd-blue" />
-                    <a href={biz.website} target="_blank" rel="noopener noreferrer" className="hover:text-white">{biz.website}</a>
+                    <Globe className="h-4 w-4 flex-shrink-0 text-pd-blue" />
+                    <a href={biz.website} target="_blank" rel="noopener noreferrer" className="truncate hover:text-white">{biz.website}</a>
                   </div>
                 )
               ) : <LockedField label="Website" />}
               {features.showEmail ? (
                 biz.email && (
                   <div className="flex items-center gap-3 text-gray-300">
-                    <Mail className="h-4 w-4 text-pd-blue" />
+                    <Mail className="h-4 w-4 flex-shrink-0 text-pd-blue" />
                     <a href={`mailto:${biz.email}`} className="hover:text-white">{biz.email}</a>
                   </div>
                 )
@@ -150,13 +158,43 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
               {features.showAddress ? (
                 biz.address && (
                   <div className="flex items-center gap-3 text-gray-300">
-                    <MapPin className="h-4 w-4 text-pd-blue" />
+                    <MapPin className="h-4 w-4 flex-shrink-0 text-pd-blue" />
                     <span>{biz.address}, {biz.city}, {biz.state} {biz.zip}</span>
                   </div>
                 )
               ) : <LockedField label="Address" />}
             </div>
           </div>
+
+          {/* Gallery */}
+          {features.showImages && biz.gallery && biz.gallery.length > 0 && (
+            <div className="glass-card p-6">
+              <h2 className="font-heading text-lg font-bold text-white flex items-center gap-2">
+                <ImageIcon className="h-5 w-5 text-pd-blue" /> Photo Gallery
+              </h2>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {biz.gallery.map((img, i) => {
+                  const ref = img?.asset?._ref || "";
+                  const [, id, dims, format] = ref.split("-");
+                  const imgUrl = id && dims && format
+                    ? `https://cdn.sanity.io/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/${process.env.NEXT_PUBLIC_SANITY_DATASET}/${id}-${dims}.${format}`
+                    : `https://picsum.photos/seed/${biz.slug?.current}-gallery-${i}/400/300`;
+                  return (
+                    <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-pd-dark/50">
+                      <Image
+                        src={imgUrl}
+                        alt={`${biz.name} photo ${i + 1}`}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        loading="lazy"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Hours */}
           {features.showHours ? (
