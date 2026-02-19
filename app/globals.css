@@ -1,192 +1,169 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* ============================================================
+   PLATINUM DIRECTORY — Dark Glassmorphism Design System
+   ============================================================ */
 
 @theme inline {
+  /* Font stacks */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), Georgia, "Times New Roman", serif;
+
+  /* Map CSS vars → Tailwind utilities */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-plus-jakarta);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Brand palette — available as Tailwind utilities */
+  --color-gold: #d4af37;
+  --color-gold-light: #f5d060;
+  --color-gold-dark: #b8922b;
+  --color-navy-950: #060c18;
+  --color-navy-900: #0a0f1a;
+  --color-navy-800: #0d1321;
+  --color-purple-deep: #1a0533;
+  --color-purple-mid: #2d1b4e;
+  --color-purple-glass: #5b21b6;
+
+  /* Radius scale */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
 
-  /* Container configuration */
-  --container-sm: 640px;
-  --container-md: 768px;
-  --container-lg: 1024px;
+  /* Container */
   --container-xl: 1280px;
   --container-2xl: 1400px;
 }
 
-/* ============================================
-   NESTWELL - Earth Tone Design System
-   ============================================ */
+/* ============================================================
+   DARK PREMIUM COLOUR TOKENS
+   ============================================================ */
 
 :root {
-  /* Base radius - friendlier, more rounded */
   --radius: 0.75rem;
 
-  /* Earth Tone Color Palette - Light Mode */
-  /* Background: Warm Cream */
-  --background: oklch(0.98 0.01 90);
-  /* Foreground: Deep Espresso */
-  --foreground: oklch(0.25 0.02 50);
-
-  /* Cards: Slightly warmer white */
-  --card: oklch(0.995 0.005 90);
-  --card-foreground: oklch(0.25 0.02 50);
-
-  /* Popover */
-  --popover: oklch(0.995 0.005 90);
-  --popover-foreground: oklch(0.25 0.02 50);
-
-  /* Primary: Terracotta */
-  --primary: oklch(0.55 0.12 35);
-  --primary-foreground: oklch(0.98 0.01 90);
-
-  /* Secondary: Sage Green */
-  --secondary: oklch(0.65 0.08 145);
-  --secondary-foreground: oklch(0.25 0.02 50);
-
-  /* Muted: Soft Clay */
-  --muted: oklch(0.94 0.015 80);
-  --muted-foreground: oklch(0.45 0.02 50);
-
-  /* Accent: Warm highlight */
-  --accent: oklch(0.92 0.02 55);
-  --accent-foreground: oklch(0.25 0.02 50);
-
-  /* Destructive: Warm red */
-  --destructive: oklch(0.55 0.2 25);
-
-  /* Success: Forest green */
-  --success: oklch(0.45 0.1 160);
-
-  /* Borders: Stone gray */
-  --border: oklch(0.88 0.015 80);
-  --input: oklch(0.88 0.015 80);
-  --ring: oklch(0.55 0.12 35);
-
-  /* Chart colors - earth tones */
-  --chart-1: oklch(0.55 0.12 35); /* Terracotta */
-  --chart-2: oklch(0.65 0.08 145); /* Sage */
-  --chart-3: oklch(0.45 0.1 160); /* Forest */
-  --chart-4: oklch(0.75 0.08 55); /* Clay */
-  --chart-5: oklch(0.7 0.02 80); /* Stone */
-
-  /* Sidebar - Warm cream */
-  --sidebar: oklch(0.96 0.01 85);
-  --sidebar-foreground: oklch(0.25 0.02 50);
-  --sidebar-primary: oklch(0.55 0.12 35);
-  --sidebar-primary-foreground: oklch(0.98 0.01 90);
-  --sidebar-accent: oklch(0.92 0.02 55);
-  --sidebar-accent-foreground: oklch(0.25 0.02 50);
-  --sidebar-border: oklch(0.88 0.015 80);
-  --sidebar-ring: oklch(0.55 0.12 35);
-}
-
-/* Dark Mode - Warm Charcoal */
-.dark {
-  color-scheme: dark;
-
-  /* Background: Warm charcoal */
-  --background: oklch(0.18 0.015 50);
-  /* Foreground: Warm cream */
-  --foreground: oklch(0.94 0.01 85);
+  /* Background: deep navy */
+  --background: #0a0f1a;
+  --foreground: #e2e8f0;
 
   /* Cards */
-  --card: oklch(0.22 0.015 50);
-  --card-foreground: oklch(0.94 0.01 85);
+  --card: rgba(15, 23, 42, 0.6);
+  --card-foreground: #e2e8f0;
 
   /* Popover */
-  --popover: oklch(0.22 0.015 50);
-  --popover-foreground: oklch(0.94 0.01 85);
+  --popover: #0d1321;
+  --popover-foreground: #e2e8f0;
 
-  /* Primary: Lighter terracotta for dark mode */
-  --primary: oklch(0.65 0.12 35);
-  --primary-foreground: oklch(0.18 0.015 50);
+  /* Primary: gold */
+  --primary: #d4af37;
+  --primary-foreground: #060c18;
 
-  /* Secondary: Lighter sage */
-  --secondary: oklch(0.55 0.08 145);
-  --secondary-foreground: oklch(0.94 0.01 85);
+  /* Secondary: purple */
+  --secondary: #2d1b4e;
+  --secondary-foreground: #e2e8f0;
 
   /* Muted */
-  --muted: oklch(0.28 0.015 50);
-  --muted-foreground: oklch(0.65 0.01 80);
+  --muted: rgba(15, 23, 42, 0.5);
+  --muted-foreground: #94a3b8;
 
   /* Accent */
-  --accent: oklch(0.3 0.02 55);
-  --accent-foreground: oklch(0.94 0.01 85);
+  --accent: rgba(124, 58, 237, 0.15);
+  --accent-foreground: #e2e8f0;
 
-  /* Destructive */
-  --destructive: oklch(0.65 0.18 25);
-
-  /* Success */
-  --success: oklch(0.55 0.1 160);
+  /* Feedback */
+  --destructive: #ef4444;
+  --success: #22c55e;
 
   /* Borders */
-  --border: oklch(0.32 0.015 50);
-  --input: oklch(0.32 0.015 50);
-  --ring: oklch(0.65 0.12 35);
+  --border: rgba(124, 58, 237, 0.18);
+  --input: rgba(15, 23, 42, 0.7);
+  --ring: #d4af37;
 
-  /* Chart colors - adjusted for dark */
-  --chart-1: oklch(0.65 0.12 35);
-  --chart-2: oklch(0.55 0.08 145);
-  --chart-3: oklch(0.55 0.1 160);
-  --chart-4: oklch(0.65 0.08 55);
-  --chart-5: oklch(0.6 0.02 80);
-
-  /* Sidebar */
-  --sidebar: oklch(0.2 0.015 50);
-  --sidebar-foreground: oklch(0.94 0.01 85);
-  --sidebar-primary: oklch(0.65 0.12 35);
-  --sidebar-primary-foreground: oklch(0.18 0.015 50);
-  --sidebar-accent: oklch(0.28 0.02 55);
-  --sidebar-accent-foreground: oklch(0.94 0.01 85);
-  --sidebar-border: oklch(0.32 0.015 50);
-  --sidebar-ring: oklch(0.65 0.12 35);
+  /* Sidebar (dashboard) */
+  --sidebar: #0d1321;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-primary: #d4af37;
+  --sidebar-primary-foreground: #060c18;
+  --sidebar-accent: rgba(124, 58, 237, 0.15);
+  --sidebar-accent-foreground: #e2e8f0;
+  --sidebar-border: rgba(124, 58, 237, 0.18);
+  --sidebar-ring: #d4af37;
 }
 
-/* ============================================
-   Base Styles
-   ============================================ */
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+@keyframes gold-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-gold {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+  }
+  50% {
+    box-shadow: 0 0 24px 4px rgba(212, 175, 55, 0.18);
+  }
+}
+
+/* ============================================================
+   BASE LAYER
+   ============================================================ */
 
 @layer base {
   * {
@@ -195,16 +172,57 @@
 
   html {
     scroll-behavior: smooth;
+    color-scheme: dark;
   }
 
   body {
-    @apply bg-background text-foreground;
+    background: linear-gradient(180deg, #0a0f1a 0%, #0d1321 50%, #0a0f1a 100%);
+    background-attachment: fixed;
+    color: #e2e8f0;
+    min-height: 100vh;
+    font-family: var(--font-sans);
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Balanced headings - prevent widows */
+  /* Floating radial gradient particles */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(
+        ellipse 80% 50% at 50% -10%,
+        rgba(124, 58, 237, 0.14) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 55% 40% at 85% 15%,
+        rgba(29, 78, 216, 0.09) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 40% 30% at 15% 75%,
+        rgba(91, 33, 182, 0.07) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 35% 25% at 70% 90%,
+        rgba(212, 175, 55, 0.04) 0%,
+        transparent 50%
+      );
+  }
+
+  /* All content above the pseudo-element */
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
+
   h1,
   h2,
   h3,
@@ -214,12 +232,6 @@
     text-wrap: balance;
   }
 
-  /* Tabular numbers for data */
-  .tabular-nums {
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* Container with proper max-width and padding */
   .container {
     width: 100%;
     margin-left: auto;
@@ -242,123 +254,186 @@
       padding-right: 2rem;
     }
   }
-}
 
-/* ============================================
-   Accessibility
-   ============================================ */
+  /* Smooth GPU-accelerated transitions on interactive elements */
+  a,
+  button,
+  [role="button"] {
+    transition: opacity 200ms ease, transform 200ms ease;
+    will-change: auto;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-/* Skip link for keyboard navigation */
-.skip-link {
-  @apply absolute left-4 z-[100] rounded-md px-4 py-2 font-medium;
-  @apply bg-primary text-primary-foreground;
-  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring;
-  top: -100px;
-  transition: top 0.2s ease-out;
-}
-
-.skip-link:focus {
-  top: 1rem;
-}
-
-/* Screen reader only */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-/* ============================================
-   Motion & Animation Preferences
-   ============================================ */
-
-/* Respect user motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms;
-    animation-iteration-count: 1;
-    transition-duration: 0.01ms;
-    scroll-behavior: auto;
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-/* ============================================
-   Touch & Interaction
-   ============================================ */
+/* ============================================================
+   PREMIUM COMPONENT CLASSES
+   ============================================================ */
 
-/* Prevent double-tap zoom delay on mobile */
-button,
-a,
-[role="button"],
-input[type="submit"],
-input[type="button"] {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
+@layer components {
+  /* ── Glass card — default ── */
+  .glass-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(124, 58, 237, 0.15);
+    border-radius: 16px;
+    transition:
+      box-shadow 300ms ease,
+      border-color 300ms ease,
+      transform 300ms ease;
+    will-change: transform, box-shadow;
+  }
 
-/* Contain overscroll in modals/sheets */
-.overscroll-contain {
-  overscroll-behavior: contain;
-}
+  .glass-card:hover {
+    box-shadow:
+      0 0 32px rgba(212, 175, 55, 0.1),
+      0 8px 32px rgba(0, 0, 0, 0.45);
+    border-color: rgba(212, 175, 55, 0.28);
+    transform: translateY(-2px);
+  }
 
-/* ============================================
-   Typography Utilities
-   ============================================ */
+  /* ── Glass card — premium (gold accent) ── */
+  .glass-card-premium {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 20px;
+    box-shadow:
+      0 0 40px rgba(212, 175, 55, 0.06),
+      inset 0 1px 0 rgba(212, 175, 55, 0.1);
+  }
 
-/* Heading font */
-.font-heading {
-  font-family:
-    var(--font-plus-jakarta), var(--font-inter), system-ui, sans-serif;
-}
+  /* ── Gold shimmer text ── */
+  .text-gold-shimmer {
+    background: linear-gradient(
+      90deg,
+      #d4af37 0%,
+      #f5d060 30%,
+      #d4af37 55%,
+      #f5d060 80%,
+      #d4af37 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gold-shimmer 5s linear infinite;
+  }
 
-/* Body font */
-.font-body {
-  font-family: var(--font-inter), system-ui, sans-serif;
-}
+  /* ── Hero gradient overlay ── */
+  .wine-hero-gradient {
+    background: linear-gradient(
+      135deg,
+      rgba(91, 33, 182, 0.3) 0%,
+      rgba(29, 78, 216, 0.2) 40%,
+      rgba(10, 15, 26, 0.9) 100%
+    );
+  }
 
-/* ============================================
-   Component Utilities
-   ============================================ */
+  /* ── Navbar glass ── */
+  .glass-nav {
+    background: rgba(10, 15, 26, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(124, 58, 237, 0.12);
+  }
 
-/* Warm shadow for cards */
-.shadow-warm {
-  box-shadow:
-    0 1px 3px 0 oklch(0.55 0.05 35 / 0.08),
-    0 1px 2px -1px oklch(0.55 0.05 35 / 0.08);
-}
+  /* ── Search bar glow on focus ── */
+  .search-glow:focus-within {
+    box-shadow:
+      0 0 0 1px rgba(212, 175, 55, 0.4),
+      0 0 24px rgba(212, 175, 55, 0.12);
+  }
 
-.shadow-warm-md {
-  box-shadow:
-    0 4px 6px -1px oklch(0.55 0.05 35 / 0.08),
-    0 2px 4px -2px oklch(0.55 0.05 35 / 0.08);
-}
+  /* ── Fade-up animation helper ── */
+  .animate-fade-up {
+    animation: fade-up 0.6s ease forwards;
+  }
 
-.shadow-warm-lg {
-  box-shadow:
-    0 10px 15px -3px oklch(0.55 0.05 35 / 0.08),
-    0 4px 6px -4px oklch(0.55 0.05 35 / 0.08);
-}
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
 
-/* Hover lift effect */
-.hover-lift {
-  transition:
-    transform 0.2s ease-out,
-    box-shadow 0.2s ease-out;
-}
+  /* ── Button: primary gold ── */
+  .btn-gold {
+    background: linear-gradient(135deg, #d4af37 0%, #f5d060 50%, #d4af37 100%);
+    background-size: 200% auto;
+    color: #060c18;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 0.75rem 2rem;
+    transition:
+      background-position 300ms ease,
+      box-shadow 300ms ease,
+      transform 200ms ease;
+  }
 
-.hover-lift:hover {
-  transform: translateY(-4px);
-}
+  .btn-gold:hover {
+    background-position: right center;
+    box-shadow:
+      0 0 24px rgba(212, 175, 55, 0.35),
+      0 4px 16px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+  }
 
-/* Button press effect */
-.press-effect:active {
-  transform: scale(0.98);
+  /* ── Button: glass outline ── */
+  .btn-glass {
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(124, 58, 237, 0.25);
+    color: #e2e8f0;
+    font-weight: 500;
+    border-radius: 12px;
+    padding: 0.75rem 2rem;
+    transition:
+      border-color 300ms ease,
+      background 300ms ease,
+      transform 200ms ease;
+  }
+
+  .btn-glass:hover {
+    border-color: rgba(212, 175, 55, 0.4);
+    background: rgba(15, 23, 42, 0.7);
+    transform: translateY(-1px);
+  }
+
+  /* ── Divider gradient ── */
+  .divider-gold {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(212, 175, 55, 0.3),
+      transparent
+    );
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 1rem;
+    border-radius: 999px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    color: #d4af37;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
 }
