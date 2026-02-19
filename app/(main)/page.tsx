@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { sanityFetch } from "@/lib/sanity/live";
-import { CATEGORIES_QUERY, FEATURED_BUSINESSES_QUERY, BUSINESS_COUNT_QUERY } from "@/lib/sanity/queries";
+import { createClient } from "@/lib/supabase/server";
 import { Search, Gift, Trophy, MapPin, Star, Shield, Phone, Globe, Navigation, ChevronRight, Wine, UtensilsCrossed, Car, Heart, ShoppingBag, Briefcase, Wrench, Sparkles, Home, Music, Crown, Store, Map } from "lucide-react";
 import type { Business, Category } from "@/types";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
@@ -41,23 +40,40 @@ function getTierBadge(tier: string) {
 }
 
 export default async function HomePage() {
-  const [{ data: categories }, { data: featuredBusinesses }, { data: businessCount }] = await Promise.all([
-    sanityFetch({ query: CATEGORIES_QUERY }),
-    sanityFetch({ query: FEATURED_BUSINESSES_QUERY }),
-    sanityFetch({ query: BUSINESS_COUNT_QUERY }),
+  const supabase = await createClient();
+
+  const [
+    { data: categories },
+    { data: featuredBusinesses },
+    { count: businessCount },
+  ] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("*")
+      .eq("is_active", true)
+      .order("display_order"),
+    supabase
+      .from("businesses")
+      .select("*, categories(name, slug)")
+      .eq("is_active", true)
+      .or("tier.eq.platinum_elite,tier.eq.platinum_partner,is_featured.eq.true")
+      .order("tier", { ascending: false })
+      .limit(12),
+    supabase
+      .from("businesses")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true),
   ]);
 
   const allCategories = (categories as Category[]) || [];
   const displayCategories = allCategories.slice(0, 20);
   const catPills = allCategories.slice(0, 10);
+  const bizList = (featuredBusinesses as any[]) || [];
 
   return (
     <div className="premium-bg">
-      {/* ═══════════════════════════════════════════
-          HERO SECTION
-          ═══════════════════════════════════════════ */}
+      {/* HERO SECTION */}
       <section className="wine-hero-gradient relative overflow-hidden py-28 lg:py-36">
-        {/* Background decorative elements */}
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
         <div className="absolute left-1/2 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-pd-purple/10 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-[400px] w-[400px] translate-x-1/4 translate-y-1/4 rounded-full bg-pd-gold/5 blur-3xl" />
@@ -111,8 +127,8 @@ export default async function HomePage() {
           <div className="horizontal-scroll mx-auto mt-8 flex max-w-3xl gap-2 pb-2">
             {catPills.map((cat) => (
               <Link
-                key={cat._id}
-                href={`/category/${cat.slug?.current}`}
+                key={cat.id}
+                href={`/search?category=${cat.slug}`}
                 className="glass-card flex-shrink-0 rounded-full px-4 py-1.5 text-xs text-gray-300 transition-all hover:border-pd-gold/40 hover:text-pd-gold"
               >
                 {cat.name}
@@ -124,7 +140,7 @@ export default async function HomePage() {
           <div className="mt-12 flex flex-wrap justify-center gap-10">
             <div className="text-center">
               <p className="font-heading text-4xl font-bold text-white tabular-nums">
-                <AnimatedCounter target={(businessCount as number) || 7831} />
+                <AnimatedCounter target={businessCount || 0} />
               </p>
               <p className="mt-1 text-sm text-gray-400">Businesses</p>
             </div>
@@ -146,9 +162,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════
-          FEATURED PLATINUM BUSINESSES
-          ═══════════════════════════════════════════ */}
+      {/* FEATURED PLATINUM BUSINESSES */}
       <ScrollReveal>
         <section className="py-20">
           <div className="container">
@@ -162,18 +176,17 @@ export default async function HomePage() {
 
             {/* Horizontal scrolling carousel */}
             <div className="horizontal-scroll -mx-4 mt-8 flex gap-5 px-4 pb-4">
-              {(featuredBusinesses as Business[] || []).map((biz) => {
-                const imgUrl = biz.coverImageUrl || `https://picsum.photos/seed/${biz.slug?.current || biz._id}/800/400`;
+              {bizList.map((biz) => {
+                const imgUrl = biz.cover_image_url || `https://picsum.photos/seed/${biz.slug || biz.id}/800/400`;
+                const catName = biz.categories?.name;
                 return (
                   <Link
-                    key={biz._id}
-                    href={`/business/${biz.slug?.current}`}
+                    key={biz.id}
+                    href={`/business/${biz.slug}`}
                     className="glass-card glow-effect group relative flex w-72 flex-shrink-0 flex-col overflow-hidden"
                   >
-                    {/* Featured ribbon */}
-                    {biz.isFeatured && <div className="featured-ribbon">FEATURED</div>}
+                    {biz.is_featured && <div className="featured-ribbon">FEATURED</div>}
 
-                    {/* Cover image */}
                     <div className="relative h-44 overflow-hidden bg-gradient-to-br from-pd-purple-dark/40 to-pd-blue-dark/30">
                       <img
                         src={imgUrl}
@@ -184,7 +197,6 @@ export default async function HomePage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-[rgba(10,15,26,0.95)] via-[rgba(10,15,26,0.3)] to-transparent" />
                     </div>
 
-                    {/* Card body */}
                     <div className="flex flex-1 flex-col p-4">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-heading text-sm font-bold text-white group-hover:text-pd-gold">
@@ -193,17 +205,17 @@ export default async function HomePage() {
                         {getTierBadge(biz.tier)}
                       </div>
 
-                      {biz.primaryCategory && (
+                      {catName && (
                         <span className="mt-2 inline-block w-fit rounded-full bg-pd-purple/20 px-2.5 py-0.5 text-[10px] text-pd-purple-light">
-                          {biz.primaryCategory.name}
+                          {catName}
                         </span>
                       )}
 
                       <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
-                        {(biz.averageRating > 0 || biz.googleRating) && (
+                        {biz.average_rating > 0 && (
                           <span className="flex items-center gap-1">
                             <Star className="h-3 w-3 fill-pd-gold text-pd-gold" />
-                            <span className="text-white">{biz.averageRating || biz.googleRating}</span>
+                            <span className="text-white">{biz.average_rating}</span>
                           </span>
                         )}
                         {biz.city && (
@@ -213,7 +225,6 @@ export default async function HomePage() {
                         )}
                       </div>
 
-                      {/* Quick action buttons */}
                       <div className="mt-auto flex gap-2 pt-3">
                         {biz.phone && (
                           <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-pd-purple/20 text-gray-400 transition-colors group-hover:border-pd-gold/30 group-hover:text-pd-gold">
@@ -234,7 +245,7 @@ export default async function HomePage() {
                 );
               })}
 
-              {(!featuredBusinesses || (featuredBusinesses as Business[]).length === 0) && (
+              {bizList.length === 0 && (
                 <div className="glass-card mx-auto flex w-full max-w-md flex-col items-center p-12 text-center">
                   <Shield className="h-12 w-12 text-pd-purple/50" />
                   <p className="mt-4 text-lg text-gray-400">Premium businesses coming soon</p>
@@ -248,9 +259,7 @@ export default async function HomePage() {
         </section>
       </ScrollReveal>
 
-      {/* ═══════════════════════════════════════════
-          WEEKLY GIVEAWAY BANNER WITH COUNTDOWN
-          ═══════════════════════════════════════════ */}
+      {/* WEEKLY GIVEAWAY BANNER */}
       <ScrollReveal>
         <section className="relative overflow-hidden py-12">
           <div className="absolute inset-0 bg-gradient-to-r from-pd-purple-dark/40 via-pd-blue-dark/20 to-pd-purple-dark/40" />
@@ -290,9 +299,7 @@ export default async function HomePage() {
         </section>
       </ScrollReveal>
 
-      {/* ═══════════════════════════════════════════
-          CATEGORIES GRID (4x5 Responsive)
-          ═══════════════════════════════════════════ */}
+      {/* CATEGORIES GRID */}
       <ScrollReveal>
         <section className="py-20">
           <div className="container">
@@ -308,8 +315,8 @@ export default async function HomePage() {
                 const IconComponent = ICON_MAP[cat.icon || ""] || MapPin;
                 return (
                   <Link
-                    key={cat._id}
-                    href={`/category/${cat.slug?.current}`}
+                    key={cat.id}
+                    href={`/search?category=${cat.slug}`}
                     className="glass-card group flex flex-col items-center gap-3 p-6 text-center"
                   >
                     <div className="category-icon-scale flex h-12 w-12 items-center justify-center rounded-xl bg-pd-purple/15">
@@ -317,9 +324,6 @@ export default async function HomePage() {
                     </div>
                     <p className="font-heading text-xs font-semibold text-white">
                       {cat.name}
-                    </p>
-                    <p className="text-[10px] text-gray-500">
-                      {cat.businessCount || 0} businesses
                     </p>
                   </Link>
                 );
@@ -329,9 +333,7 @@ export default async function HomePage() {
         </section>
       </ScrollReveal>
 
-      {/* ═══════════════════════════════════════════
-          MAP SECTION — Temecula Valley Dark Theme
-          ═══════════════════════════════════════════ */}
+      {/* MAP SECTION */}
       <ScrollReveal>
         <section className="py-20">
           <div className="container">
@@ -347,7 +349,6 @@ export default async function HomePage() {
 
             <div className="map-section-dark mt-8 overflow-hidden rounded-2xl border border-pd-purple/15 p-1">
               <div className="relative h-[400px] overflow-hidden rounded-xl">
-                {/* Stylized abstract map background */}
                 <div className="absolute inset-0" style={{
                   background: `
                     radial-gradient(circle at 45% 55%, rgba(124, 58, 237, 0.12) 0%, transparent 35%),
@@ -357,7 +358,6 @@ export default async function HomePage() {
                   `,
                 }} />
 
-                {/* Grid lines for map feel */}
                 <div className="absolute inset-0 opacity-[0.03]" style={{
                   backgroundImage: `
                     linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
@@ -366,27 +366,22 @@ export default async function HomePage() {
                   backgroundSize: '60px 60px',
                 }} />
 
-                {/* City markers */}
                 {VALLEY_CITIES.map((city, i) => {
-                  // Normalize positions to fit within the map area
                   const x = ((city.lng + 117.35) / 0.4) * 100;
                   const y = ((33.8 - city.lat) / 0.5) * 100;
                   const isPrimary = ["Temecula", "Murrieta", "Menifee", "Lake Elsinore"].includes(city.name);
                   return (
                     <Link
                       key={city.name}
-                      href={`/city/${city.name}`}
+                      href={`/search?city=${city.name}`}
                       className="group absolute z-10"
                       style={{
                         left: `${Math.max(8, Math.min(88, x))}%`,
                         top: `${Math.max(8, Math.min(88, y))}%`,
                       }}
                     >
-                      {/* Pulse ring */}
                       <div className={`absolute -inset-3 animate-ping rounded-full ${isPrimary ? 'bg-pd-gold/20' : 'bg-pd-blue/15'}`} style={{ animationDuration: `${3 + i * 0.5}s` }} />
-                      {/* Dot */}
                       <div className={`relative h-3 w-3 rounded-full border-2 transition-all group-hover:scale-150 ${isPrimary ? 'border-pd-gold bg-pd-gold shadow-glow-gold' : 'border-pd-blue-light bg-pd-blue shadow-glow-blue'}`} />
-                      {/* Label */}
                       <span className="absolute left-1/2 top-5 -translate-x-1/2 whitespace-nowrap rounded-md bg-pd-dark/90 px-2 py-0.5 text-[10px] font-medium text-gray-300 opacity-0 transition-opacity group-hover:opacity-100">
                         {city.name}
                       </span>
@@ -394,12 +389,10 @@ export default async function HomePage() {
                   );
                 })}
 
-                {/* "Temecula Valley" label */}
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                   <p className="font-heading text-2xl font-bold text-white/10">TEMECULA VALLEY</p>
                 </div>
 
-                {/* Legend */}
                 <div className="absolute bottom-4 right-4 flex items-center gap-4 rounded-xl bg-pd-dark/80 px-4 py-2 backdrop-blur-sm">
                   <span className="flex items-center gap-1.5 text-[10px] text-gray-400">
                     <span className="h-2 w-2 rounded-full bg-pd-gold" /> Primary
@@ -414,9 +407,7 @@ export default async function HomePage() {
         </section>
       </ScrollReveal>
 
-      {/* ═══════════════════════════════════════════
-          $3,500 BUSINESS SWEEPSTAKES CTA
-          ═══════════════════════════════════════════ */}
+      {/* $3,500 BUSINESS SWEEPSTAKES CTA */}
       <ScrollReveal>
         <section className="py-20">
           <div className="container">
@@ -447,9 +438,7 @@ export default async function HomePage() {
         </section>
       </ScrollReveal>
 
-      {/* ═══════════════════════════════════════════
-          ADVERTISE CTA
-          ═══════════════════════════════════════════ */}
+      {/* ADVERTISE CTA */}
       <ScrollReveal>
         <section className="wine-hero-gradient py-24">
           <div className="container text-center">

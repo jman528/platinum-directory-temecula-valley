@@ -1,22 +1,27 @@
 export interface Business {
-  _id: string;
+  id: string;
   name: string;
-  slug: { current: string };
+  slug: string;
   description?: string;
-  longDescription?: any[];
-  primaryCategory?: { name: string; slug: { current: string }; icon: string };
-  subcategories?: { name: string; slug: { current: string } }[];
-  tags?: string[];
-  address?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  neighborhood?: string;
-  geopoint?: { lat: number; lng: number };
+  category_id?: string;
+  tier: "free" | "verified_platinum" | "platinum_partner" | "platinum_elite";
+  is_active: boolean;
+  is_featured: boolean;
+  is_claimed?: boolean;
+  claimed_by?: string;
+  terms_accepted?: boolean;
+  terms_accepted_at?: string;
   phone?: string;
   email?: string;
   website?: string;
-  socialLinks?: {
+  address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  latitude?: number;
+  longitude?: number;
+  hours?: Record<string, { open?: string; close?: string; closed?: boolean }>;
+  social_media?: {
     facebook?: string;
     instagram?: string;
     twitter?: string;
@@ -24,120 +29,117 @@ export interface Business {
     youtube?: string;
     tiktok?: string;
     yelp?: string;
-    googleBusiness?: string;
+    google_business?: string;
   };
-  logo?: SanityImage;
-  coverImage?: SanityImage;
-  coverImageUrl?: string;
-  gallery?: SanityImage[];
-  videoUrl?: string;
-  hours?: Record<string, { open?: string; close?: string; closed?: boolean }>;
-  priceRange?: string;
   amenities?: string[];
-  cuisineTypes?: string[];
-  paymentMethods?: string[];
-  languages?: string[];
-  yearEstablished?: number;
-  googleRating?: number;
-  googleReviewCount?: number;
-  googlePlaceId?: string;
-  smartOffers?: SmartOffer[];
-  tier: 'free' | 'verified_platinum' | 'platinum_partner' | 'platinum_elite';
-  status: 'pending' | 'active' | 'suspended' | 'expired';
-  isVerified: boolean;
-  isFeatured: boolean;
-  ownerClerkId?: string;
-  ownerEmail?: string;
-  ownerName?: string;
-  claimedAt?: string;
-  averageRating: number;
-  reviewCount: number;
-  seoTitle?: string;
-  seoDescription?: string;
+  average_rating: number;
+  review_count: number;
+  cover_image_url?: string;
+  logo_url?: string;
+  owner_user_id?: string;
+  stripe_connect_id?: string;
+  stripe_connect_status?: string;
+  subscription_status?: string;
+  outreach_status?: string;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  category_name?: string;
+  category_slug?: string;
+  images?: BusinessImage[];
 }
 
-export interface SmartOffer {
-  title: string;
-  description?: string;
-  originalPrice?: number;
-  offerPrice?: number;
-  image?: SanityImage;
-  validFrom?: string;
-  validUntil?: string;
-  maxRedemptions?: number;
-  currentRedemptions?: number;
-  isActive: boolean;
-  terms?: string;
+export interface BusinessImage {
+  id: string;
+  business_id: string;
+  image_url: string;
+  alt_text?: string;
+  display_order: number;
 }
 
 export interface Category {
-  _id: string;
+  id: string;
   name: string;
-  slug: { current: string };
+  slug: string;
   description?: string;
   icon?: string;
-  image?: SanityImage;
-  order: number;
-  isActive: boolean;
-  businessCount: number;
+  display_order: number;
+  is_active: boolean;
 }
 
-export interface Review {
-  _id: string;
-  authorName: string;
-  authorAvatar?: string;
-  rating: number;
-  title?: string;
-  body: string;
-  photos?: SanityImage[];
-  publishedAt: string;
-  ownerResponse?: {
-    body: string;
-    respondedAt: string;
-  };
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string;
+  avatar_url?: string;
+  user_type: "customer" | "business_owner" | "affiliate" | "admin" | "super_admin";
+  city?: string;
+  state?: string;
+  phone?: string;
+  referral_code?: string;
+  points_balance: number;
+  points_pending: number;
+  total_points_earned: number;
+  ai_credits_balance: number;
+  is_affiliate: boolean;
+  affiliate_status: string;
+  commission_balance_available: number;
+  terms_accepted?: boolean;
+  terms_accepted_at?: string;
+  marketing_consent?: boolean;
+  marketing_consent_at?: string;
+  created_at: string;
+}
+
+export interface Offer {
+  id: string;
+  business_id: string;
+  title: string;
+  description?: string;
+  terms?: string;
+  offer_type: "voucher" | "local_deal";
+  original_price?: number;
+  offer_price: number;
+  discount_type?: string;
+  discount_value?: number;
+  max_claims?: number;
+  current_claims: number;
+  starts_at?: string;
+  expires_at?: string;
+  is_active: boolean;
+  is_featured: boolean;
+  status: string;
+  cover_image_url?: string;
+  business_name?: string;
+  business_slug?: string;
+}
+
+export interface FeatureFlag {
+  id: string;
+  flag_key: string;
+  enabled: boolean;
+  description?: string;
 }
 
 export interface Lead {
-  _id: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone?: string;
+  id: string;
+  business_id?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
   message?: string;
-  service?: string;
-  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
   source?: string;
-  _createdAt: string;
+  status: string;
+  created_at: string;
 }
 
-export interface Giveaway {
-  _id: string;
-  title: string;
-  description?: string;
-  giveawayType: 'consumer' | 'business';
-  prizeValue: number;
-  prizeDescription: string;
-  eligibility?: string;
-  requiredTiers?: string[];
-  startDate: string;
-  endDate: string;
-  drawingFrequency: string;
-  image?: SanityImage;
-  entryCount: number;
-  sponsoringBusinesses?: { name: string; slug: { current: string }; logo?: SanityImage }[];
-  rules?: any[];
-  isActive: boolean;
-}
-
-export interface SanityImage {
-  _type: 'image';
-  asset: {
-    _ref: string;
-    _type: 'reference';
-  };
-  hotspot?: {
-    x: number;
-    y: number;
-    height: number;
-    width: number;
-  };
+export interface GiveawayEntry {
+  id: string;
+  giveaway_type: "consumer" | "business";
+  email: string;
+  full_name?: string;
+  phone?: string;
+  referral_code?: string;
+  total_entries: number;
+  created_at: string;
 }

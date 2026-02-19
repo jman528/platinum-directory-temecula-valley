@@ -1,56 +1,35 @@
-import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "@/components/ui/sonner";
-import { SanityLive } from "@/lib/sanity/live";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default:
-      "Platinum Directory — Temecula Valley's Verified Business Directory",
+    default: "Platinum Directory — Temecula Valley's Verified Business Directory",
     template: "%s | Platinum Directory",
   },
   description:
     "Discover verified local businesses in Temecula Valley. Wine country dining, premium services, and exclusive deals from trusted businesses across 11 cities.",
   keywords: [
-    "Temecula Valley",
-    "business directory",
-    "local businesses",
-    "wineries",
-    "restaurants",
-    "Temecula",
-    "Murrieta",
-    "verified businesses",
-    "platinum directory",
+    "Temecula Valley", "business directory", "local businesses", "wineries",
+    "restaurants", "Temecula", "Murrieta", "verified businesses", "platinum directory",
   ],
   authors: [{ name: "Platinum Directory" }],
   creator: "Platinum Directory",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-  ),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: "Platinum Directory",
-    title:
-      "Platinum Directory — Temecula Valley's Verified Business Directory",
-    description:
-      "Discover verified local businesses in Temecula Valley. Wine country dining, premium services, and exclusive deals.",
+    title: "Platinum Directory — Temecula Valley's Verified Business Directory",
+    description: "Discover verified local businesses in Temecula Valley. Wine country dining, premium services, and exclusive deals.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Platinum Directory — Temecula Valley",
-    description:
-      "Discover verified local businesses in Temecula Valley. Wine country dining, premium services, and exclusive deals.",
+    description: "Discover verified local businesses in Temecula Valley.",
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-  },
+  robots: { index: true, follow: true },
+  icons: { icon: "/logo.png", apple: "/logo.png" },
 };
 
 export const viewport: Viewport = {
@@ -61,25 +40,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <head>
-          <link rel="preconnect" href="https://cdn.sanity.io" />
-          <link rel="preconnect" href="https://api.mapbox.com" />
-        </head>
-        <body className="font-sans antialiased" suppressHydrationWarning>
-          <a href="#main" className="skip-link">
-            Skip to main content
-          </a>
-          {children}
-          <Toaster />
-          <SanityLive />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://api.mapbox.com" />
+      </head>
+      <body className="font-sans antialiased" suppressHydrationWarning>
+        <a href="#main" className="skip-link">Skip to main content</a>
+        {children}
+        <Toaster />
+      </body>
+    </html>
   );
 }

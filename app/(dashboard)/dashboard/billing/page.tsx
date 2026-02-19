@@ -1,13 +1,21 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { CreditCard, Shield, ExternalLink } from "lucide-react";
 
 export default async function BillingPage() {
-  const user = await currentUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const tier = (user.publicMetadata?.tier as string) || "free";
+  const { data: biz } = await supabase
+    .from("businesses")
+    .select("tier, subscription_status")
+    .eq("owner_user_id", user.id)
+    .limit(1)
+    .single();
+
+  const tier = biz?.tier || "free";
 
   return (
     <div>
@@ -35,10 +43,10 @@ export default async function BillingPage() {
         </div>
       ) : (
         <div className="mt-6 glass-card p-6">
-          <p className="text-gray-400">Your subscription is managed through GoHighLevel.</p>
-          <a href="https://lk.platinumdirectorytemeculavalley.com" target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-lg bg-pd-blue px-4 py-2 text-sm font-medium text-white hover:bg-pd-blue-dark">
-            Manage Subscription <ExternalLink className="h-4 w-4" />
-          </a>
+          <p className="text-gray-400">Your subscription is managed through Stripe.</p>
+          <p className="mt-2 text-sm text-gray-500">
+            Status: <span className="capitalize text-white">{biz?.subscription_status || "active"}</span>
+          </p>
         </div>
       )}
     </div>

@@ -1,15 +1,19 @@
 import Link from "next/link";
-import { sanityFetch } from "@/lib/sanity/live";
-import { BUSINESSES_BY_CATEGORY_QUERY, CATEGORIES_QUERY } from "@/lib/sanity/queries";
+import { createClient } from "@/lib/supabase/server";
 import { Star, Shield, MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import type { Business, Category } from "@/types";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const { data: categories } = await sanityFetch({ query: CATEGORIES_QUERY });
-  const cat = (categories as Category[])?.find((c) => c.slug?.current === slug);
+  const supabase = await createClient();
+  const { data: cat } = await supabase
+    .from("categories")
+    .select("name")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .single();
+
   return {
     title: cat ? `${cat.name} in Temecula Valley` : "Category",
     description: cat ? `Find verified ${cat.name.toLowerCase()} businesses in Temecula Valley.` : undefined,
@@ -18,18 +22,30 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [{ data: businesses }, { data: categories }] = await Promise.all([
-    sanityFetch({
-      query: BUSINESSES_BY_CATEGORY_QUERY,
-      params: { categorySlug: slug, start: 0, end: 24 },
-    }),
-    sanityFetch({ query: CATEGORIES_QUERY }),
-  ]);
+  const supabase = await createClient();
 
-  const cat = (categories as Category[])?.find((c) => c.slug?.current === slug);
+  // Fetch the category first to get the ID
+  const { data: cat } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .single();
+
   if (!cat) notFound();
 
-  const bizList = (businesses as Business[]) || [];
+  // Fetch businesses by category_id
+  const { data: businesses } = await supabase
+    .from("businesses")
+    .select("*, categories(name, slug)")
+    .eq("is_active", true)
+    .eq("category_id", cat.id)
+    .order("tier", { ascending: false })
+    .order("is_featured", { ascending: false })
+    .order("average_rating", { ascending: false })
+    .range(0, 23);
+
+  const bizList = (businesses as any[]) || [];
 
   return (
     <div className="container py-8">
@@ -50,17 +66,17 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         </div>
       ) : (
         <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {bizList.map((biz) => (
-            <Link key={biz._id} href={`/business/${biz.slug?.current}`} className="glass-card group p-4">
+          {bizList.map((biz: any) => (
+            <Link key={biz.id} href={`/business/${biz.slug}`} className="glass-card group p-4">
               <div className="flex items-center gap-2">
                 <h3 className="truncate font-heading font-semibold text-white group-hover:text-pd-gold">{biz.name}</h3>
-                {biz.isVerified && <Shield className="h-4 w-4 shrink-0 text-pd-gold" />}
+                {biz.tier !== "free" && <Shield className="h-4 w-4 shrink-0 text-pd-gold" />}
               </div>
               <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
-                {(biz.averageRating > 0 || biz.googleRating) && (
+                {biz.average_rating > 0 && (
                   <span className="flex items-center gap-1">
                     <Star className="h-3 w-3 fill-pd-gold text-pd-gold" />
-                    {biz.averageRating || biz.googleRating}
+                    {biz.average_rating}
                   </span>
                 )}
                 {biz.city && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{biz.city}</span>}

@@ -1,28 +1,31 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { sanityFetch } from "@/lib/sanity/live";
-import { BUSINESSES_BY_OWNER_QUERY, LEADS_BY_BUSINESS_QUERY } from "@/lib/sanity/queries";
 import { Users, Mail, Phone } from "lucide-react";
-import type { Business, Lead } from "@/types";
+import type { Lead } from "@/types";
 
 export default async function LeadsPage() {
-  const user = await currentUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const { data: businesses } = await sanityFetch({
-    query: BUSINESSES_BY_OWNER_QUERY,
-    params: { clerkId: user.id },
-  });
+  // Get user's businesses
+  const { data: businesses } = await supabase
+    .from("businesses")
+    .select("id")
+    .eq("owner_user_id", user.id);
 
-  const bizList = (businesses as Business[]) || [];
+  const bizIds = (businesses || []).map((b: any) => b.id);
+
+  // Fetch leads for all owned businesses
   let allLeads: Lead[] = [];
+  if (bizIds.length > 0) {
+    const { data: leads } = await supabase
+      .from("leads")
+      .select("*")
+      .in("business_id", bizIds)
+      .order("created_at", { ascending: false });
 
-  for (const biz of bizList) {
-    const { data: leads } = await sanityFetch({
-      query: LEADS_BY_BUSINESS_QUERY,
-      params: { businessId: biz._id },
-    });
-    allLeads = [...allLeads, ...((leads as Lead[]) || [])];
+    allLeads = (leads as Lead[]) || [];
   }
 
   const statusColors: Record<string, string> = {
@@ -46,13 +49,13 @@ export default async function LeadsPage() {
       ) : (
         <div className="mt-6 space-y-3">
           {allLeads.map((lead) => (
-            <div key={lead._id} className="glass-card p-4">
+            <div key={lead.id} className="glass-card p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-white">{lead.customerName}</p>
+                  <p className="font-medium text-white">{lead.name}</p>
                   <div className="mt-1 flex items-center gap-4 text-sm text-gray-400">
-                    {lead.customerEmail && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{lead.customerEmail}</span>}
-                    {lead.customerPhone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{lead.customerPhone}</span>}
+                    {lead.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{lead.email}</span>}
+                    {lead.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{lead.phone}</span>}
                   </div>
                   {lead.message && <p className="mt-2 text-sm text-gray-500 line-clamp-1">{lead.message}</p>}
                 </div>

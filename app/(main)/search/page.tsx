@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { sanityFetch } from "@/lib/sanity/live";
-import { BUSINESS_SEARCH_QUERY, CATEGORIES_QUERY } from "@/lib/sanity/queries";
+import { createClient } from "@/lib/supabase/server";
 import { Search, SlidersHorizontal, Star, Shield, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import type { Business, Category } from "@/types";
@@ -51,9 +50,9 @@ function FilterContent({
           </Link>
           {catList.map((cat) => (
             <Link
-              key={cat._id}
-              href={`/search?category=${cat.slug?.current}${query ? `&q=${query}` : ""}`}
-              className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${category === cat.slug?.current ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}
+              key={cat.id}
+              href={`/search?category=${cat.slug}${query ? `&q=${query}` : ""}`}
+              className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${category === cat.slug ? "bg-pd-purple/20 text-white" : "text-gray-400 hover:bg-pd-purple/10 hover:text-white"}`}
             >
               {cat.name}
             </Link>
@@ -88,26 +87,60 @@ function FilterContent({
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string; city?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; city?: string; tier?: string; has_offers?: string; page?: string }>;
 }) {
   const params = await searchParams;
   const query = params.q || "";
   const category = params.category || "";
   const city = params.city || "";
+  const tier = params.tier || "";
+  const hasOffers = params.has_offers === "true";
   const page = Number(params.page) || 1;
   const perPage = 12;
-  const start = (page - 1) * perPage;
-  const end = start + perPage;
 
-  const [{ data: businesses }, { data: categories }] = await Promise.all([
-    sanityFetch({
-      query: BUSINESS_SEARCH_QUERY,
-      params: { query, category, city, start, end },
-    }),
-    sanityFetch({ query: CATEGORIES_QUERY }),
-  ]);
+  const supabase = await createClient();
 
-  const bizList = (businesses as Business[]) || [];
+  // Fetch categories for the filter sidebar
+  const { data: categories } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("is_active", true)
+    .order("display_order");
+
+  // Build business query
+  let bizQuery = supabase
+    .from("businesses")
+    .select("*, categories(name, slug)")
+    .eq("is_active", true)
+    .order("tier", { ascending: false })
+    .order("is_featured", { ascending: false })
+    .order("average_rating", { ascending: false })
+    .range((page - 1) * perPage, page * perPage - 1);
+
+  if (query) {
+    bizQuery = bizQuery.or(`name.ilike.%${query}%,description.ilike.%${query}%`);
+  }
+  if (city) {
+    bizQuery = bizQuery.eq("city", city);
+  }
+  if (tier) {
+    bizQuery = bizQuery.eq("tier", tier);
+  }
+  if (category) {
+    // Look up category id by slug
+    const { data: catRow } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("slug", category)
+      .single();
+    if (catRow) {
+      bizQuery = bizQuery.eq("category_id", catRow.id);
+    }
+  }
+
+  const { data: businesses } = await bizQuery;
+
+  const bizList = (businesses as any[]) || [];
   const catList = (categories as Category[]) || [];
 
   return (
@@ -166,17 +199,17 @@ export default async function SearchPage({
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {bizList.map((biz) => {
-                const imgUrl = biz.coverImageUrl || `https://picsum.photos/seed/${biz.slug?.current || biz._id}/800/400`;
+                const imgUrl = biz.cover_image_url || `https://picsum.photos/seed/${biz.slug || biz.id}/800/400`;
+                const catName = biz.categories?.name;
+                const isVerified = biz.tier !== "free";
                 return (
                   <Link
-                    key={biz._id}
-                    href={`/business/${biz.slug?.current}`}
+                    key={biz.id}
+                    href={`/business/${biz.slug}`}
                     className="glass-card glow-effect group relative flex gap-4 overflow-hidden p-4"
                   >
-                    {/* Featured ribbon */}
-                    {biz.isFeatured && <div className="featured-ribbon">FEATURED</div>}
+                    {biz.is_featured && <div className="featured-ribbon">FEATURED</div>}
 
-                    {/* Thumbnail image */}
                     <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-pd-purple-dark/40 to-pd-blue-dark/30 sm:h-24 sm:w-24">
                       <img
                         src={imgUrl}
@@ -186,7 +219,6 @@ export default async function SearchPage({
                       />
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="truncate font-heading text-sm font-semibold text-white group-hover:text-pd-gold">
@@ -194,21 +226,21 @@ export default async function SearchPage({
                         </h3>
                         {getTierBadge(biz.tier)}
                       </div>
-                      {biz.isVerified && (
+                      {isVerified && (
                         <span className="verified-pulse mt-0.5 inline-flex items-center gap-1 text-xs text-pd-gold">
                           <Shield className="h-3 w-3" /> Platinum Verified
                         </span>
                       )}
-                      {biz.primaryCategory && (
+                      {catName && (
                         <span className="mt-1 inline-block rounded-full bg-pd-purple/20 px-2.5 py-0.5 text-[10px] text-pd-purple-light">
-                          {biz.primaryCategory.name}
+                          {catName}
                         </span>
                       )}
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-400 sm:gap-3">
-                        {(biz.averageRating > 0 || biz.googleRating) && (
+                        {biz.average_rating > 0 && (
                           <span className="flex items-center gap-1">
                             <Star className="h-3 w-3 fill-pd-gold text-pd-gold" />
-                            <span className="text-white">{biz.averageRating || biz.googleRating}</span>
+                            <span className="text-white">{biz.average_rating}</span>
                           </span>
                         )}
                         {biz.city && (
@@ -224,6 +256,26 @@ export default async function SearchPage({
                   </Link>
                 );
               })}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {bizList.length === perPage && (
+            <div className="mt-8 flex justify-center gap-2">
+              {page > 1 && (
+                <Link
+                  href={`/search?page=${page - 1}${query ? `&q=${query}` : ""}${category ? `&category=${category}` : ""}${city ? `&city=${city}` : ""}`}
+                  className="rounded-lg border border-pd-purple/20 px-4 py-2 text-sm text-gray-300 hover:border-pd-gold/40 hover:text-white"
+                >
+                  Previous
+                </Link>
+              )}
+              <Link
+                href={`/search?page=${page + 1}${query ? `&q=${query}` : ""}${category ? `&category=${category}` : ""}${city ? `&city=${city}` : ""}`}
+                className="rounded-lg border border-pd-purple/20 px-4 py-2 text-sm text-gray-300 hover:border-pd-gold/40 hover:text-white"
+              >
+                Next
+              </Link>
             </div>
           )}
         </div>

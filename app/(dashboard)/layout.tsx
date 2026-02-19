@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 
@@ -7,10 +7,25 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await currentUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const tier = (user.publicMetadata?.tier as string) || "free";
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("user_type")
+    .eq("id", user.id)
+    .single();
+
+  // Get the tier from the user's business (if they own one)
+  const { data: biz } = await supabase
+    .from("businesses")
+    .select("tier")
+    .eq("owner_user_id", user.id)
+    .limit(1)
+    .single();
+
+  const tier = biz?.tier || "free";
 
   return (
     <div className="flex min-h-screen bg-pd-dark">

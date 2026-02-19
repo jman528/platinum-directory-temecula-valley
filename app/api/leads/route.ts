@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeClient } from "@/lib/sanity/write-client";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,17 +10,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const lead = await writeClient.create({
-      _type: "lead",
-      business: { _type: "reference", _ref: businessId },
-      customerName: name,
-      customerEmail: email,
-      customerPhone: phone || "",
-      message: message || "",
-      service: service || "",
-      status: "new",
-      source: source || "directory_listing",
-    });
+    const supabase = createAdminClient();
+
+    const { data: lead, error } = await supabase
+      .from("leads")
+      .insert({
+        business_id: businessId,
+        name,
+        email,
+        phone: phone || "",
+        message: message || (service ? `Service inquiry: ${service}` : ""),
+        status: "new",
+        source: source || "website",
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Lead creation error:", error);
+      return NextResponse.json({ error: "Failed to create lead" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, lead });
   } catch (error) {

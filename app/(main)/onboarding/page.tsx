@@ -1,26 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 export default function OnboardingPage() {
-  const { user } = useUser();
   const router = useRouter();
+  const supabase = createClient();
+  const [user, setUser] = useState<any>(null);
   const [isBusinessOwner, setIsBusinessOwner] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) router.push("/sign-in");
+      else setUser(user);
+    });
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    
+
     if (user) {
-      await user.update({
-        unsafeMetadata: {
-          phone: formData.get("phone"),
-          isBusinessOwner,
-          onboardingComplete: true,
-        },
-      });
+      await supabase.from("profiles").update({
+        phone: formData.get("phone") as string,
+        user_type: isBusinessOwner ? "business_owner" : "customer",
+      }).eq("id", user.id);
     }
 
     if (isBusinessOwner) {

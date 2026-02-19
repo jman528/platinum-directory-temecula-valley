@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { clerkClient } from "@clerk/nextjs/server";
-import { writeClient } from "@/lib/sanity/write-client";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const TIER_MAP: Record<string, string> = {
   "verified_platinum": "verified_platinum",
@@ -14,38 +13,28 @@ const TIER_MAP: Record<string, string> = {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { contact_id, email, plan_name, status, billing_period } = body;
+    const { email, plan_name, status } = body;
 
     const tier = TIER_MAP[plan_name?.toLowerCase()] || "free";
+    const supabase = createAdminClient();
 
-    // Find Clerk user by email
-    const clerk = await clerkClient();
-    const users = await clerk.users.getUserList({ emailAddress: [email] });
-    const user = users.data[0];
+    // Find user by email and update their business tier
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .single();
 
-    if (user) {
-      await clerk.users.updateUserMetadata(user.id, {
-        publicMetadata: {
+    if (profile) {
+      // Update business tier
+      await supabase
+        .from("businesses")
+        .update({
           tier,
+          is_featured: tier === "platinum_partner" || tier === "platinum_elite",
           subscription_status: status || "active",
-          billing_period: billing_period || "monthly",
-          subscription_updated_at: new Date().toISOString(),
-        },
-      });
-    }
-
-    // Update Sanity business tier
-    const businesses = await writeClient.fetch(
-      `*[_type == "business" && ownerEmail == $email]{ _id }`,
-      { email }
-    );
-
-    for (const biz of businesses) {
-      await writeClient.patch(biz._id).set({
-        tier,
-        isVerified: tier !== "free",
-        isFeatured: tier === "platinum_partner" || tier === "platinum_elite",
-      }).commit();
+        })
+        .eq("owner_user_id", profile.id);
     }
 
     return NextResponse.json({ success: true });

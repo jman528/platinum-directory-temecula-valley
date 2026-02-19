@@ -1,40 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeClient } from "@/lib/sanity/write-client";
-import { client } from "@/lib/sanity/client";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { giveawayId, fullName, email, phone, zipCode, referredBy } = body;
 
-    if (!giveawayId || !fullName || !email || !zipCode) {
+    if (!fullName || !email || !zipCode) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Check for existing entry
-    const existing = await client.fetch(
-      `*[_type == "giveawayEntry" && giveaway._ref == $giveawayId && email == $email][0]`,
-      { giveawayId, email }
-    );
+    const supabase = createAdminClient();
+
+    // Check for existing entry by email (and optionally by giveaway_type)
+    // The giveaway_entries table does not have a giveaway_id FK --
+    // entries are distinguished by giveaway_type. We use the giveawayId
+    // as a way to determine the type, defaulting to 'consumer'.
+    const giveawayType = giveawayId === "giveaway-business-elite" ? "business" : "consumer";
+
+    const { data: existing } = await supabase
+      .from("giveaway_entries")
+      .select("id")
+      .eq("email", email)
+      .eq("giveaway_type", giveawayType)
+      .maybeSingle();
+
     if (existing) {
       return NextResponse.json({ error: "Already entered" }, { status: 409 });
     }
 
-    const entry = await writeClient.create({
-      _type: "giveawayEntry",
-      giveaway: { _type: "reference", _ref: giveawayId },
-      fullName,
-      email,
-      phone: phone || "",
-      zipCode,
-      entries: 1,
-      referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-      referredBy: referredBy || undefined,
-    });
+    const referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-    await writeClient.patch(giveawayId).inc({ entryCount: 1 }).commit();
+    const { data: entry, error } = await supabase
+      .from("giveaway_entries")
+      .insert({
+        giveaway_type: giveawayType,
+        full_name: fullName,
+        email,
+        phone: phone || "",
+        city: zipCode, // Using city field for zip code storage (closest match in schema)
+        referral_code: referredBy || null,
+        total_entries: 1,
+        bonus_entries: 0,
+        agreed_to_rules: true,
+      })
+      .select()
+      .single();
 
-    return NextResponse.json({ success: true, entry });
+    if (error) {
+      console.error("Giveaway entry error:", error);
+      return NextResponse.json({ error: "Failed to enter giveaway" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, entry: { ...entry, referralCode } });
   } catch (error) {
     console.error("Giveaway entry error:", error);
     return NextResponse.json({ error: "Failed to enter giveaway" }, { status: 500 });

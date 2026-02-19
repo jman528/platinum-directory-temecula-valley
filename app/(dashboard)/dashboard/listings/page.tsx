@@ -1,21 +1,20 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { sanityFetch } from "@/lib/sanity/live";
-import { BUSINESSES_BY_OWNER_QUERY } from "@/lib/sanity/queries";
 import Link from "next/link";
 import { Plus, Shield, ExternalLink } from "lucide-react";
-import type { Business } from "@/types";
 
 export default async function ListingsPage() {
-  const user = await currentUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const { data: businesses } = await sanityFetch({
-    query: BUSINESSES_BY_OWNER_QUERY,
-    params: { clerkId: user.id },
-  });
+  const { data: businesses } = await supabase
+    .from("businesses")
+    .select("*, categories(name, slug)")
+    .eq("owner_user_id", user.id)
+    .order("created_at", { ascending: false });
 
-  const bizList = (businesses as Business[]) || [];
+  const bizList = (businesses as any[]) || [];
 
   return (
     <div>
@@ -32,8 +31,8 @@ export default async function ListingsPage() {
         </div>
       ) : (
         <div className="mt-6 space-y-4">
-          {bizList.map((biz) => (
-            <div key={biz._id} className="glass-card p-6">
+          {bizList.map((biz: any) => (
+            <div key={biz.id} className="glass-card p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pd-purple/10 text-lg font-bold text-pd-purple-light">
@@ -42,16 +41,16 @@ export default async function ListingsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-heading font-semibold text-white">{biz.name}</h3>
-                      {biz.isVerified && <Shield className="h-4 w-4 text-pd-gold" />}
+                      {biz.tier !== "free" && <Shield className="h-4 w-4 text-pd-gold" />}
                     </div>
-                    <p className="text-sm text-gray-400">{biz.primaryCategory?.name} &middot; {biz.city}</p>
+                    <p className="text-sm text-gray-400">{biz.categories?.name || "Uncategorized"} &middot; {biz.city}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`rounded-full px-3 py-1 text-xs ${biz.status === "active" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
-                    {biz.status}
+                  <span className={`rounded-full px-3 py-1 text-xs ${biz.is_active ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
+                    {biz.is_active ? "active" : "inactive"}
                   </span>
-                  <Link href={`/business/${biz.slug?.current}`} className="text-gray-400 hover:text-white">
+                  <Link href={`/business/${biz.slug}`} className="text-gray-400 hover:text-white">
                     <ExternalLink className="h-4 w-4" />
                   </Link>
                 </div>

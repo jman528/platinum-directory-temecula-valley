@@ -1,24 +1,28 @@
 import Link from "next/link";
 import Image from "next/image";
-import { sanityFetch } from "@/lib/sanity/live";
-import { BUSINESS_BY_SLUG_QUERY, REVIEWS_BY_BUSINESS_QUERY } from "@/lib/sanity/queries";
+import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import {
   Star, Shield, MapPin, Phone, Globe, Mail, Clock,
   Facebook, Instagram, Linkedin, Youtube, Lock, ImageIcon
 } from "lucide-react";
 import type { Metadata } from "next";
-import type { Business, Review } from "@/types";
+import type { Business } from "@/types";
 import { getTierFeatures } from "@/lib/features";
 import { formatPhone } from "@/lib/utils/format-phone";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const { data } = await sanityFetch({ query: BUSINESS_BY_SLUG_QUERY, params: { slug } });
-  const biz = data as Business | null;
+  const supabase = await createClient();
+  const { data: biz } = await supabase
+    .from("businesses")
+    .select("name, description")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .single();
   return {
-    title: biz?.seoTitle || biz?.name || "Business",
-    description: biz?.seoDescription || biz?.description || undefined,
+    title: biz?.name || "Business",
+    description: biz?.description || undefined,
   };
 }
 
@@ -36,17 +40,44 @@ function LockedField({ label }: { label: string }) {
 
 export default async function BusinessPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [{ data: business }, { data: reviews }] = await Promise.all([
-    sanityFetch({ query: BUSINESS_BY_SLUG_QUERY, params: { slug } }),
-    sanityFetch({ query: REVIEWS_BY_BUSINESS_QUERY, params: { businessId: "" } }),
-  ]);
+  const supabase = await createClient();
 
-  const biz = business as Business | null;
+  // First fetch the business
+  const { data: business } = await supabase
+    .from("businesses")
+    .select("*, categories(name, slug)")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .single();
+
+  const biz = business as any;
   if (!biz) notFound();
 
+  // Now fetch images and offers in parallel using the business ID
+  const [{ data: images }, { data: offers }] = await Promise.all([
+    supabase
+      .from("business_images")
+      .select("*")
+      .eq("business_id", biz.id)
+      .order("display_order"),
+    supabase
+      .from("offers")
+      .select("*")
+      .eq("is_active", true)
+      .eq("status", "approved")
+      .eq("business_id", biz.id),
+  ]);
+
   const features = getTierFeatures(biz.tier);
-  const reviewList = (reviews as Review[]) || [];
-  const heroImg = biz.coverImageUrl || `https://picsum.photos/seed/${biz.slug?.current || biz._id}/1200/400`;
+  const heroImg = biz.cover_image_url || `https://picsum.photos/seed/${biz.slug || biz.id}/1200/400`;
+  const catName = biz.categories?.name;
+  const catSlug = biz.categories?.slug;
+  const isVerified = biz.tier !== "free";
+  const bizImages = (images || []) as any[];
+  const bizOffers = (offers || []) as any[];
+
+  // Only show enriched images if business has claimed and accepted terms
+  const showGallery = features.showImages && bizImages.length > 0 && (biz.is_claimed && biz.terms_accepted);
 
   return (
     <div className="container py-8">
@@ -56,7 +87,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
         <span className="mx-2">/</span>
         {biz.city && (
           <>
-            <Link href={`/city/${biz.city}`} className="hover:text-white">{biz.city}</Link>
+            <Link href={`/search?city=${biz.city}`} className="hover:text-white">{biz.city}</Link>
             <span className="mx-2">/</span>
           </>
         )}
@@ -78,34 +109,31 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
           <div>
             <h1 className="font-heading text-2xl font-bold text-white drop-shadow-lg sm:text-3xl md:text-4xl">{biz.name}</h1>
             <div className="mt-1 flex flex-wrap items-center gap-2">
-              {biz.isVerified && (
+              {isVerified && (
                 <span className="flex items-center gap-1 rounded-full bg-pd-gold/20 px-3 py-1 text-xs text-pd-gold backdrop-blur-sm sm:text-sm">
                   <Shield className="h-3 w-3 sm:h-4 sm:w-4" /> Platinum Verified
                 </span>
               )}
-              {biz.isFeatured && (
+              {biz.is_featured && (
                 <span className="rounded-full bg-pd-gold/20 px-3 py-1 text-xs text-pd-gold backdrop-blur-sm sm:text-sm">FEATURED</span>
               )}
-              {biz.primaryCategory && (
+              {catName && (
                 <Link
-                  href={`/category/${biz.primaryCategory.slug?.current}`}
+                  href={`/search?category=${catSlug}`}
                   className="rounded-full bg-pd-blue/20 px-3 py-1 text-xs text-pd-blue-light backdrop-blur-sm hover:bg-pd-blue/30 sm:text-sm"
                 >
-                  {biz.primaryCategory.name}
+                  {catName}
                 </Link>
               )}
             </div>
           </div>
           <div className="flex items-center gap-3 text-sm text-white/90">
-            {(biz.averageRating > 0 || biz.googleRating) && (
+            {biz.average_rating > 0 && (
               <span className="flex items-center gap-1 rounded-full bg-black/30 px-3 py-1 backdrop-blur-sm">
                 <Star className="h-4 w-4 fill-pd-gold text-pd-gold" />
-                {biz.averageRating || biz.googleRating}
-                <span className="text-white/60">({biz.reviewCount || biz.googleReviewCount || 0})</span>
+                {biz.average_rating}
+                <span className="text-white/60">({biz.review_count || 0})</span>
               </span>
-            )}
-            {biz.priceRange && (
-              <span className="rounded-full bg-black/30 px-3 py-1 backdrop-blur-sm">{biz.priceRange}</span>
             )}
           </div>
         </div>
@@ -159,7 +187,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
                 biz.address && (
                   <div className="flex items-center gap-3 text-gray-300">
                     <MapPin className="h-4 w-4 flex-shrink-0 text-pd-blue" />
-                    <span>{biz.address}, {biz.city}, {biz.state} {biz.zip}</span>
+                    <span>{biz.address}, {biz.city}, {biz.state} {biz.zip_code}</span>
                   </div>
                 )
               ) : <LockedField label="Address" />}
@@ -167,31 +195,24 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
           </div>
 
           {/* Gallery */}
-          {features.showImages && biz.gallery && biz.gallery.length > 0 && (
+          {showGallery && (
             <div className="glass-card p-6">
               <h2 className="font-heading text-lg font-bold text-white flex items-center gap-2">
                 <ImageIcon className="h-5 w-5 text-pd-blue" /> Photo Gallery
               </h2>
               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {biz.gallery.map((img, i) => {
-                  const ref = img?.asset?._ref || "";
-                  const [, id, dims, format] = ref.split("-");
-                  const imgUrl = id && dims && format
-                    ? `https://cdn.sanity.io/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/${process.env.NEXT_PUBLIC_SANITY_DATASET}/${id}-${dims}.${format}`
-                    : `https://picsum.photos/seed/${biz.slug?.current}-gallery-${i}/400/300`;
-                  return (
-                    <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-pd-dark/50">
-                      <Image
-                        src={imgUrl}
-                        alt={`${biz.name} photo ${i + 1}`}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        loading="lazy"
-                      />
-                    </div>
-                  );
-                })}
+                {bizImages.map((img, i) => (
+                  <div key={img.id} className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-pd-dark/50">
+                    <Image
+                      src={img.image_url}
+                      alt={img.alt_text || `${biz.name} photo ${i + 1}`}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -204,7 +225,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
                   <Clock className="h-5 w-5 text-pd-blue" /> Business Hours
                 </h2>
                 <div className="mt-4 space-y-2">
-                  {Object.entries(biz.hours).map(([day, info]) => (
+                  {Object.entries(biz.hours as Record<string, any>).map(([day, info]) => (
                     <div key={day} className="flex justify-between text-sm">
                       <span className="capitalize text-gray-400">{day}</span>
                       <span className="text-gray-300">
@@ -226,7 +247,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
             <div className="glass-card p-6">
               <h2 className="font-heading text-lg font-bold text-white">Amenities</h2>
               <div className="mt-4 flex flex-wrap gap-2">
-                {biz.amenities.map((a) => (
+                {biz.amenities.map((a: string) => (
                   <span key={a} className="rounded-full border border-pd-purple/20 px-3 py-1 text-sm text-gray-300">{a}</span>
                 ))}
               </div>
@@ -240,8 +261,8 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
           <div className="glass-card p-6">
             <h3 className="font-heading text-lg font-bold text-white">Get a Quote</h3>
             <p className="mt-2 text-sm text-gray-400">Contact this business directly</p>
-            <form className="mt-4 space-y-3">
-              <input type="hidden" name="businessId" value={biz._id} />
+            <form action="/api/leads" method="POST" className="mt-4 space-y-3">
+              <input type="hidden" name="businessId" value={biz.id} />
               <input type="text" name="name" placeholder="Your Name" className="w-full rounded-lg border border-pd-purple/20 bg-pd-dark/80 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-pd-blue focus:outline-none" />
               <input type="email" name="email" placeholder="Email" className="w-full rounded-lg border border-pd-purple/20 bg-pd-dark/80 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-pd-blue focus:outline-none" />
               <input type="tel" name="phone" placeholder="Phone" className="w-full rounded-lg border border-pd-purple/20 bg-pd-dark/80 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-pd-blue focus:outline-none" />
@@ -253,17 +274,17 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
           </div>
 
           {/* Smart Offers */}
-          {biz.smartOffers && biz.smartOffers.length > 0 && (
+          {bizOffers.length > 0 && (
             <div className="glass-card p-6">
               <h3 className="font-heading text-lg font-bold text-pd-gold">Smart Offers</h3>
               <div className="mt-4 space-y-3">
-                {biz.smartOffers.map((offer, i) => (
-                  <div key={i} className="rounded-lg border border-pd-gold/20 bg-pd-gold/5 p-3">
+                {bizOffers.map((offer: any) => (
+                  <div key={offer.id} className="rounded-lg border border-pd-gold/20 bg-pd-gold/5 p-3">
                     <p className="font-medium text-white">{offer.title}</p>
-                    {offer.originalPrice && offer.offerPrice && (
+                    {offer.original_price && offer.offer_price && (
                       <div className="mt-1 flex items-center gap-2">
-                        <span className="text-gray-500 line-through">${offer.originalPrice}</span>
-                        <span className="text-lg font-bold text-pd-gold">${offer.offerPrice}</span>
+                        <span className="text-gray-500 line-through">${offer.original_price}</span>
+                        <span className="text-lg font-bold text-pd-gold">${offer.offer_price}</span>
                       </div>
                     )}
                   </div>
@@ -273,27 +294,27 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
           )}
 
           {/* Social Links */}
-          {features.showSocialLinks && biz.socialLinks && (
+          {features.showSocialLinks && biz.social_media && (
             <div className="glass-card p-6">
               <h3 className="font-heading text-lg font-bold text-white">Follow Us</h3>
               <div className="mt-4 flex flex-wrap gap-3">
-                {biz.socialLinks.facebook && (
-                  <a href={biz.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-pd-purple/20 p-2 text-gray-400 hover:text-white">
+                {biz.social_media.facebook && (
+                  <a href={biz.social_media.facebook} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-pd-purple/20 p-2 text-gray-400 hover:text-white">
                     <Facebook className="h-5 w-5" />
                   </a>
                 )}
-                {biz.socialLinks.instagram && (
-                  <a href={biz.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-pd-purple/20 p-2 text-gray-400 hover:text-white">
+                {biz.social_media.instagram && (
+                  <a href={biz.social_media.instagram} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-pd-purple/20 p-2 text-gray-400 hover:text-white">
                     <Instagram className="h-5 w-5" />
                   </a>
                 )}
-                {biz.socialLinks.linkedin && (
-                  <a href={biz.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-pd-purple/20 p-2 text-gray-400 hover:text-white">
+                {biz.social_media.linkedin && (
+                  <a href={biz.social_media.linkedin} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-pd-purple/20 p-2 text-gray-400 hover:text-white">
                     <Linkedin className="h-5 w-5" />
                   </a>
                 )}
-                {biz.socialLinks.youtube && (
-                  <a href={biz.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-pd-purple/20 p-2 text-gray-400 hover:text-white">
+                {biz.social_media.youtube && (
+                  <a href={biz.social_media.youtube} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-pd-purple/20 p-2 text-gray-400 hover:text-white">
                     <Youtube className="h-5 w-5" />
                   </a>
                 )}
@@ -306,7 +327,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
             <div className="glass-card border-pd-gold/30 p-6 text-center">
               <p className="text-sm font-medium text-pd-gold">Is this your business?</p>
               <p className="mt-1 text-xs text-gray-400">Claim it and unlock your full profile</p>
-              <Link href="/claim" className="mt-3 inline-block rounded-lg bg-pd-gold px-4 py-2 text-sm font-medium text-pd-dark hover:bg-pd-gold-light">
+              <Link href={`/claim/${biz.id}`} className="mt-3 inline-block rounded-lg bg-pd-gold px-4 py-2 text-sm font-medium text-pd-dark hover:bg-pd-gold-light">
                 Claim Business
               </Link>
             </div>

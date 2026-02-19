@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { currentUser } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { Trophy, Shield, Crown, Zap, Check } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -9,8 +9,19 @@ export const metadata: Metadata = {
 };
 
 export default async function BusinessSweepstakesPage() {
-  const user = await currentUser();
-  const tier = (user?.publicMetadata?.tier as string) || null;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let tier: string | null = null;
+  if (user) {
+    const { data: biz } = await supabase
+      .from("businesses")
+      .select("tier")
+      .eq("owner_user_id", user.id)
+      .limit(1)
+      .single();
+    tier = biz?.tier || null;
+  }
   const isPaidTier = tier && ["verified_platinum", "platinum_partner", "platinum_elite"].includes(tier);
 
   return (

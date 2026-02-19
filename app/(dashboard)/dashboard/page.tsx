@@ -1,25 +1,33 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { sanityFetch } from "@/lib/sanity/live";
-import { BUSINESSES_BY_OWNER_QUERY } from "@/lib/sanity/queries";
 import { BarChart3, Users, Eye, DollarSign } from "lucide-react";
-import type { Business } from "@/types";
 
 export default async function DashboardPage() {
-  const user = await currentUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const { data: businesses } = await sanityFetch({
-    query: BUSINESSES_BY_OWNER_QUERY,
-    params: { clerkId: user.id },
-  });
+  // Fetch profile and user's businesses
+  const [{ data: profile }, { data: businesses }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("businesses")
+      .select("*")
+      .eq("owner_user_id", user.id)
+      .order("created_at", { ascending: false }),
+  ]);
 
-  const bizList = (businesses as Business[]) || [];
+  const bizList = (businesses as any[]) || [];
+  const displayName = profile?.full_name?.split(" ")[0] || "there";
 
   return (
     <div>
       <h1 className="font-heading text-2xl font-bold text-white">Dashboard Overview</h1>
-      <p className="mt-1 text-gray-400">Welcome back, {user.firstName || "there"}!</p>
+      <p className="mt-1 text-gray-400">Welcome back, {displayName}!</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="glass-card p-4">
@@ -71,14 +79,14 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="mt-4 space-y-3">
-            {bizList.map((biz) => (
-              <div key={biz._id} className="glass-card flex items-center justify-between p-4">
+            {bizList.map((biz: any) => (
+              <div key={biz.id} className="glass-card flex items-center justify-between p-4">
                 <div>
                   <p className="font-medium text-white">{biz.name}</p>
                   <p className="text-sm text-gray-400">{biz.city}, {biz.state} &middot; {biz.tier?.replace(/_/g, " ")}</p>
                 </div>
-                <span className={`rounded-full px-2 py-0.5 text-xs ${biz.status === "active" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
-                  {biz.status}
+                <span className={`rounded-full px-2 py-0.5 text-xs ${biz.is_active ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
+                  {biz.is_active ? "active" : "inactive"}
                 </span>
               </div>
             ))}

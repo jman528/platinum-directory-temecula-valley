@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { sanityFetch } from "@/lib/sanity/live";
-import { BUSINESSES_BY_CITY_QUERY } from "@/lib/sanity/queries";
+import { createClient } from "@/lib/supabase/server";
 import { Star, Shield, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import type { Business } from "@/types";
@@ -20,12 +19,19 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
   const city = decodeURIComponent(rawCity);
   const cityInfo = CITIES.find((c) => c.name === city);
 
-  const { data: businesses } = await sanityFetch({
-    query: BUSINESSES_BY_CITY_QUERY,
-    params: { city, start: 0, end: 24 },
-  });
+  const supabase = await createClient();
 
-  const bizList = (businesses as Business[]) || [];
+  const { data: businesses } = await supabase
+    .from("businesses")
+    .select("*, categories(name, slug)")
+    .eq("is_active", true)
+    .eq("city", city)
+    .order("tier", { ascending: false })
+    .order("is_featured", { ascending: false })
+    .order("average_rating", { ascending: false })
+    .range(0, 23);
+
+  const bizList = (businesses as any[]) || [];
 
   return (
     <div className="container py-8">
@@ -51,22 +57,22 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
         </div>
       ) : (
         <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {bizList.map((biz) => (
-            <Link key={biz._id} href={`/business/${biz.slug?.current}`} className="glass-card group p-4">
+          {bizList.map((biz: any) => (
+            <Link key={biz.id} href={`/business/${biz.slug}`} className="glass-card group p-4">
               <div className="flex items-center gap-2">
                 <h3 className="truncate font-heading font-semibold text-white group-hover:text-pd-gold">{biz.name}</h3>
-                {biz.isVerified && <Shield className="h-4 w-4 shrink-0 text-pd-gold" />}
+                {biz.tier !== "free" && <Shield className="h-4 w-4 shrink-0 text-pd-gold" />}
               </div>
-              {biz.primaryCategory && (
+              {biz.categories?.name && (
                 <span className="mt-1 inline-block rounded-full bg-pd-blue/20 px-2 py-0.5 text-[10px] text-pd-blue-light">
-                  {biz.primaryCategory.name}
+                  {biz.categories.name}
                 </span>
               )}
               <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
-                {(biz.averageRating > 0 || biz.googleRating) && (
+                {biz.average_rating > 0 && (
                   <span className="flex items-center gap-1">
                     <Star className="h-3 w-3 fill-pd-gold text-pd-gold" />
-                    {biz.averageRating || biz.googleRating}
+                    {biz.average_rating}
                   </span>
                 )}
                 {biz.address && <span className="truncate">{biz.address}</span>}

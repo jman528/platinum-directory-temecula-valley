@@ -1,6 +1,5 @@
-import { SanityLive } from "@/lib/sanity/live";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 export default function MainLayout({
   children,
@@ -10,11 +9,10 @@ export default function MainLayout({
   return (
     <>
       <Navbar />
-      <main id="main" className="premium-bg min-h-screen">
+      <main id="main" className="premium-bg min-h-screen pt-16">
         {children}
       </main>
       <Footer />
-      <SanityLive />
     </>
   );
 }
