@@ -61,8 +61,9 @@ export function Navbar() {
         {/* Desktop Nav Links */}
         <div className="hidden items-center gap-6 md:flex">
           <Link href="/search" className="text-sm text-gray-300 transition-colors hover:text-white">Directory</Link>
-          <Link href="/search?has_offers=true" className="text-sm text-gray-300 transition-colors hover:text-white">Deals</Link>
-          <Link href="/search" className="text-sm text-gray-300 transition-colors hover:text-white">Giveaway</Link>
+          <Link href="/deals" className="text-sm text-gray-300 transition-colors hover:text-white">Deals</Link>
+          <Link href="/giveaway" className="text-sm text-gray-300 transition-colors hover:text-white">Giveaway</Link>
+          <Link href="/pricing" className="text-sm text-gray-300 transition-colors hover:text-white">Pricing</Link>
           <Link href="/legal/business-terms" className="text-sm text-gray-300 transition-colors hover:text-white">For Businesses</Link>
         </div>
 
@@ -131,8 +132,9 @@ export function Navbar() {
         <div className="border-t border-white/5 px-4 py-4 md:hidden" style={{ background: "rgba(10, 15, 26, 0.95)" }}>
           <div className="flex flex-col gap-3">
             <Link href="/search" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Directory</Link>
-            <Link href="/search?has_offers=true" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Deals</Link>
-            <Link href="/search" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Giveaway</Link>
+            <Link href="/deals" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Deals</Link>
+            <Link href="/giveaway" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Giveaway</Link>
+            <Link href="/pricing" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Pricing</Link>
             <Link href="/legal/business-terms" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">For Businesses</Link>
           </div>
         </div>

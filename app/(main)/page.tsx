@@ -74,9 +74,108 @@ export default async function HomePage() {
     <div className="premium-bg">
       {/* HERO SECTION */}
       <section className="wine-hero-gradient relative overflow-hidden py-28 lg:py-36">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
-        <div className="absolute left-1/2 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-pd-purple/10 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-[400px] w-[400px] translate-x-1/4 translate-y-1/4 rounded-full bg-pd-gold/5 blur-3xl" />
+        {/* Temecula Valley Rolling Hills SVG Background */}
+        <div className="absolute inset-0" aria-hidden="true">
+          <svg
+            viewBox="0 0 1440 700"
+            preserveAspectRatio="xMidYMax slice"
+            className="absolute inset-x-0 bottom-0 h-full w-full"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              {/* Golden hour radial glow at horizon */}
+              <radialGradient id="hero-golden-glow" cx="50%" cy="58%" r="45%" fx="50%" fy="58%">
+                <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.14" />
+                <stop offset="35%" stopColor="#C4872A" stopOpacity="0.07" />
+                <stop offset="70%" stopColor="#7C3AED" stopOpacity="0.03" />
+                <stop offset="100%" stopColor="#0A0F1A" stopOpacity="0" />
+              </radialGradient>
+              {/* Warm amber horizon band */}
+              <linearGradient id="hero-horizon" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="transparent" />
+                <stop offset="55%" stopColor="#D4AF37" stopOpacity="0.06" />
+                <stop offset="70%" stopColor="#C4872A" stopOpacity="0.04" />
+                <stop offset="100%" stopColor="transparent" />
+              </linearGradient>
+              {/* Far distant hills */}
+              <linearGradient id="hills-far" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#2D1B69" />
+                <stop offset="100%" stopColor="#1A1040" />
+              </linearGradient>
+              {/* Mid-distance hills */}
+              <linearGradient id="hills-mid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3B1F7A" />
+                <stop offset="100%" stopColor="#1E1245" />
+              </linearGradient>
+              {/* Near hills */}
+              <linearGradient id="hills-near" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#261555" />
+                <stop offset="100%" stopColor="#120D2E" />
+              </linearGradient>
+              {/* Foreground hills blend to page bg */}
+              <linearGradient id="hills-front" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#180F35" />
+                <stop offset="100%" stopColor="#0A0F1A" />
+              </linearGradient>
+            </defs>
+
+            {/* Golden hour sky glow */}
+            <rect width="1440" height="700" fill="url(#hero-golden-glow)" />
+            <rect width="1440" height="700" fill="url(#hero-horizon)" />
+
+            {/* Layer 1: Far distant rolling hills */}
+            <path d="M0,480 C100,440 200,460 340,410 C480,360 560,400 720,370 C880,340 980,390 1100,365 C1220,340 1340,380 1440,360 L1440,700 L0,700 Z" fill="url(#hills-far)" opacity="0.5" />
+
+            {/* Layer 2: Mid-distance vineyard hills */}
+            <path d="M0,520 C140,480 260,500 400,465 C540,430 660,480 820,450 C980,420 1080,470 1220,445 C1360,420 1420,450 1440,440 L1440,700 L0,700 Z" fill="url(#hills-mid)" opacity="0.6" />
+
+            {/* Vineyard row lines on mid hills - golden at dusk */}
+            <g opacity="0.07" stroke="#D4AF37" strokeWidth="0.8" fill="none">
+              <path d="M260,490 Q340,475 420,482 Q500,470 580,476" />
+              <path d="M275,497 Q355,482 435,489 Q515,477 595,483" />
+              <path d="M290,504 Q370,489 450,496 Q530,484 610,490" />
+              <path d="M305,511 Q385,496 465,503 Q545,491 625,497" />
+              <path d="M840,458 Q940,442 1040,452 Q1120,444 1200,450" />
+              <path d="M855,465 Q955,449 1055,459 Q1135,451 1215,457" />
+              <path d="M870,472 Q970,456 1070,466 Q1150,458 1230,464" />
+              <path d="M885,479 Q985,463 1085,473 Q1165,465 1245,471" />
+            </g>
+
+            {/* Layer 3: Near rolling hills */}
+            <path d="M0,560 C120,535 240,550 400,520 C560,490 680,530 860,505 C1040,480 1160,520 1300,500 C1380,492 1430,508 1440,505 L1440,700 L0,700 Z" fill="url(#hills-near)" opacity="0.7" />
+
+            {/* Vineyard rows on near hills - amber tones */}
+            <g opacity="0.05" stroke="#C4872A" strokeWidth="1" fill="none">
+              <path d="M80,548 Q180,532 280,540 Q380,528 480,536" />
+              <path d="M95,555 Q195,539 295,547 Q395,535 495,543" />
+              <path d="M110,562 Q210,546 310,554 Q410,542 510,550" />
+              <path d="M700,515 Q820,498 940,510 Q1040,500 1140,508" />
+              <path d="M715,522 Q835,505 955,517 Q1055,507 1155,515" />
+              <path d="M730,529 Q850,512 970,524 Q1070,514 1170,522" />
+            </g>
+
+            {/* Layer 4: Foreground hills - blend into page */}
+            <path d="M0,600 C200,580 360,595 540,575 C720,555 900,585 1080,568 C1260,550 1380,575 1440,565 L1440,700 L0,700 Z" fill="url(#hills-front)" opacity="0.85" />
+
+            {/* Subtle foreground vineyard texture */}
+            <g opacity="0.03" stroke="#D4AF37" strokeWidth="1.2" fill="none">
+              <path d="M160,592 Q280,578 400,586 Q500,577 600,582" />
+              <path d="M175,598 Q295,584 415,592 Q515,583 615,588" />
+              <path d="M850,575 Q970,562 1090,572 Q1180,565 1270,570" />
+              <path d="M865,581 Q985,568 1105,578 Q1195,571 1285,576" />
+            </g>
+          </svg>
+
+          {/* Warm golden overlay blending hills with atmosphere */}
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0F1A] via-transparent to-transparent" />
+        </div>
+
+        {/* Subtle grid texture */}
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]" />
+        {/* Atmospheric glow accents */}
+        <div className="absolute left-1/4 top-1/4 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-pd-purple/8 blur-[120px]" />
+        <div className="absolute right-1/4 top-1/3 h-[400px] w-[400px] rounded-full bg-pd-gold/5 blur-[100px]" />
 
         <div className="container relative text-center">
           <div className="mx-auto mb-6 flex justify-center">
