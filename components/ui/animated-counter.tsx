@@ -7,15 +7,19 @@ export function AnimatedCounter({
   suffix = "",
   prefix = "",
   duration = 2000,
+  decimals,
 }: {
   target: number;
   suffix?: string;
   prefix?: string;
   duration?: number;
+  decimals?: number;
 }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const hasAnimated = useRef(false);
+  const isDecimal = decimals !== undefined ? decimals > 0 : target % 1 !== 0;
+  const decimalPlaces = decimals ?? (isDecimal ? 1 : 0);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -27,7 +31,7 @@ export function AnimatedCounter({
             const elapsed = Date.now() - start;
             const progress = Math.min(elapsed / duration, 1);
             const eased = 1 - Math.pow(1 - progress, 3);
-            setCount(Math.floor(eased * target));
+            setCount(eased * target);
             if (progress < 1) requestAnimationFrame(animate);
           };
           requestAnimationFrame(animate);
@@ -39,10 +43,14 @@ export function AnimatedCounter({
     return () => observer.disconnect();
   }, [target, duration]);
 
+  const display = isDecimal
+    ? count.toFixed(decimalPlaces)
+    : Math.floor(count).toLocaleString();
+
   return (
     <span ref={ref}>
       {prefix}
-      {count.toLocaleString()}
+      {display}
       {suffix}
     </span>
   );

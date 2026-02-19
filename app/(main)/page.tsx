@@ -241,9 +241,9 @@ export default async function HomePage() {
           <div className="mt-12 flex flex-wrap justify-center gap-10">
             <div className="text-center">
               <p className="font-heading text-4xl font-bold text-white tabular-nums">
-                <AnimatedCounter target={businessCount || 0} />
+                <AnimatedCounter target={3.4} suffix="M+" />
               </p>
-              <p className="mt-1 text-sm text-gray-400">Businesses</p>
+              <p className="mt-1 text-sm text-gray-400">Visitors Annually</p>
             </div>
             <div className="hidden h-14 w-px bg-gradient-to-b from-transparent via-pd-purple/30 to-transparent md:block" />
             <div className="text-center">
@@ -254,12 +254,20 @@ export default async function HomePage() {
             </div>
             <div className="hidden h-14 w-px bg-gradient-to-b from-transparent via-pd-purple/30 to-transparent md:block" />
             <div className="text-center">
+              <p className="font-heading text-4xl font-bold text-white tabular-nums">
+                <AnimatedCounter target={9580} duration={2000} />
+              </p>
+              <p className="mt-1 text-sm text-gray-400">Hospitality Jobs</p>
+            </div>
+            <div className="hidden h-14 w-px bg-gradient-to-b from-transparent via-pd-purple/30 to-transparent md:block" />
+            <div className="text-center">
               <p className="font-heading text-4xl font-bold text-white">
                 <AnimatedCounter target={11} duration={1500} />
               </p>
-              <p className="mt-1 text-sm text-gray-400">Cities</p>
+              <p className="mt-1 text-sm text-gray-400">Cities Covered</p>
             </div>
           </div>
+          <p className="mt-4 text-[10px] text-gray-600">Source: Visit Temecula Valley 2024</p>
         </div>
       </section>
 
