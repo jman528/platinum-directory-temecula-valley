@@ -94,15 +94,18 @@ export interface Profile {
 export interface Offer {
   id: string;
   business_id: string;
+  slug: string;
   title: string;
   description?: string;
   terms?: string;
+  redemption_instructions?: string;
   offer_type: "voucher" | "local_deal";
   original_price?: number;
   offer_price: number;
   discount_type?: string;
   discount_value?: number;
   max_claims?: number;
+  max_per_customer: number;
   current_claims: number;
   starts_at?: string;
   expires_at?: string;

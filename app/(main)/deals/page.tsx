@@ -270,23 +270,24 @@ function OfferCard({ offer, featured = false }: { offer: any; featured?: boolean
       {/* Actions */}
       <div className="flex items-center gap-2 border-t border-white/5 px-5 py-3">
         <Link
-          href={`/business/${biz?.slug}?offer=${offer.id}`}
+          href={`/offers/${offer.slug || offer.id}`}
           className="btn-glow flex flex-1 items-center justify-center gap-2 rounded-xl bg-pd-gold py-2.5 font-heading text-sm font-semibold text-pd-dark transition-colors hover:bg-pd-gold-light"
         >
           <ShoppingCart className="h-4 w-4" />
           Buy Now
         </Link>
-        <ShareButton offerId={offer.id} title={offer.title} businessSlug={biz?.slug} />
+        <ShareButton offerId={offer.id} title={offer.title} offerSlug={offer.slug} businessSlug={biz?.slug} />
       </div>
     </div>
   );
 }
 
-function ShareButton({ offerId, title, businessSlug }: { offerId: string; title: string; businessSlug?: string }) {
+function ShareButton({ offerId, title, offerSlug, businessSlug }: { offerId: string; title: string; offerSlug?: string; businessSlug?: string }) {
+  const url = offerSlug ? `/offers/${offerSlug}` : `/business/${businessSlug}?offer=${offerId}`;
   return (
     <div className="flex gap-1">
       <button
-        data-copy-url={`/business/${businessSlug}?offer=${offerId}`}
+        data-copy-url={url}
         className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-gray-400 transition-colors hover:border-white/20 hover:text-white"
         title="Copy link"
       >
@@ -294,7 +295,7 @@ function ShareButton({ offerId, title, businessSlug }: { offerId: string; title:
       </button>
       <button
         data-share-title={title}
-        data-share-url={`/business/${businessSlug}?offer=${offerId}`}
+        data-share-url={url}
         className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-gray-400 transition-colors hover:border-white/20 hover:text-white"
         title="Share"
       >
