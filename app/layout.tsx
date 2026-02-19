@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -50,6 +51,7 @@ export default function RootLayout({
         <a href="#main" className="skip-link">Skip to main content</a>
         {children}
         <Toaster />
+        <SpeedInsights />
       </body>
     </html>
   );
