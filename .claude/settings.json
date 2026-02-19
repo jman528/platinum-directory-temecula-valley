@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "transport": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=ybputwiajqccvgonaoua"
+    },
+    "stripe": {
+      "transport": "http",
+      "url": "https://mcp.stripe.com/"
+    }
+  }
+}
