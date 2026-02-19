@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import Image from "next/image";
-import { Mail, Lock, Eye, EyeOff, Chrome, Apple, Facebook } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Chrome } from "lucide-react";
 
 export default function SignInPage() {
   return (
@@ -47,6 +47,16 @@ function SignInForm() {
     router.refresh();
   }
 
+  async function handleOAuth(provider: "google" | "facebook" | "apple") {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${redirect}`,
+      },
+    });
+    if (error) setError(error.message);
+  }
+
   return (
     <div className="premium-bg flex min-h-screen items-center justify-center px-4 py-12">
       <div className="glass-card w-full max-w-md p-8">
@@ -64,41 +74,20 @@ function SignInForm() {
           </div>
         )}
 
-        {/* OAuth — coming soon */}
-        <div className="mb-2 space-y-2 opacity-50 pointer-events-none select-none">
-          <button
-            type="button"
-            disabled
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white"
-          >
-            <Chrome className="h-5 w-5" />
-            Continue with Google
-          </button>
-          <button
-            type="button"
-            disabled
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white"
-          >
-            <Facebook className="h-5 w-5" />
-            Continue with Facebook
-          </button>
-          <button
-            type="button"
-            disabled
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white"
-          >
-            <Apple className="h-5 w-5" />
-            Continue with Apple
-          </button>
-        </div>
-        <p className="mb-4 text-center text-xs text-gray-500">Social sign-in coming soon</p>
+        <button
+          onClick={() => handleOAuth("google")}
+          className="mb-3 flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white transition-all hover:border-white/20 hover:bg-white/10"
+        >
+          <Chrome className="h-5 w-5" />
+          Continue with Google
+        </button>
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-white/10" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-[#0f172a] px-4 text-gray-500">sign in with email</span>
+            <span className="bg-[#0f172a] px-4 text-gray-500">or sign in with email</span>
           </div>
         </div>
 
