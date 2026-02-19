@@ -250,7 +250,7 @@ async function groqChat(
   messages: ChatMessage[],
   opts: ChatOptions
 ): Promise<ChatResponse> {
-  const model = opts.model || "llama3-8b-8192";
+  const model = opts.model || "llama-3.1-8b-instant";
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -283,7 +283,7 @@ async function* groqStream(
   messages: ChatMessage[],
   opts: ChatOptions
 ): AsyncGenerator<string> {
-  const model = opts.model || "llama3-8b-8192";
+  const model = opts.model || "llama-3.1-8b-instant";
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
