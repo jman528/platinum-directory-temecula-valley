@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Search, Menu, X, User, LogOut, LayoutDashboard, Coins } from "lucide-react";
+import { Search, Menu, X, User, LogOut, LayoutDashboard, Coins, Home } from "lucide-react";
 import type { Profile } from "@/types";
 
 export function Navbar() {
@@ -60,6 +60,7 @@ export function Navbar() {
 
         {/* Desktop Nav Links */}
         <div className="hidden items-center gap-6 md:flex">
+          <Link href="/" className="text-sm text-gray-300 transition-colors hover:text-white"><Home className="inline h-4 w-4" /></Link>
           <Link href="/search" className="text-sm text-gray-300 transition-colors hover:text-white">Directory</Link>
           <Link href="/deals" className="text-sm text-gray-300 transition-colors hover:text-white">Deals</Link>
           <Link href="/giveaway" className="text-sm text-gray-300 transition-colors hover:text-white">Giveaway</Link>
@@ -131,6 +132,7 @@ export function Navbar() {
       {menuOpen && (
         <div className="border-t border-white/5 px-4 py-4 md:hidden" style={{ background: "rgba(10, 15, 26, 0.95)" }}>
           <div className="flex flex-col gap-3">
+            <Link href="/" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Home</Link>
             <Link href="/search" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Directory</Link>
             <Link href="/deals" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Deals</Link>
             <Link href="/giveaway" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Giveaway</Link>
