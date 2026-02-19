@@ -6,6 +6,8 @@ import type { Business, Category } from "@/types";
 import { formatPhone } from "@/lib/utils/format-phone";
 import MobileFilterToggle from "@/components/ui/mobile-filter-toggle";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Search Businesses",
   description: "Search verified businesses in Temecula Valley.",
@@ -138,7 +140,8 @@ export default async function SearchPage({
     }
   }
 
-  const { data: businesses } = await bizQuery;
+  const { data: businesses, error: bizError } = await bizQuery;
+  if (bizError) console.error("Search query error:", bizError);
 
   const bizList = (businesses as any[]) || [];
   const catList = (categories as Category[]) || [];
