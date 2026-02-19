@@ -26,10 +26,11 @@ export default async function DashboardLayout({
     .single();
 
   const tier = biz?.tier || "free";
+  const userType = profile?.user_type || "customer";
 
   return (
     <div className="flex min-h-screen bg-pd-dark">
-      <DashboardSidebar tier={tier} />
+      <DashboardSidebar tier={tier} userType={userType} />
       <main className="flex-1 overflow-auto p-6">{children}</main>
     </div>
   );

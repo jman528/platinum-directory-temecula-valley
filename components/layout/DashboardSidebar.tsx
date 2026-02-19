@@ -13,6 +13,7 @@ import {
   Settings,
   ArrowLeft,
   Shield,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +28,8 @@ const navItems = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
-export default function DashboardSidebar({ tier }: { tier: string }) {
+export default function DashboardSidebar({ tier, userType }: { tier: string; userType?: string }) {
+  const isAdmin = userType === "admin" || userType === "super_admin";
   const pathname = usePathname();
 
   return (
@@ -67,6 +69,24 @@ export default function DashboardSidebar({ tier }: { tier: string }) {
               </Link>
             );
           })}
+
+          {isAdmin && (
+            <>
+              <div className="my-2 border-t border-pd-purple/20" />
+              <Link
+                href="/admin"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                  pathname.startsWith("/admin")
+                    ? "bg-pd-gold/15 text-pd-gold"
+                    : "text-pd-gold/70 hover:bg-pd-gold/10 hover:text-pd-gold"
+                )}
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Admin Panel
+              </Link>
+            </>
+          )}
         </nav>
 
         {tier === "free" && (
