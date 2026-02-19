@@ -73,7 +73,7 @@ export default async function DashboardPage() {
         {bizList.length === 0 ? (
           <div className="mt-4 glass-card p-8 text-center">
             <p className="text-gray-400">You haven&apos;t claimed any businesses yet.</p>
-            <a href="/claim" className="mt-4 inline-block rounded-lg bg-pd-blue px-4 py-2 text-sm font-medium text-white hover:bg-pd-blue-dark">
+            <a href="/claim-business" className="mt-4 inline-block rounded-lg bg-pd-blue px-4 py-2 text-sm font-medium text-white hover:bg-pd-blue-dark">
               Claim Your Business
             </a>
           </div>
