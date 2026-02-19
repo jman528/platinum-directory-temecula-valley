@@ -20,7 +20,7 @@ export default async function ListingsPage() {
     <div>
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold text-white">My Listings</h1>
-        <Link href="/claim" className="flex items-center gap-2 rounded-lg bg-pd-blue px-4 py-2 text-sm font-medium text-white hover:bg-pd-blue-dark">
+        <Link href="/claim-business" className="flex items-center gap-2 rounded-lg bg-pd-blue px-4 py-2 text-sm font-medium text-white hover:bg-pd-blue-dark">
           <Plus className="h-4 w-4" /> Claim Business
         </Link>
       </div>

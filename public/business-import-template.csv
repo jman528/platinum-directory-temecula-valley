@@ -1,0 +1,2 @@
+name,category,address,city,state,zip,phone,email,website,description,hours_mon_fri,hours_sat,hours_sun
+"Example Business","restaurants-dining","123 Main St","Temecula","CA","92590","(951) 555-1234","info@example.com","https://example.com","A great local restaurant","9:00 AM - 9:00 PM","10:00 AM - 10:00 PM","10:00 AM - 8:00 PM"
