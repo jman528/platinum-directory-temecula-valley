@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { streamChat, type ChatMessage } from "@/lib/ai/provider";
+import { callChatAI, type AIMessage } from "@/lib/ai/router";
 
 const SYSTEM_PROMPT = `You are the Platinum Directory AI Assistant for Temecula Valley.
 You help visitors discover local businesses, wineries, restaurants, deals, and events in the Temecula Valley area (including Temecula, Murrieta, Hemet, Menifee, Fallbrook, Lake Elsinore, Perris, Wildomar, Sun City, Winchester, and Canyon Lake).
@@ -17,56 +17,52 @@ Do NOT make up specific business names, phone numbers, or addresses unless you a
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json();
+    const { messages, message, conversationHistory } = await req.json();
 
-    if (!messages || !Array.isArray(messages)) {
+    // Support both old format (messages array) and new format (message + conversationHistory)
+    let chatMessages: AIMessage[];
+    if (messages && Array.isArray(messages)) {
+      chatMessages = messages.slice(-20);
+    } else if (message?.trim()) {
+      chatMessages = [
+        ...(conversationHistory || []).slice(-10),
+        { role: "user" as const, content: message },
+      ];
+    } else {
       return new Response(JSON.stringify({ error: "Messages required" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    // Prepend system message
-    const fullMessages: ChatMessage[] = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...messages.slice(-20), // Keep last 20 messages for context window
-    ];
+    const result = await callChatAI(chatMessages, SYSTEM_PROMPT);
 
-    // Stream the response
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of streamChat(fullMessages, {
-            temperature: 0.7,
-            maxTokens: 512,
-          })) {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: chunk })}\n\n`));
-          }
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-        } catch (err: any) {
-          console.error("Chat stream error:", err);
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ error: err.message || "AI service unavailable" })}\n\n`)
-          );
-          controller.close();
-        }
-      },
-    });
-
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      },
-    });
-  } catch (err: any) {
+    return new Response(
+      JSON.stringify({
+        reply: result.text,
+        content: result.text, // backward compat
+        ...(process.env.NODE_ENV === "development" && {
+          _debug: {
+            provider: result.provider,
+            model: result.model,
+            attempts: result.attemptCount,
+          },
+        }),
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (err) {
     console.error("Chat error:", err);
-    return new Response(JSON.stringify({ error: "Failed to process chat" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        reply: "I'm having trouble right now. Try searching the directory directly!",
+        content: "I'm having trouble right now. Try searching the directory directly!",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }

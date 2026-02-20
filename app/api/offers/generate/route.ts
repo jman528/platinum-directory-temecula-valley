@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chatCompletion, type ChatMessage } from "@/lib/ai/provider";
+import { callAI, type AIMessage } from "@/lib/ai/router";
 import { createClient } from "@/lib/supabase/server";
 
 const SYSTEM_PROMPT = `You are an expert marketing strategist for local businesses in Temecula Valley, California.
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     const biz = business as any;
     const categoryName = biz.categories?.name || "Local Business";
 
-    const messages: ChatMessage[] = [
+    const messages: AIMessage[] = [
       { role: "system", content: SYSTEM_PROMPT },
       {
         role: "user",
@@ -72,7 +72,7 @@ Return JSON array only.`,
       },
     ];
 
-    const response = await chatCompletion(messages, {
+    const result = await callAI(messages, {
       temperature: 0.8,
       maxTokens: 1500,
     });
@@ -81,7 +81,7 @@ Return JSON array only.`,
     let offers;
     try {
       // Try to extract JSON from the response
-      const content = response.content.trim();
+      const content = result.text.trim();
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         offers = JSON.parse(jsonMatch[0]);
@@ -95,7 +95,7 @@ Return JSON array only.`,
       );
     }
 
-    return NextResponse.json({ offers, model: response.model });
+    return NextResponse.json({ offers, model: result.model, provider: result.provider });
   } catch (err: any) {
     console.error("Offer generation error:", err);
     return NextResponse.json(
