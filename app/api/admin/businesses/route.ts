@@ -51,6 +51,16 @@ export async function GET(req: NextRequest) {
       query = query.eq("is_active", true);
     } else if (tab === "free") {
       query = query.eq("tier", "free");
+    } else if (tab === "verified_platinum") {
+      query = query.eq("tier", "verified_platinum");
+    } else if (tab === "platinum_partner") {
+      query = query.eq("tier", "platinum_partner");
+    } else if (tab === "platinum_elite") {
+      query = query.eq("tier", "platinum_elite");
+    } else if (tab === "suspended") {
+      query = query.eq("is_active", false);
+    } else if (tab === "hot_leads") {
+      query = query.eq("is_hot_lead", true);
     } else if (tab === "paid") {
       query = query.neq("tier", "free");
     }
@@ -70,7 +80,11 @@ export async function GET(req: NextRequest) {
     // Pagination + ordering
     const from = page * limit;
     const to = from + limit - 1;
-    query = query.order("created_at", { ascending: false }).range(from, to);
+    if (tab === "hot_leads") {
+      query = query.order("lead_score", { ascending: false }).range(from, to);
+    } else {
+      query = query.order("created_at", { ascending: false }).range(from, to);
+    }
 
     const { data, error, count } = await query;
 

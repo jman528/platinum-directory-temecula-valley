@@ -14,12 +14,16 @@ import {
   Trash2,
   Pencil,
   Eye,
+  Flame,
+  Sparkles,
+  Flag,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { CITIES } from "@/lib/constants";
 
 const FILTER_TABS = [
   { key: "all", label: "All" },
+  { key: "hot_leads", label: "Hot Leads" },
   { key: "pending", label: "Pending Verification" },
   { key: "active", label: "Active" },
   { key: "free", label: "Free" },
@@ -277,6 +281,50 @@ export default function AdminBusinessesPage() {
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Enrichment Controls + Flagged Names */}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Link
+          href="/admin/businesses/flagged"
+          className="flex items-center gap-1.5 rounded-lg border border-yellow-500/20 bg-yellow-500/10 px-3 py-1.5 text-xs font-medium text-yellow-400 hover:bg-yellow-500/20"
+        >
+          <Flag className="h-3 w-3" /> Review Flagged Names
+        </Link>
+        <button
+          onClick={async () => {
+            setActionLoading("enrich_basic");
+            await fetch("/api/admin/enrich-batch", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ batch_size: 50, enrichment_tier: "basic" }),
+            });
+            setActionLoading(null);
+            fetchBusinesses(0);
+          }}
+          disabled={actionLoading === "enrich_basic"}
+          className="flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-3 py-1.5 text-xs font-medium text-green-400 hover:bg-green-500/20 disabled:opacity-50"
+        >
+          {actionLoading === "enrich_basic" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+          Quick Enrich: Basic (Free)
+        </button>
+        <button
+          onClick={async () => {
+            setActionLoading("enrich_standard");
+            await fetch("/api/admin/enrich-batch", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ batch_size: 25, enrichment_tier: "standard" }),
+            });
+            setActionLoading(null);
+            fetchBusinesses(0);
+          }}
+          disabled={actionLoading === "enrich_standard"}
+          className="flex items-center gap-1.5 rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-blue-400 hover:bg-blue-500/20 disabled:opacity-50"
+        >
+          {actionLoading === "enrich_standard" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+          Enrich: Standard (Google)
+        </button>
       </div>
 
       {/* Glass-card Table */}

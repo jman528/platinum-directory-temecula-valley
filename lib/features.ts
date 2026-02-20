@@ -1,10 +1,10 @@
 export const TIER_FEATURES = {
   free: {
     showBasicListing: true,
-    showAddress: false, showPhone: false, showWebsite: false, showEmail: false,
+    showAddress: true, showPhone: true, showWebsite: false, showEmail: false,
     showSocialLinks: false, showDescription: false, showHours: false,
     showImages: false, showVideo: false, showGoogleReviews: false,
-    showGoogleMap: false, showBlog: false, showEvents: false,
+    showGoogleMap: true, showBlog: false, showEvents: false,
     showJobs: false, showTeam: false,
     verifiedBadge: false, featuredPlacement: false,
     smartOfferFee: 0.30, leadsPerMonth: 0,
@@ -12,6 +12,10 @@ export const TIER_FEATURES = {
     emailCampaigns: false, smsCampaigns: false,
     categoryExclusivity: false, dedicatedManager: false,
     enteredInBusinessSweepstakes: false,
+    maxImages: 0, maxSmartOffers: 0, hasAnalytics: false,
+    hasLeadAlerts: false, platformFee: 0, setupFee: 0,
+    maxDescriptionChars: 200, hasRichText: false, maxVideoEmbeds: 0,
+    hasVirtualTour: false,
   },
   verified_platinum: {
     showBasicListing: true,
@@ -26,6 +30,10 @@ export const TIER_FEATURES = {
     emailCampaigns: false, smsCampaigns: false,
     categoryExclusivity: false, dedicatedManager: false,
     enteredInBusinessSweepstakes: true,
+    maxImages: 5, maxSmartOffers: 3, hasAnalytics: false,
+    hasLeadAlerts: true, platformFee: 0.25, setupFee: 199,
+    maxDescriptionChars: 1000, hasRichText: true, maxVideoEmbeds: 0,
+    hasVirtualTour: false,
   },
   platinum_partner: {
     showBasicListing: true,
@@ -40,6 +48,10 @@ export const TIER_FEATURES = {
     emailCampaigns: true, smsCampaigns: '1000/mo' as const,
     categoryExclusivity: false, dedicatedManager: false,
     enteredInBusinessSweepstakes: true,
+    maxImages: 15, maxSmartOffers: 10, hasAnalytics: true,
+    hasLeadAlerts: true, platformFee: 0.20, setupFee: 499,
+    maxDescriptionChars: 2500, hasRichText: true, maxVideoEmbeds: 1,
+    hasVirtualTour: false,
   },
   platinum_elite: {
     showBasicListing: true,
@@ -54,6 +66,10 @@ export const TIER_FEATURES = {
     emailCampaigns: true, smsCampaigns: '5000/mo' as const,
     categoryExclusivity: true, dedicatedManager: true,
     enteredInBusinessSweepstakes: true,
+    maxImages: 50, maxSmartOffers: -1, hasAnalytics: true,
+    hasLeadAlerts: true, platformFee: 0.15, setupFee: 999,
+    maxDescriptionChars: 5000, hasRichText: true, maxVideoEmbeds: -1,
+    hasVirtualTour: true,
   },
 } as const;
 

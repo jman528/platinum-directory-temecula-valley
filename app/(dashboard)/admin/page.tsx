@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import {
   TrendingUp, Store, AlertTriangle, ShieldAlert, Target, Bot,
-  CheckCircle, XCircle, Eye
+  CheckCircle, XCircle, Eye, Database, Flame, BarChart3, Flag
 } from 'lucide-react'
 import AdminRevenueChart from '@/components/admin/AdminRevenueChart'
 
@@ -29,6 +29,11 @@ export default async function AdminDashboardPage() {
     { data: recentUsers },
     { data: pointsData },
     { data: aiCreditsData },
+    { count: validNameCount },
+    { count: flaggedNameCount },
+    { count: hotLeadCount },
+    { count: enrichedCount },
+    { data: qualityScores },
   ] = await Promise.all([
     adminClient.from('businesses').select('*', { count: 'exact', head: true }).eq('is_active', true),
     adminClient.from('businesses').select('*', { count: 'exact', head: true }).eq('is_active', false),
@@ -38,6 +43,12 @@ export default async function AdminDashboardPage() {
     adminClient.from('profiles').select('id, email, full_name, user_type, created_at').order('created_at', { ascending: false }).limit(10),
     adminClient.from('profiles').select('points_balance'),
     adminClient.from('ai_credit_transactions').select('credits_delta').lt('credits_delta', 0).gte('created_at', startOfMonth.toISOString()),
+    // Data quality stats
+    adminClient.from('businesses').select('*', { count: 'exact', head: true }).eq('has_valid_name', true),
+    adminClient.from('businesses').select('*', { count: 'exact', head: true }).eq('has_valid_name', false),
+    adminClient.from('businesses').select('*', { count: 'exact', head: true }).eq('is_hot_lead', true),
+    adminClient.from('businesses').select('*', { count: 'exact', head: true }).eq('enrichment_status', 'completed'),
+    adminClient.from('businesses').select('data_quality_score').not('data_quality_score', 'is', null),
   ])
 
   // Revenue estimate from paid tier counts
@@ -207,6 +218,94 @@ export default async function AdminDashboardPage() {
         <h3 className="font-heading text-lg font-bold text-white">Revenue Overview</h3>
         <p className="text-sm text-gray-400">Subscription MRR by month</p>
         <AdminRevenueChart />
+      </div>
+
+      {/* Data Quality Overview */}
+      <div className="mt-8 glass-card p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-heading text-lg font-bold text-white flex items-center gap-2">
+              <Database className="h-5 w-5 text-pd-blue" /> Import &amp; Data Quality
+            </h3>
+            <p className="mt-1 text-sm text-gray-400">Business data quality overview</p>
+          </div>
+          <div className="flex gap-2">
+            <Link
+              href="/admin/businesses/flagged"
+              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-400 hover:bg-white/5 hover:text-white"
+            >
+              <Flag className="mr-1 inline h-3 w-3" /> Review Flagged Names
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg bg-white/5 p-4">
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Total Businesses</p>
+            <p className="mt-1 text-2xl font-bold text-white">{(totalCount || 0).toLocaleString()}</p>
+          </div>
+          <div className="rounded-lg bg-white/5 p-4">
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Valid Names</p>
+            <p className="mt-1 text-2xl font-bold text-green-400">
+              {(validNameCount || 0).toLocaleString()}
+              <span className="ml-1 text-sm text-gray-500">
+                ({totalCount ? Math.round(((validNameCount || 0) / totalCount) * 100) : 0}%)
+              </span>
+            </p>
+          </div>
+          <div className="rounded-lg bg-white/5 p-4">
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Flagged Names</p>
+            <p className="mt-1 text-2xl font-bold text-yellow-400">{(flaggedNameCount || 0).toLocaleString()}</p>
+          </div>
+          <div className="rounded-lg bg-white/5 p-4">
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-400 flex items-center gap-1">
+              <Flame className="h-3 w-3 text-orange-400" /> Hot Leads
+            </p>
+            <p className="mt-1 text-2xl font-bold text-orange-400">{(hotLeadCount || 0).toLocaleString()}</p>
+          </div>
+        </div>
+
+        {/* Data Quality Distribution */}
+        {(() => {
+          const scores = qualityScores || []
+          const high = scores.filter((s: any) => s.data_quality_score >= 80).length
+          const med = scores.filter((s: any) => s.data_quality_score >= 50 && s.data_quality_score < 80).length
+          const low = scores.filter((s: any) => s.data_quality_score >= 20 && s.data_quality_score < 50).length
+          const vlow = scores.filter((s: any) => s.data_quality_score < 20).length
+          const total = scores.length || 1
+          return (
+            <div className="mt-5">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-400">Data Quality Distribution</p>
+              <div className="space-y-2">
+                {[
+                  { label: '80-100 (High)', count: high, color: 'bg-green-500' },
+                  { label: '50-79 (Medium)', count: med, color: 'bg-blue-500' },
+                  { label: '20-49 (Low)', count: low, color: 'bg-yellow-500' },
+                  { label: '0-19 (Very Low)', count: vlow, color: 'bg-red-500' },
+                ].map(tier => (
+                  <div key={tier.label} className="flex items-center gap-3">
+                    <span className="w-28 text-xs text-gray-400">{tier.label}</span>
+                    <div className="flex-1 rounded-full bg-white/5 h-3 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${tier.color}`}
+                        style={{ width: `${Math.max(1, (tier.count / total) * 100)}%` }}
+                      />
+                    </div>
+                    <span className="w-20 text-right text-xs text-gray-400">
+                      {tier.count.toLocaleString()} ({Math.round((tier.count / total) * 100)}%)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
+
+        <div className="mt-4 flex items-center justify-between rounded-lg bg-white/5 p-3">
+          <div className="flex items-center gap-4 text-xs text-gray-400">
+            <span><BarChart3 className="mr-1 inline h-3 w-3" /> Enrichment: {(enrichedCount || 0).toLocaleString()} completed / {((totalCount || 0) - (enrichedCount || 0)).toLocaleString()} pending</span>
+          </div>
+        </div>
       </div>
 
       {/* System Health Footer */}
