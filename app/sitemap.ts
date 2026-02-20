@@ -21,7 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   // City pages — static, no DB needed
-  const cities = ['temecula', 'murrieta', 'hemet', 'menifee', 'fallbrook', 'lake-elsinore', 'perris', 'wildomar']
+  const cities = ['temecula', 'murrieta', 'hemet', 'menifee', 'fallbrook', 'lake-elsinore', 'perris', 'wildomar', 'canyon-lake', 'winchester', 'french-valley']
   const cityPages: MetadataRoute.Sitemap = cities.map(c => ({
     url: `${BASE_URL}/city/${c}`,
     lastModified: new Date(),
