@@ -3,7 +3,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Stripe from "stripe";
 import { headers } from "next/headers";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY is not configured");
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 const TIER_CONFIG: Record<string, { name: string; monthly: number; setup: number }> = {
   "platinum-partner": { name: "Platinum Partner", monthly: 799, setup: 1000 },
@@ -72,6 +75,7 @@ export async function POST(req: NextRequest) {
     // Create Stripe Checkout session
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer_email: signerEmail,

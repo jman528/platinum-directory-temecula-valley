@@ -4,8 +4,11 @@ import Stripe from 'stripe'
 import { logWebhookEvent } from '@/lib/webhook-logger'
 import { sendEmail } from '@/lib/email'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY is not configured");
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ""
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -14,6 +17,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event
   try {
+    const stripe = getStripe()
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch (err) {
     console.error('Stripe webhook verification failed:', err)

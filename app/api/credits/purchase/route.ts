@@ -4,7 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import Stripe from 'stripe'
 import { CREDIT_PACKS } from '@/lib/credits/pricing'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY is not configured");
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -19,6 +22,7 @@ export async function POST(req: NextRequest) {
   const totalCredits = pack.credits + ('bonus' in pack ? (pack.bonus ?? 0) : 0)
 
   try {
+    const stripe = getStripe()
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
