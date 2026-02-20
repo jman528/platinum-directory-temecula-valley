@@ -21,6 +21,8 @@ import {
   CreditCard,
   Bell,
   Search,
+  Ticket,
+  Phone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +39,9 @@ const adminNav = [
   { href: "/admin/ai", label: "AI Agents & Credits", icon: Bot },
   { href: "/admin/team", label: "Team", icon: UsersRound },
   { href: "/admin/flags", label: "Feature Flags", icon: Flag },
+  { href: "/admin/discounts", label: "Discount Codes", icon: Ticket },
   { href: "/admin/moderation", label: "Moderation", icon: ShieldAlert },
+  { href: "/admin/dialer", label: "Dialer", icon: Phone },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
