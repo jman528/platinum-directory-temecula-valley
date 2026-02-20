@@ -10,6 +10,7 @@ const months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb']
 const revenueData = months.map((month, i) => ({
   month,
   subscriptions: Math.round(800 + i * 350 + Math.random() * 200),
+  setupFees: Math.round(100 + i * 200 + Math.random() * 150),
   smartOffers: Math.round(200 + i * 150 + Math.random() * 100),
   aiCredits: Math.round(50 + i * 80 + Math.random() * 60),
 }))
@@ -37,9 +38,10 @@ export default function AdminAnalyticsCharts({ type }: { type: 'revenue' | 'sign
             <XAxis dataKey="month" tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} />
             <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickFormatter={(v) => `$${v}`} />
             <Tooltip contentStyle={tooltipStyle} />
-            <Line type="monotone" dataKey="subscriptions" stroke="#D4AF37" strokeWidth={2} dot={false} name="Subscriptions" />
-            <Line type="monotone" dataKey="smartOffers" stroke="#8B5CF6" strokeWidth={2} dot={false} name="Smart Offers" />
-            <Line type="monotone" dataKey="aiCredits" stroke="#06B6D4" strokeWidth={2} dot={false} name="AI Credits" />
+            <Line type="monotone" dataKey="subscriptions" stroke="#3B82F6" strokeWidth={2} dot={false} name="Subscriptions" />
+            <Line type="monotone" dataKey="setupFees" stroke="#D4AF37" strokeWidth={2} dot={false} name="Setup Fees" />
+            <Line type="monotone" dataKey="smartOffers" stroke="#22C55E" strokeWidth={2} dot={false} name="Smart Offers" />
+            <Line type="monotone" dataKey="aiCredits" stroke="#8B5CF6" strokeWidth={2} dot={false} name="AI Credits" />
           </LineChart>
         </ResponsiveContainer>
       </div>

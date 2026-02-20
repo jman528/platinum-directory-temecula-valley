@@ -1,6 +1,6 @@
 import { requireAdmin } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { BarChart3, TrendingUp, DollarSign, Users, Target, Bot } from 'lucide-react'
+import { BarChart3, TrendingUp, DollarSign, Users, Target, Bot, Receipt } from 'lucide-react'
 import AdminAnalyticsCharts from '@/components/admin/AdminAnalyticsCharts'
 
 function formatCurrency(amount: number) {
@@ -22,6 +22,7 @@ export default async function AdminAnalyticsPage() {
     { data: pointsData },
     { data: aiCreditsData },
     { data: recentSignups },
+    { data: setupFeeData },
   ] = await Promise.all([
     adminClient.from('businesses').select('tier').neq('tier', 'free'),
     adminClient.from('businesses').select('*', { count: 'exact', head: true }),
@@ -29,6 +30,7 @@ export default async function AdminAnalyticsPage() {
     adminClient.from('profiles').select('points_balance'),
     adminClient.from('ai_credit_transactions').select('credits_delta').lt('credits_delta', 0).gte('created_at', startOfMonth.toISOString()),
     adminClient.from('businesses').select('tier, created_at').order('created_at', { ascending: false }).limit(100),
+    adminClient.from('businesses').select('name, tier, setup_fee_status, setup_fee_amount, setup_fee_paid_at, discount_code_used').neq('setup_fee_status', 'not_applicable').order('setup_fee_paid_at', { ascending: false }).limit(50),
   ])
 
   // Revenue by tier
@@ -56,6 +58,21 @@ export default async function AdminAnalyticsPage() {
 
   // New signups this month
   const newThisMonth = recentSignups?.filter(b => new Date(b.created_at) >= startOfMonth).length || 0
+
+  // Setup fee calculations
+  const setupFeePaid = (setupFeeData || []).filter(b => b.setup_fee_status === 'paid')
+  const setupFeeUnpaid = (setupFeeData || []).filter(b => b.setup_fee_status === 'unpaid')
+  const setupFeeWaived = (setupFeeData || []).filter(b => b.setup_fee_status === 'waived')
+  const totalSetupFeeRevenue = setupFeePaid.reduce((sum, b) => sum + (b.setup_fee_amount || 0), 0)
+  const pendingSetupFees = setupFeeUnpaid.reduce((sum, b) => sum + (b.setup_fee_amount || 0), 0)
+
+  // Revenue by source
+  const revenueSources = [
+    { source: 'Subscriptions (MRR)', amount: totalMRR, color: 'text-blue-400', bg: 'bg-blue-500' },
+    { source: 'Setup Fees (Collected)', amount: totalSetupFeeRevenue, color: 'text-pd-gold', bg: 'bg-pd-gold' },
+    { source: 'Setup Fees (Pending)', amount: pendingSetupFees, color: 'text-yellow-400', bg: 'bg-yellow-500' },
+  ]
+  const totalRevenue = totalMRR + totalSetupFeeRevenue
 
   const statCards = [
     {
@@ -178,6 +195,105 @@ export default async function AdminAnalyticsPage() {
                 </tr>
               </tfoot>
             )}
+          </table>
+        </div>
+      </div>
+
+      {/* Revenue by Source */}
+      <div className="mt-8 glass-card p-6">
+        <h3 className="font-heading text-lg font-bold text-white">Revenue by Source</h3>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          {revenueSources.map((src) => (
+            <div key={src.source} className="rounded-lg bg-white/[0.03] p-4">
+              <div className="flex items-center gap-2">
+                <div className={`h-3 w-3 rounded-full ${src.bg}`} />
+                <p className="text-sm text-gray-400">{src.source}</p>
+              </div>
+              <p className="mt-1 text-2xl font-bold text-white">{formatCurrency(src.amount)}</p>
+              <p className="text-xs text-gray-500">
+                {totalRevenue > 0 ? Math.round((src.amount / totalRevenue) * 100) : 0}% of total
+              </p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 h-3 flex rounded-full overflow-hidden bg-white/5">
+          {revenueSources.map((src) => (
+            <div
+              key={src.source}
+              className={`${src.bg} transition-all`}
+              style={{ width: `${totalRevenue > 0 ? (src.amount / totalRevenue) * 100 : 0}%` }}
+            />
+          ))}
+        </div>
+        <div className="mt-2 flex items-center justify-between text-sm">
+          <span className="text-gray-400">Total Revenue</span>
+          <span className="font-bold text-green-400">{formatCurrency(totalRevenue)}</span>
+        </div>
+      </div>
+
+      {/* Setup Fee Tracking */}
+      <div className="mt-8 glass-card p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-heading text-lg font-bold text-white">Setup Fee Tracking</h3>
+            <p className="text-sm text-gray-400">
+              {setupFeePaid.length} paid &middot; {setupFeeUnpaid.length} pending &middot; {setupFeeWaived.length} waived
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Receipt className="h-5 w-5 text-pd-gold" />
+            <span className="text-sm font-bold text-pd-gold">{formatCurrency(totalSetupFeeRevenue)} collected</span>
+          </div>
+        </div>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/10 text-left">
+                <th className="pb-3 text-gray-400">Business</th>
+                <th className="pb-3 text-gray-400">Tier</th>
+                <th className="pb-3 text-gray-400">Setup Fee</th>
+                <th className="pb-3 text-gray-400">Status</th>
+                <th className="pb-3 text-gray-400">Paid Date</th>
+                <th className="pb-3 text-gray-400">Discount Code</th>
+                <th className="pb-3 text-gray-400">Net Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(setupFeeData || []).map((b, i) => (
+                <tr key={i} className="border-b border-white/5">
+                  <td className="py-3 text-white">{b.name}</td>
+                  <td className="py-3">
+                    <span className="rounded-full bg-pd-gold/10 px-2 py-0.5 text-xs text-pd-gold">
+                      {(b.tier || '').replace(/_/g, ' ')}
+                    </span>
+                  </td>
+                  <td className="py-3 text-gray-400">{b.setup_fee_amount ? formatCurrency(b.setup_fee_amount) : '—'}</td>
+                  <td className="py-3">
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${
+                      b.setup_fee_status === 'paid' ? 'bg-green-500/10 text-green-400' :
+                      b.setup_fee_status === 'waived' ? 'bg-blue-500/10 text-blue-400' :
+                      b.setup_fee_status === 'unpaid' ? 'bg-yellow-500/10 text-yellow-400' :
+                      'bg-gray-500/10 text-gray-400'
+                    }`}>
+                      {b.setup_fee_status}
+                    </span>
+                  </td>
+                  <td className="py-3 text-gray-400">
+                    {b.setup_fee_paid_at ? new Date(b.setup_fee_paid_at).toLocaleDateString() : '—'}
+                  </td>
+                  <td className="py-3 text-gray-400">{b.discount_code_used || '—'}</td>
+                  <td className="py-3 font-semibold text-white">
+                    {b.setup_fee_status === 'paid' ? formatCurrency(b.setup_fee_amount || 0) :
+                     b.setup_fee_status === 'waived' ? '$0' : '—'}
+                  </td>
+                </tr>
+              ))}
+              {(!setupFeeData || setupFeeData.length === 0) && (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-gray-500">No setup fee records yet.</td>
+                </tr>
+              )}
+            </tbody>
           </table>
         </div>
       </div>

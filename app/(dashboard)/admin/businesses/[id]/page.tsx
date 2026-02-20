@@ -76,6 +76,11 @@ export default function AdminBusinessDetailPage({
   const [activeTab, setActiveTab] = useState("basic");
   const [aiChecking, setAiChecking] = useState(false);
   const [aiResult, setAiResult] = useState<string | null>(null);
+  const [showSetupFeeModal, setShowSetupFeeModal] = useState(false);
+  const [pendingTier, setPendingTier] = useState("");
+  const [setupFeeDiscountCode, setSetupFeeDiscountCode] = useState("");
+  const [setupFeeValidating, setSetupFeeValidating] = useState(false);
+  const [setupFeeDiscount, setSetupFeeDiscount] = useState<any>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -237,6 +242,73 @@ export default function AdminBusinessDetailPage({
     }
   }
 
+  const SETUP_FEES: Record<string, number> = {
+    verified_platinum: 199,
+    platinum_partner: 499,
+    platinum_elite: 999,
+  };
+
+  function handleTierChange(newTier: string) {
+    const fee = SETUP_FEES[newTier] || 0;
+    if (fee > 0 && newTier !== business?.tier) {
+      setPendingTier(newTier);
+      setSetupFeeDiscountCode("");
+      setSetupFeeDiscount(null);
+      setShowSetupFeeModal(true);
+    } else {
+      updateField("tier", newTier);
+    }
+  }
+
+  async function validateSetupFeeDiscount() {
+    if (!setupFeeDiscountCode.trim()) return;
+    setSetupFeeValidating(true);
+    try {
+      const res = await fetch("/api/discounts/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: setupFeeDiscountCode, applies_to: "setup_fee", tier: pendingTier }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setSetupFeeDiscount(data.discount);
+      } else {
+        setSetupFeeDiscount({ error: data.reason });
+      }
+    } catch {
+      setSetupFeeDiscount({ error: "Failed to validate code" });
+    } finally {
+      setSetupFeeValidating(false);
+    }
+  }
+
+  function applySetupFee(action: "send_invoice" | "mark_paid" | "waive") {
+    const baseFee = SETUP_FEES[pendingTier] || 0;
+    let finalAmount = baseFee;
+    if (setupFeeDiscount && !setupFeeDiscount.error) {
+      if (setupFeeDiscount.discount_type === "percentage") {
+        finalAmount = baseFee * (1 - setupFeeDiscount.discount_value / 100);
+      } else if (setupFeeDiscount.discount_type === "fixed") {
+        finalAmount = Math.max(0, baseFee - setupFeeDiscount.discount_value);
+      }
+    }
+
+    updateField("tier", pendingTier);
+    updateField("setup_fee_amount", finalAmount);
+    updateField("discount_code_used", setupFeeDiscount?.code || setupFeeDiscountCode || null);
+
+    if (action === "mark_paid") {
+      updateField("setup_fee_status", "paid");
+      updateField("setup_fee_paid_at", new Date().toISOString());
+    } else if (action === "waive") {
+      updateField("setup_fee_status", "waived");
+      updateField("setup_fee_amount", 0);
+    } else {
+      updateField("setup_fee_status", "unpaid");
+    }
+    setShowSetupFeeModal(false);
+  }
+
   const inputClass = "w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-pd-purple/40 focus:outline-none text-sm";
   const labelClass = "mb-1 block text-sm text-gray-400";
 
@@ -371,7 +443,7 @@ export default function AdminBusinessDetailPage({
               </div>
               <div>
                 <label className={labelClass}>Tier</label>
-                <select value={business?.tier || "free"} onChange={e => updateField("tier", e.target.value)} className={inputClass}>
+                <select value={business?.tier || "free"} onChange={e => handleTierChange(e.target.value)} className={inputClass}>
                   {TIERS.map(t => <option key={t.value} value={t.value} className="bg-pd-dark">{t.label}</option>)}
                 </select>
               </div>
@@ -774,6 +846,75 @@ export default function AdminBusinessDetailPage({
           </div>
         )}
       </div>
+
+      {/* Setup Fee Modal */}
+      {showSetupFeeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-pd-dark p-6 shadow-2xl">
+            <h3 className="font-heading text-lg font-bold text-white">
+              Upgrading to {pendingTier.replace(/_/g, ' ')}
+            </h3>
+            <p className="mt-1 text-sm text-gray-400">
+              Setup Fee: <span className="font-bold text-pd-gold">${SETUP_FEES[pendingTier] || 0}</span>
+            </p>
+
+            <div className="mt-4">
+              <label className={labelClass}>Have a discount code?</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={setupFeeDiscountCode}
+                  onChange={e => { setSetupFeeDiscountCode(e.target.value); setSetupFeeDiscount(null); }}
+                  placeholder="Enter code"
+                  className={inputClass}
+                />
+                <button
+                  onClick={validateSetupFeeDiscount}
+                  disabled={setupFeeValidating || !setupFeeDiscountCode.trim()}
+                  className="whitespace-nowrap rounded-lg bg-pd-purple/20 px-3 py-2 text-sm text-pd-purple-light hover:bg-pd-purple/30 disabled:opacity-50"
+                >
+                  {setupFeeValidating ? "..." : "Apply"}
+                </button>
+              </div>
+              {setupFeeDiscount && !setupFeeDiscount.error && (
+                <p className="mt-1 text-xs text-green-400">
+                  Code applied: {setupFeeDiscount.discount_type === 'percentage' ? `${setupFeeDiscount.discount_value}% off` : `$${setupFeeDiscount.discount_value} off`}
+                </p>
+              )}
+              {setupFeeDiscount?.error && (
+                <p className="mt-1 text-xs text-red-400">{setupFeeDiscount.error}</p>
+              )}
+            </div>
+
+            <div className="mt-6 flex flex-col gap-2">
+              <button
+                onClick={() => applySetupFee("send_invoice")}
+                className="w-full rounded-lg bg-pd-blue px-4 py-2.5 text-sm font-medium text-white hover:bg-pd-blue-dark"
+              >
+                Send Invoice
+              </button>
+              <button
+                onClick={() => applySetupFee("mark_paid")}
+                className="w-full rounded-lg bg-green-600/20 px-4 py-2.5 text-sm font-medium text-green-400 hover:bg-green-600/30"
+              >
+                Mark as Paid
+              </button>
+              <button
+                onClick={() => applySetupFee("waive")}
+                className="w-full rounded-lg bg-white/5 px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-white/10"
+              >
+                Waive Fee
+              </button>
+              <button
+                onClick={() => setShowSetupFeeModal(false)}
+                className="mt-1 w-full text-sm text-gray-500 hover:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
