@@ -6,7 +6,10 @@ import {
   Gift, Award, Trophy, Star, Crown, Loader2,
   ArrowRight, Copy, CheckCircle, Zap,
   Share2, Facebook, Twitter, Linkedin, ExternalLink,
+  Wallet, ShoppingBag,
 } from "lucide-react";
+import { POINTS_CONFIG, pointsToDollars } from "@/lib/points-config";
+import OnboardingChecklist from "@/components/OnboardingChecklist";
 
 interface Redemption {
   id: string;
@@ -24,12 +27,12 @@ const TIERS = [
 ];
 
 const EARN_TIPS = [
-  { label: "Leave reviews on businesses", points: "50 pts" },
-  { label: "Share deals with friends", points: "25 pts" },
-  { label: "Refer a friend to sign up", points: "100 pts" },
-  { label: "Daily check-in", points: "10 pts" },
-  { label: "Complete your profile", points: "75 pts" },
-  { label: "Purchase a smart offer", points: "25 pts" },
+  { label: "Leave a Google review", points: "1,000 pts" },
+  { label: "Share a listing", points: "25 pts" },
+  { label: "Refer a friend to sign up", points: "500 pts" },
+  { label: "Daily login", points: "10 pts" },
+  { label: "7-day login streak", points: "250 pts" },
+  { label: "Referred business subscribes", points: "50,000 pts" },
 ];
 
 const SOCIAL_ACTIONS = [
@@ -52,6 +55,7 @@ export default function RewardsDashboardPage() {
   const [copied, setCopied] = useState(false);
   const [claimedActions, setClaimedActions] = useState<Set<string>>(new Set());
   const [claiming, setClaiming] = useState<string | null>(null);
+  const [topupLoading, setTopupLoading] = useState<number | null>(null);
 
   const supabase = createClient();
 
@@ -118,6 +122,22 @@ export default function RewardsDashboardPage() {
     setClaiming(null);
   }
 
+  async function handleTopUp(tierIndex: number) {
+    setTopupLoading(tierIndex);
+    try {
+      const res = await fetch("/api/points/topup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier_index: tierIndex }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch { /* ignore */ }
+    setTopupLoading(null);
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -137,6 +157,11 @@ export default function RewardsDashboardPage() {
     <div>
       <h1 className="font-heading text-2xl font-bold text-white">Rewards</h1>
       <p className="mt-1 text-gray-400">Track your tier, earn points, and redeem rewards</p>
+
+      {/* Onboarding Checklist */}
+      <div className="mt-6">
+        <OnboardingChecklist />
+      </div>
 
       {/* Current Tier */}
       <div className="mt-6 glass-card p-6">
@@ -292,6 +317,45 @@ export default function RewardsDashboardPage() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Wallet Top-Up */}
+      <div className="mt-8">
+        <h2 className="font-heading text-lg font-bold text-white flex items-center gap-2">
+          <Wallet className="h-5 w-5 text-pd-gold" /> Top Up Your Points Wallet
+        </h2>
+        <p className="mt-1 text-sm text-gray-400">Buy points to use on any Smart Offer. Like a Temecula Valley gift card!</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {POINTS_CONFIG.TOPUP_TIERS.map((tier, i) => {
+            const total = tier.points + tier.bonus;
+            return (
+              <button
+                key={i}
+                onClick={() => handleTopUp(i)}
+                disabled={topupLoading !== null}
+                className="glass-card group relative overflow-hidden p-4 text-left transition-all hover:border-pd-gold/40"
+              >
+                {tier.bonus > 0 && (
+                  <span className="absolute right-2 top-2 rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-400">
+                    +{tier.bonus.toLocaleString()} BONUS
+                  </span>
+                )}
+                <p className="text-2xl font-bold text-pd-gold">${tier.price}</p>
+                <p className="mt-1 text-sm text-white">{total.toLocaleString()} points</p>
+                <p className="text-xs text-gray-500">${pointsToDollars(total)} value</p>
+                {topupLoading === i ? (
+                  <div className="mt-3 flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 animate-spin text-pd-gold" />
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs font-medium text-pd-gold group-hover:text-white">
+                    Buy Now →
+                  </p>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
