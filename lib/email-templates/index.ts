@@ -26,7 +26,7 @@ ${content}
 }
 
 function btn(text: string, url: string): string {
-  return `<table cellpadding="0" cellspacing="0" style="margin:24px 0;"><tr><td style="background:#D4AF37;border-radius:8px;padding:12px 28px;"><a href="${url}" style="color:#0a0a1a;text-decoration:none;font-weight:600;font-size:14px;">${text}</a></td></tr></table>`
+  return `<table cellpadding="0" cellspacing="0" style="margin:24px 0;"><tr><td style="background:#C9A84C;border-radius:8px;padding:12px 28px;"><a href="${url}" style="color:#0a0a1a;text-decoration:none;font-weight:600;font-size:14px;">${text}</a></td></tr></table>`
 }
 
 type Template = {
@@ -61,7 +61,7 @@ export const emailTemplates: Record<string, Template> = {
     html: (d) => wrap(`
       <h1 style="color:#ffffff;font-size:24px;margin:0 0 16px;">Your listing is live!</h1>
       <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
-        <strong style="color:#D4AF37;">${d.business_name}</strong> is now listed on Platinum Directory.
+        <strong style="color:#C9A84C;">${d.business_name}</strong> is now listed on Platinum Directory.
       </p>
       <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
         Customers can find you at your listing page. Manage your profile from the dashboard.
@@ -77,7 +77,7 @@ export const emailTemplates: Record<string, Template> = {
     html: (d) => wrap(`
       <h1 style="color:#ffffff;font-size:24px;margin:0 0 16px;">New Lead!</h1>
       <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
-        Someone is interested in <strong style="color:#D4AF37;">${d.business_name}</strong>.
+        Someone is interested in <strong style="color:#C9A84C;">${d.business_name}</strong>.
       </p>
       <table style="width:100%;background:rgba(255,255,255,0.05);border-radius:8px;padding:16px;margin:16px 0;">
         <tr><td style="color:#9ca3af;font-size:13px;padding:4px 0;">Name</td><td style="color:#ffffff;font-size:14px;">${d.customer_name}</td></tr>
@@ -95,7 +95,7 @@ export const emailTemplates: Record<string, Template> = {
     html: (d) => wrap(`
       <h1 style="color:#ffffff;font-size:24px;margin:0 0 16px;">Your voucher is ready!</h1>
       <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
-        You purchased <strong style="color:#D4AF37;">${d.offer_name}</strong> from ${d.business_name}.
+        You purchased <strong style="color:#C9A84C;">${d.offer_name}</strong> from ${d.business_name}.
       </p>
       ${d.qr_code_url ? `<div style="text-align:center;margin:24px 0;"><img src="${d.qr_code_url}" alt="QR Code" width="200" height="200" style="border-radius:8px;" /></div>` : ''}
       <p style="color:#d1d5db;font-size:14px;line-height:1.6;margin:0 0 8px;"><strong style="color:#fff;">How to redeem:</strong></p>
@@ -114,7 +114,7 @@ export const emailTemplates: Record<string, Template> = {
     html: (d) => wrap(`
       <h1 style="color:#ffffff;font-size:24px;margin:0 0 16px;">You made a sale!</h1>
       <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
-        Someone just purchased <strong style="color:#D4AF37;">${d.offer_name}</strong>.
+        Someone just purchased <strong style="color:#C9A84C;">${d.offer_name}</strong>.
       </p>
       <table style="width:100%;background:rgba(255,255,255,0.05);border-radius:8px;padding:16px;margin:16px 0;">
         <tr><td style="color:#9ca3af;font-size:13px;padding:4px 0;">Amount</td><td style="color:#22c55e;font-size:16px;font-weight:bold;">$${d.amount}</td></tr>
@@ -135,7 +135,7 @@ export const emailTemplates: Record<string, Template> = {
       </p>
       <table style="width:100%;background:rgba(255,255,255,0.05);border-radius:8px;padding:16px;margin:16px 0;">
         <tr><td style="color:#9ca3af;font-size:13px;padding:4px 0;">Amount</td><td style="color:#ffffff;font-size:16px;font-weight:bold;">$${d.amount}</td></tr>
-        <tr><td style="color:#9ca3af;font-size:13px;padding:4px 0;">Plan</td><td style="color:#D4AF37;font-size:14px;">${d.tier_name || 'Subscription'}</td></tr>
+        <tr><td style="color:#9ca3af;font-size:13px;padding:4px 0;">Plan</td><td style="color:#C9A84C;font-size:14px;">${d.tier_name || 'Subscription'}</td></tr>
         <tr><td style="color:#9ca3af;font-size:13px;padding:4px 0;">Next Billing</td><td style="color:#ffffff;font-size:14px;">${d.next_billing || '—'}</td></tr>
       </table>
       ${d.invoice_url ? btn('View Invoice', d.invoice_url) : ''}
@@ -148,7 +148,7 @@ export const emailTemplates: Record<string, Template> = {
     html: (d) => wrap(`
       <h1 style="color:#ef4444;font-size:24px;margin:0 0 16px;">Payment Failed</h1>
       <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
-        We were unable to process your payment for <strong style="color:#D4AF37;">${d.tier_name || 'your subscription'}</strong>.
+        We were unable to process your payment for <strong style="color:#C9A84C;">${d.tier_name || 'your subscription'}</strong>.
       </p>
       <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
         Please update your payment method to continue enjoying premium features.
@@ -180,11 +180,11 @@ export const emailTemplates: Record<string, Template> = {
     html: (d) => wrap(`
       <h1 style="color:#ffffff;font-size:24px;margin:0 0 16px;">New Referral!</h1>
       <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
-        Someone just signed up using your referral link. You earned <strong style="color:#D4AF37;">${d.points || 500} points</strong>!
+        Someone just signed up using your referral link. You earned <strong style="color:#C9A84C;">${d.points || 500} points</strong>!
       </p>
       <table style="width:100%;background:rgba(255,255,255,0.05);border-radius:8px;padding:16px;margin:16px 0;">
         <tr><td style="color:#9ca3af;font-size:13px;padding:4px 0;">Total Referrals</td><td style="color:#ffffff;font-size:14px;">${d.total_referrals || 1}</td></tr>
-        <tr><td style="color:#9ca3af;font-size:13px;padding:4px 0;">Total Points</td><td style="color:#D4AF37;font-size:14px;font-weight:bold;">${d.total_points || 0}</td></tr>
+        <tr><td style="color:#9ca3af;font-size:13px;padding:4px 0;">Total Points</td><td style="color:#C9A84C;font-size:14px;font-weight:bold;">${d.total_points || 0}</td></tr>
       </table>
       <p style="color:#d1d5db;font-size:14px;line-height:1.6;margin:16px 0 0;">
         Keep sharing to earn more: <strong style="color:#8b5cf6;">${d.referral_link || BASE_URL}</strong>
@@ -196,12 +196,12 @@ export const emailTemplates: Record<string, Template> = {
   'giveaway-winner': {
     subject: () => 'You Won the Platinum Directory Giveaway!',
     html: (d) => wrap(`
-      <h1 style="color:#D4AF37;font-size:28px;margin:0 0 16px;text-align:center;">Congratulations!</h1>
+      <h1 style="color:#C9A84C;font-size:28px;margin:0 0 16px;text-align:center;">Congratulations!</h1>
       <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;text-align:center;">
-        You've won the <strong style="color:#D4AF37;">${d.giveaway_name || 'Platinum Directory Giveaway'}</strong>!
+        You've won the <strong style="color:#C9A84C;">${d.giveaway_name || 'Platinum Directory Giveaway'}</strong>!
       </p>
       <div style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);border-radius:12px;padding:20px;margin:16px 0;text-align:center;">
-        <p style="color:#D4AF37;font-size:20px;font-weight:bold;margin:0;">${d.prize || 'Amazing Prize'}</p>
+        <p style="color:#C9A84C;font-size:20px;font-weight:bold;margin:0;">${d.prize || 'Amazing Prize'}</p>
       </div>
       <p style="color:#d1d5db;font-size:14px;line-height:1.6;margin:0 0 16px;">
         ${d.claim_instructions || 'We will contact you with details on how to claim your prize.'}
@@ -216,7 +216,7 @@ export const emailTemplates: Record<string, Template> = {
     html: (d) => wrap(`
       <h1 style="color:#ffffff;font-size:24px;margin:0 0 16px;">You're upgraded!</h1>
       <p style="color:#d1d5db;font-size:15px;line-height:1.6;margin:0 0 16px;">
-        Welcome to <strong style="color:#D4AF37;">${d.tier_name}</strong>. Here's what you've unlocked:
+        Welcome to <strong style="color:#C9A84C;">${d.tier_name}</strong>. Here's what you've unlocked:
       </p>
       <ul style="color:#d1d5db;font-size:14px;line-height:1.8;padding-left:20px;">
         ${(d.features || ['Premium listing', 'Lead alerts', 'Analytics dashboard']).map((f: string) => `<li>${f}</li>`).join('')}

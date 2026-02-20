@@ -25,7 +25,7 @@ const TIER_COLORS: Record<string, string> = {
   free: "#6B7280",
   verified_platinum: "#3B82F6",
   platinum_partner: "#7C3AED",
-  platinum_elite: "#D4AF37",
+  platinum_elite: "#C9A84C",
 };
 
 const TEMECULA_CENTER: [number, number] = [-117.1484, 33.4936];
@@ -70,7 +70,7 @@ export default function MapboxClusterMap({ businesses, className = "" }: MapboxC
         paint: {
           "circle-color": [
             "step", ["get", "point_count"],
-            "#7C3AED", 10, "#3B82F6", 30, "#D4AF37",
+            "#7C3AED", 10, "#3B82F6", 30, "#C9A84C",
           ],
           "circle-radius": ["step", ["get", "point_count"], 18, 10, 24, 30, 32],
           "circle-stroke-width": 2,
@@ -101,7 +101,7 @@ export default function MapboxClusterMap({ businesses, className = "" }: MapboxC
         paint: {
           "circle-color": [
             "match", ["get", "tier"],
-            "platinum_elite", "#D4AF37",
+            "platinum_elite", "#C9A84C",
             "platinum_partner", "#7C3AED",
             "verified_platinum", "#3B82F6",
             "#6B7280",
@@ -141,7 +141,7 @@ export default function MapboxClusterMap({ businesses, className = "" }: MapboxC
           ? `<span style="background:${TIER_COLORS[props.tier]};color:#fff;font-size:9px;padding:2px 6px;border-radius:9px;font-weight:700">${tierLabel}</span>`
           : "";
         const rating = props.average_rating > 0
-          ? `<span style="color:#D4AF37;font-size:12px">★ ${props.average_rating}</span>`
+          ? `<span style="color:#C9A84C;font-size:12px">★ ${props.average_rating}</span>`
           : "";
         const img = props.cover_image_url
           ? `<img src="${props.cover_image_url}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:6px" />`
@@ -158,7 +158,7 @@ export default function MapboxClusterMap({ businesses, className = "" }: MapboxC
                   ${badge}
                 </div>
                 ${rating}
-                <a href="/business/${props.slug}" style="display:block;margin-top:6px;color:#D4AF37;font-size:12px;text-decoration:none">View Listing →</a>
+                <a href="/business/${props.slug}" style="display:block;margin-top:6px;color:#C9A84C;font-size:12px;text-decoration:none">View Listing →</a>
               </div>
             </div>
           `)

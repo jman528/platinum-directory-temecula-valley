@@ -89,7 +89,7 @@ export default async function HomePage() {
             <defs>
               {/* Golden hour radial glow at horizon */}
               <radialGradient id="hero-golden-glow" cx="50%" cy="58%" r="45%" fx="50%" fy="58%">
-                <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.14" />
+                <stop offset="0%" stopColor="#C9A84C" stopOpacity="0.14" />
                 <stop offset="35%" stopColor="#C4872A" stopOpacity="0.07" />
                 <stop offset="70%" stopColor="#7C3AED" stopOpacity="0.03" />
                 <stop offset="100%" stopColor="#0A0F1A" stopOpacity="0" />
@@ -97,7 +97,7 @@ export default async function HomePage() {
               {/* Warm amber horizon band */}
               <linearGradient id="hero-horizon" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="transparent" />
-                <stop offset="55%" stopColor="#D4AF37" stopOpacity="0.06" />
+                <stop offset="55%" stopColor="#C9A84C" stopOpacity="0.06" />
                 <stop offset="70%" stopColor="#C4872A" stopOpacity="0.04" />
                 <stop offset="100%" stopColor="transparent" />
               </linearGradient>
@@ -134,7 +134,7 @@ export default async function HomePage() {
             <path d="M0,520 C140,480 260,500 400,465 C540,430 660,480 820,450 C980,420 1080,470 1220,445 C1360,420 1420,450 1440,440 L1440,700 L0,700 Z" fill="url(#hills-mid)" opacity="0.6" />
 
             {/* Vineyard row lines on mid hills - golden at dusk */}
-            <g opacity="0.07" stroke="#D4AF37" strokeWidth="0.8" fill="none">
+            <g opacity="0.07" stroke="#C9A84C" strokeWidth="0.8" fill="none">
               <path d="M260,490 Q340,475 420,482 Q500,470 580,476" />
               <path d="M275,497 Q355,482 435,489 Q515,477 595,483" />
               <path d="M290,504 Q370,489 450,496 Q530,484 610,490" />
@@ -162,7 +162,7 @@ export default async function HomePage() {
             <path d="M0,600 C200,580 360,595 540,575 C720,555 900,585 1080,568 C1260,550 1380,575 1440,565 L1440,700 L0,700 Z" fill="url(#hills-front)" opacity="0.85" />
 
             {/* Subtle foreground vineyard texture */}
-            <g opacity="0.03" stroke="#D4AF37" strokeWidth="1.2" fill="none">
+            <g opacity="0.03" stroke="#C9A84C" strokeWidth="1.2" fill="none">
               <path d="M160,592 Q280,578 400,586 Q500,577 600,582" />
               <path d="M175,598 Q295,584 415,592 Q515,583 615,588" />
               <path d="M850,575 Q970,562 1090,572 Q1180,565 1270,570" />
@@ -470,7 +470,7 @@ export default async function HomePage() {
                   background: `
                     radial-gradient(circle at 45% 55%, rgba(124, 58, 237, 0.12) 0%, transparent 35%),
                     radial-gradient(circle at 55% 40%, rgba(59, 130, 246, 0.08) 0%, transparent 30%),
-                    radial-gradient(circle at 35% 70%, rgba(212, 175, 55, 0.06) 0%, transparent 25%),
+                    radial-gradient(circle at 35% 70%, rgba(201, 168, 76, 0.06) 0%, transparent 25%),
                     linear-gradient(135deg, #0D1321 0%, #111827 50%, #0D1321 100%)
                   `,
                 }} />

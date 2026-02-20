@@ -15,10 +15,10 @@ interface ChatResponse {
   usage?: { promptTokens: number; completionTokens: number };
 }
 
-type Provider = "ollama" | "openrouter" | "anthropic" | "groq";
+type Provider = "groq" | "openrouter" | "anthropic" | "ollama";
 
 function getProvider(): Provider {
-  return (process.env.AI_PROVIDER as Provider) || "ollama";
+  return (process.env.AI_PROVIDER as Provider) || "groq";
 }
 
 // ─── Ollama ──────────────────────────────────────────────
@@ -250,7 +250,7 @@ async function groqChat(
   messages: ChatMessage[],
   opts: ChatOptions
 ): Promise<ChatResponse> {
-  const model = opts.model || "llama-3.1-8b-instant";
+  const model = opts.model || "llama-3.3-70b-versatile";
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -283,7 +283,7 @@ async function* groqStream(
   messages: ChatMessage[],
   opts: ChatOptions
 ): AsyncGenerator<string> {
-  const model = opts.model || "llama-3.1-8b-instant";
+  const model = opts.model || "llama-3.3-70b-versatile";
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",

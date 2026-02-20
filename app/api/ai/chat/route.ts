@@ -8,16 +8,27 @@ When asked about specific businesses, suggest they search the directory.
 Current date: ${new Date().toLocaleDateString()}`
 
 // Model fallback chain for PD Assistant
+// Priority: Groq (primary) → Google Gemini → DeepSeek → OpenAI → Anthropic (last resort)
 const MODEL_CHAIN = [
   {
     provider: 'groq' as const,
-    model: 'llama-3.1-8b-instant',
+    model: 'llama-3.3-70b-versatile',
     apiKey: () => process.env.GROQ_API_KEY,
   },
   {
     provider: 'google' as const,
     model: 'gemini-2.0-flash',
     apiKey: () => process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY,
+  },
+  {
+    provider: 'deepseek' as const,
+    model: 'deepseek-chat',
+    apiKey: () => process.env.DEEPSEEK_API_KEY,
+  },
+  {
+    provider: 'openai' as const,
+    model: 'gpt-4o-mini',
+    apiKey: () => process.env.OPENAI_API_KEY,
   },
   {
     provider: 'anthropic' as const,
@@ -80,6 +91,29 @@ async function callWithFallback(messages: ChatMessage[]) {
         if (response.ok) {
           const data = await response.json()
           return { text: data.candidates?.[0]?.content?.parts?.[0]?.text, provider: config.provider, model: config.model }
+        }
+      }
+      if (config.provider === 'deepseek' || config.provider === 'openai') {
+        const baseUrl = config.provider === 'deepseek'
+          ? 'https://api.deepseek.com/v1/chat/completions'
+          : 'https://api.openai.com/v1/chat/completions'
+        const response = await fetch(baseUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: config.model,
+            messages,
+            max_tokens: 500,
+            temperature: 0.7,
+          }),
+          signal: AbortSignal.timeout(15_000),
+        })
+        if (response.ok) {
+          const data = await response.json()
+          return { text: data.choices[0]?.message?.content, provider: config.provider, model: config.model }
         }
       }
       if (config.provider === 'anthropic') {

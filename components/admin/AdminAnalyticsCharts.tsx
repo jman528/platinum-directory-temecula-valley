@@ -39,7 +39,7 @@ export default function AdminAnalyticsCharts({ type }: { type: 'revenue' | 'sign
             <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickFormatter={(v) => `$${v}`} />
             <Tooltip contentStyle={tooltipStyle} />
             <Line type="monotone" dataKey="subscriptions" stroke="#3B82F6" strokeWidth={2} dot={false} name="Subscriptions" />
-            <Line type="monotone" dataKey="setupFees" stroke="#D4AF37" strokeWidth={2} dot={false} name="Setup Fees" />
+            <Line type="monotone" dataKey="setupFees" stroke="#C9A84C" strokeWidth={2} dot={false} name="Setup Fees" />
             <Line type="monotone" dataKey="smartOffers" stroke="#22C55E" strokeWidth={2} dot={false} name="Smart Offers" />
             <Line type="monotone" dataKey="aiCredits" stroke="#8B5CF6" strokeWidth={2} dot={false} name="AI Credits" />
           </LineChart>

@@ -48,7 +48,7 @@ export default function DashboardAnalyticsCharts({ type }: { type: 'views' | 'so
             <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} />
             <Tooltip contentStyle={tooltipStyle} />
             <Line type="monotone" dataKey="views" stroke="#3B82F6" strokeWidth={2} dot={false} name="Views" />
-            <Line type="monotone" dataKey="clicks" stroke="#D4AF37" strokeWidth={2} dot={false} name="Clicks" />
+            <Line type="monotone" dataKey="clicks" stroke="#C9A84C" strokeWidth={2} dot={false} name="Clicks" />
           </LineChart>
         </ResponsiveContainer>
       </div>

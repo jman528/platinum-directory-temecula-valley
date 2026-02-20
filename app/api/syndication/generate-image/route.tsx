@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                background: "linear-gradient(135deg, #D4AF37, #F5D060)",
+                background: "linear-gradient(135deg, #C9A84C, #E8C97A)",
                 borderRadius: "24px",
                 padding: "8px 20px",
                 marginBottom: "24px",
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
               style={{
                 fontSize: "42px",
                 fontWeight: 800,
-                color: "#D4AF37",
+                color: "#C9A84C",
                 textAlign: "center",
                 margin: "0",
                 lineHeight: 1.2,
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
           {/* Branding */}
           <p
             style={{
-              color: "rgba(212, 175, 55, 0.6)",
+              color: "rgba(201, 168, 76, 0.6)",
               fontSize: "14px",
               marginTop: "24px",
               letterSpacing: "3px",

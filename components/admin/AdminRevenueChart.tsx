@@ -28,7 +28,7 @@ export default function AdminRevenueChart() {
             }}
           />
           <Legend wrapperStyle={{ fontSize: 12, color: '#9ca3af' }} />
-          <Line type="monotone" dataKey="subscriptions" stroke="#D4AF37" strokeWidth={2} dot={false} name="Subscriptions" />
+          <Line type="monotone" dataKey="subscriptions" stroke="#C9A84C" strokeWidth={2} dot={false} name="Subscriptions" />
           <Line type="monotone" dataKey="smartOffers" stroke="#8B5CF6" strokeWidth={2} dot={false} name="Smart Offers" />
           <Line type="monotone" dataKey="aiCredits" stroke="#06B6D4" strokeWidth={2} dot={false} name="AI Credits" />
         </LineChart>

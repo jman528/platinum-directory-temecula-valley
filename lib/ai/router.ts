@@ -37,7 +37,7 @@ function buildFallbackChain(preferredProvider?: string, overrideModel?: string):
     {
       key: 'groq',
       provider: 'groq',
-      model: 'llama-3.1-8b-instant',
+      model: 'llama-3.3-70b-versatile',
       baseUrl: 'https://api.groq.com/openai/v1',
       apiKey: process.env.GROQ_API_KEY,
       callHandler: 'openai_compat',
