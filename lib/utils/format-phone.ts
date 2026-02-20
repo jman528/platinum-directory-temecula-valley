@@ -29,3 +29,23 @@ export function formatPhoneLocal(phone: string): string {
   }
   return phone;
 }
+
+/**
+ * Format to standard US display: (XXX) XXX-XXXX
+ * Returns original string if it can't be parsed as a 10-digit US number.
+ */
+export function formatPhoneUS(phone: string): string {
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+  const cleaned =
+    digits.length === 11 && digits[0] === "1" ? digits.slice(1) : digits;
+  if (cleaned.length !== 10) return phone;
+  return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+}
+
+/**
+ * Strip to 10 digits for storage: 9514627023
+ */
+export function stripPhoneForStorage(phone: string): string {
+  return phone.replace(/\D/g, "").replace(/^1(?=\d{10})/, "");
+}
