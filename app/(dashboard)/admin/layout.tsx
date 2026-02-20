@@ -24,6 +24,8 @@ import {
   Ticket,
   Phone,
   Palette,
+  Share2,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +45,8 @@ const adminNav = [
   { href: "/admin/discounts", label: "Discount Codes", icon: Ticket },
   { href: "/admin/moderation", label: "Moderation", icon: ShieldAlert },
   { href: "/admin/banners", label: "Banners", icon: Palette },
+  { href: "/admin/syndication", label: "Syndication", icon: Share2 },
+  { href: "/admin/citations", label: "Citations", icon: FileText },
   { href: "/admin/dialer", label: "Dialer", icon: Phone },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
