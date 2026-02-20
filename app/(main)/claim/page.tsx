@@ -61,10 +61,10 @@ export default function ClaimSearchPage() {
       .order("name")
       .limit(30);
 
-    // Deduplicate by name + city (keep first occurrence)
+    // Deduplicate by name only (chains like Bevmo appear once regardless of city)
     const seen = new Set<string>();
     const deduped = (data || []).filter((biz: any) => {
-      const key = `${(biz.name || "").toLowerCase().trim()}|${(biz.city || "").toLowerCase().trim()}`;
+      const key = (biz.name || "").toLowerCase().trim();
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
