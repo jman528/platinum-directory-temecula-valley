@@ -8,6 +8,7 @@ import type { Business, Category } from "@/types";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { CountdownTimer } from "@/components/ui/countdown-timer";
+import AffiliateBanner from "@/components/banners/AffiliateBanner";
 
 const ICON_MAP: Record<string, any> = {
   Wine, UtensilsCrossed, Car, Heart, ShoppingBag, Briefcase, Wrench, Sparkles,
@@ -270,6 +271,13 @@ export default async function HomePage() {
           <p className="mt-4 text-[10px] text-gray-600">Source: Visit Temecula Valley 2024</p>
         </div>
       </section>
+
+      {/* AFFILIATE REFERRAL BANNER */}
+      <div className="py-8">
+        <div className="container px-4">
+          <AffiliateBanner />
+        </div>
+      </div>
 
       {/* FEATURED PLATINUM BUSINESSES */}
       <ScrollReveal>

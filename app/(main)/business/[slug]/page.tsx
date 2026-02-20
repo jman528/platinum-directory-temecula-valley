@@ -14,6 +14,7 @@ import { BusinessStructuredData } from "@/components/seo/StructuredData";
 import VideoPlayTracker from "@/components/VideoPlayTracker";
 import ShareSection from "@/components/ShareSection";
 import MobileBottomBar from "@/components/MobileBottomBar";
+import BusinessCtaBanner from "@/components/banners/BusinessCtaBanner";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -538,6 +539,13 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
           )}
         </div>
       </div>
+
+      {/* Business CTA Banner — only on free-tier listings */}
+      {isFree && (
+        <div className="container px-4 py-8">
+          <BusinessCtaBanner businessId={biz.id} businessName={biz.name} />
+        </div>
+      )}
 
       {/* Mobile Bottom Bar */}
       <MobileBottomBar
