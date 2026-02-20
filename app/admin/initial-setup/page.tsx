@@ -1,3 +1,14 @@
+/**
+ * SUPERADMIN SETUP INSTRUCTIONS:
+ * 1. Go to your deployed site and sign up / sign in normally with your email
+ * 2. Go to /admin/initial-setup
+ * 3. Enter your email and the setup secret from .env.local (SUPERADMIN_SETUP_SECRET)
+ * 4. Click "Make Me Superadmin"
+ * 5. Sign out and sign back in
+ * 6. Navigate to /admin to access the admin panel
+ * 7. DELETE this page (app/admin/initial-setup/) and the API route
+ *    (app/api/admin/setup-superadmin/) after setup is complete
+ */
 "use client";
 
 import { useState } from "react";

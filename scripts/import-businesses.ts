@@ -12,9 +12,12 @@
  * Warm targets get is_hot_lead=true
  */
 
+import { config } from "dotenv";
+import * as path from "path";
+config({ path: path.resolve(__dirname, "..", ".env.local") });
+
 import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
-import * as path from "path";
 
 // --- Supabase admin client ---
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
