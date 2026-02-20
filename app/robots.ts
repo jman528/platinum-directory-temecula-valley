@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/dashboard/', '/api/', '/_next/'],
+        disallow: ['/admin/', '/dashboard/', '/api/', '/_next/', '/internal/'],
       },
     ],
     sitemap: 'https://platinumdirectorytemeculavalley.com/sitemap.xml',
