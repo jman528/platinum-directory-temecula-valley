@@ -3,7 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import {
   TrendingUp, Store, AlertTriangle, ShieldAlert, Target, Bot,
-  CheckCircle, XCircle, Eye, Database, Flame, BarChart3, Flag
+  CheckCircle, XCircle, Eye, Database, Flame, BarChart3, Flag,
+  LayoutGrid, Palette, Settings, DollarSign, Sparkles, List,
 } from 'lucide-react'
 import AdminRevenueChart from '@/components/admin/AdminRevenueChart'
 
@@ -81,6 +82,7 @@ export default async function AdminDashboardPage() {
       icon: TrendingUp,
       color: 'text-green-400',
       bg: 'bg-green-500/10',
+      border: 'border-l-green-500',
     },
     {
       title: 'Active Businesses',
@@ -89,6 +91,7 @@ export default async function AdminDashboardPage() {
       icon: Store,
       color: 'text-blue-400',
       bg: 'bg-blue-500/10',
+      border: 'border-l-blue-500',
     },
     {
       title: 'Pending Verification',
@@ -97,6 +100,7 @@ export default async function AdminDashboardPage() {
       icon: AlertTriangle,
       color: 'text-yellow-400',
       bg: 'bg-yellow-500/10',
+      border: 'border-l-yellow-500',
     },
     {
       title: 'Open Moderation Items',
@@ -105,6 +109,7 @@ export default async function AdminDashboardPage() {
       icon: ShieldAlert,
       color: 'text-red-400',
       bg: 'bg-red-500/10',
+      border: 'border-l-red-500',
     },
     {
       title: 'Points Liability',
@@ -113,6 +118,7 @@ export default async function AdminDashboardPage() {
       icon: Target,
       color: 'text-purple-400',
       bg: 'bg-purple-500/10',
+      border: 'border-l-purple-500',
     },
     {
       title: 'AI Credits Used (MTD)',
@@ -121,6 +127,7 @@ export default async function AdminDashboardPage() {
       icon: Bot,
       color: 'text-cyan-400',
       bg: 'bg-cyan-500/10',
+      border: 'border-l-cyan-500',
     },
   ]
 
@@ -134,7 +141,7 @@ export default async function AdminDashboardPage() {
       {/* 6 Stat Cards */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((stat) => (
-          <div key={stat.title} className="glass-card p-5">
+          <div key={stat.title} className={`glass-card p-5 border-l-4 ${stat.border}`}>
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wider text-gray-400">{stat.title}</p>
@@ -210,6 +217,33 @@ export default async function AdminDashboardPage() {
               ))
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mt-8">
+        <h3 className="font-heading text-lg font-bold text-white mb-4">Quick Actions</h3>
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
+          {[
+            { label: 'Manage Businesses', icon: Store, href: '/admin/businesses', color: 'text-blue-400' },
+            { label: 'Banner Controls', icon: Palette, href: '/admin/banners', color: 'text-purple-400' },
+            { label: 'Feature Flags', icon: Settings, href: 'https://supabase.com/dashboard', color: 'text-gray-400', external: true },
+            { label: 'Revenue Dashboard', icon: DollarSign, href: '/admin/revenue', color: 'text-green-400' },
+            { label: 'AI Assistant (Ctrl+K)', icon: Sparkles, href: '/admin/dialer', color: 'text-cyan-400' },
+            { label: 'View All Listings', icon: List, href: '/search', color: 'text-pd-gold' },
+          ].map((action) => (
+            <Link
+              key={action.label}
+              href={action.href}
+              target={action.external ? '_blank' : undefined}
+              className="glass-card flex items-center gap-3 p-4 transition-all hover:border-pd-purple/30"
+            >
+              <div className="rounded-lg bg-white/5 p-2.5">
+                <action.icon className={`h-5 w-5 ${action.color}`} />
+              </div>
+              <span className="text-sm font-medium text-white">{action.label}</span>
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -309,11 +343,16 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* System Health Footer */}
-      <div className="mt-6 flex flex-wrap gap-4 rounded-xl border border-white/5 bg-white/[0.02] p-4 text-xs text-gray-500">
-        <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-green-400" /> Database (Healthy)</span>
-        <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-green-400" /> API Status (Online)</span>
-        <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-green-400" /> Server Load (Normal)</span>
-        <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-green-400" /> Last Backup (Recent)</span>
+      <div className="mt-6 rounded-xl border border-white/5 bg-white/[0.02] p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="h-2.5 w-2.5 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-sm font-medium text-white">System Status: Operational</span>
+        </div>
+        <div className="flex flex-wrap gap-4 text-xs text-gray-500">
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-green-400" /> Database</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-green-400" /> API</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-green-400" /> Payments</span>
+        </div>
       </div>
     </div>
   )
