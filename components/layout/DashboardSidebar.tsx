@@ -43,11 +43,13 @@ export default function DashboardSidebar({
   userType,
   pointsBalance,
   userName,
+  userEmail,
 }: {
   tier: string;
   userType?: string;
   pointsBalance?: number;
   userName?: string;
+  userEmail?: string;
 }) {
   const isAdmin = userType === "admin" || userType === "super_admin";
   const pathname = usePathname();
@@ -59,6 +61,17 @@ export default function DashboardSidebar({
     platinum_elite: "Elite",
   };
 
+  const roleLabels: Record<string, { label: string; color: string }> = {
+    super_admin: { label: "Super Admin", color: "#ef4444" },
+    admin: { label: "Admin", color: "#f59e0b" },
+    business_owner: { label: tierLabels[tier] || "Free", color: "#d4af37" },
+    customer: { label: tierLabels[tier] || "Free", color: "#8b5cf6" },
+  };
+
+  const role = roleLabels[userType || "customer"] || roleLabels.customer;
+  const initial = (userName?.[0] || userEmail?.[0] || "U").toUpperCase();
+  const displayEmail = userEmail && userEmail.length > 25 ? userEmail.slice(0, 22) + "..." : userEmail;
+
   return (
     <aside className="hidden w-64 flex-shrink-0 border-r border-pd-purple/20 bg-[#0D1321] lg:block">
       <div className="flex h-full flex-col">
@@ -68,11 +81,23 @@ export default function DashboardSidebar({
             Back to Directory
           </Link>
           <h2 className="mt-3 font-heading text-lg font-bold text-white">Dashboard</h2>
-          <div className="mt-1 flex items-center gap-1">
-            <Shield className="h-3 w-3 text-pd-gold" />
-            <span className="text-xs text-pd-gold">
-              {tierLabels[tier] || tier.replace(/_/g, " ")} Member
-            </span>
+
+          {/* User identity */}
+          <div className="mt-3 flex items-center gap-3">
+            <div
+              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold"
+              style={{ background: `linear-gradient(135deg, ${role.color}40, ${role.color}20)`, color: role.color }}
+            >
+              {initial}
+            </div>
+            <div className="min-w-0">
+              {userName && <p className="truncate text-sm font-medium text-white">{userName}</p>}
+              {displayEmail && <p className="truncate text-xs text-gray-400">{displayEmail}</p>}
+              <div className="mt-0.5 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: role.color }} />
+                <span className="text-xs text-gray-400">{role.label}</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -117,13 +142,10 @@ export default function DashboardSidebar({
           )}
         </nav>
 
-        {/* User Info Footer */}
+        {/* Points Footer */}
         <div className="border-t border-pd-purple/20 p-4">
-          {userName && (
-            <p className="truncate text-sm font-medium text-white">{userName}</p>
-          )}
           {typeof pointsBalance === "number" && (
-            <div className="mt-1 flex items-center gap-1">
+            <div className="flex items-center gap-1">
               <Coins className="h-3 w-3 text-pd-gold" />
               <span className="text-xs text-gray-400">
                 {pointsBalance.toLocaleString()} pts

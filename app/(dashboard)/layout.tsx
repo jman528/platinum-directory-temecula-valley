@@ -34,6 +34,7 @@ export default async function DashboardLayout({
         tier={tier}
         userType={userType}
         userName={profile?.full_name || undefined}
+        userEmail={user.email || undefined}
         pointsBalance={profile?.points_balance ?? 0}
       />
       <main className="flex-1 overflow-auto p-6">{children}</main>

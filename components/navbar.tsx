@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Search, Menu, X, User, LogOut, LayoutDashboard, Coins } from "lucide-react";
+import { Search, Menu, X, User, LogOut, LayoutDashboard, Coins, Settings } from "lucide-react";
 import type { Profile } from "@/types";
 
 export function Navbar() {
@@ -103,22 +103,39 @@ export function Navbar() {
                     {profile.points_balance.toLocaleString()}
                   </span>
                 )}
-                <User className="h-4 w-4" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-pd-purple/30 text-xs font-bold text-pd-purple-light">
+                  {(profile?.full_name?.[0] || user.email?.[0] || "U").toUpperCase()}
+                </div>
               </button>
               {userMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                  <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-xl border border-white/10 bg-[#111827] p-1 shadow-2xl">
+                  <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-white/10 bg-[#111827] p-1 shadow-2xl">
+                    {/* User info header */}
+                    <div className="border-b border-white/10 px-3 py-2">
+                      {profile?.full_name && (
+                        <p className="truncate text-sm font-medium text-white">{profile.full_name}</p>
+                      )}
+                      <p className="truncate text-xs text-gray-400">{user.email}</p>
+                    </div>
                     <Link
                       href="/dashboard"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white"
+                      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white"
                     >
                       <LayoutDashboard className="h-4 w-4" /> Dashboard
                     </Link>
+                    <Link
+                      href="/dashboard/settings"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white"
+                    >
+                      <Settings className="h-4 w-4" /> Settings
+                    </Link>
+                    <div className="my-1 border-t border-white/10" />
                     <button
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-red-400"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
                     >
                       <LogOut className="h-4 w-4" /> Sign Out
                     </button>
@@ -127,12 +144,20 @@ export function Navbar() {
               )}
             </div>
           ) : (
-            <Link
-              href="/sign-in"
-              className="whitespace-nowrap rounded-xl bg-gradient-to-r from-pd-purple to-pd-blue px-4 py-2 text-sm font-medium text-white transition-all hover:from-pd-gold hover:to-pd-gold-light hover:text-pd-dark"
-            >
-              Sign In
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/sign-in"
+                className="whitespace-nowrap rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-white/10"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/sign-up"
+                className="hidden whitespace-nowrap rounded-xl bg-gradient-to-r from-pd-purple to-pd-blue px-4 py-2 text-sm font-medium text-white transition-all hover:from-pd-gold hover:to-pd-gold-light hover:text-pd-dark sm:inline-block"
+              >
+                Sign Up
+              </Link>
+            </div>
           )}
 
           {/* Mobile menu toggle */}
