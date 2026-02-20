@@ -59,9 +59,18 @@ export default function ClaimSearchPage() {
       .ilike("name", `%${query}%`)
       .eq("is_active", true)
       .order("name")
-      .limit(10);
+      .limit(30);
 
-    setResults(data || []);
+    // Deduplicate by name + city (keep first occurrence)
+    const seen = new Set<string>();
+    const deduped = (data || []).filter((biz: any) => {
+      const key = `${(biz.name || "").toLowerCase().trim()}|${(biz.city || "").toLowerCase().trim()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 10);
+
+    setResults(deduped);
     setSearched(true);
     setLoading(false);
   }

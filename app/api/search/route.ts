@@ -31,8 +31,8 @@ export async function GET(req: NextRequest) {
           id, name, slug, description, tier,
           phone, website, address, city,
           average_rating, review_count,
-          cover_image_url, is_featured,
-          categories!inner(name, slug)
+          cover_image_url, is_featured, category_id,
+          categories(name, slug)
         `)
         .eq("is_active", true)
         .order("is_featured", { ascending: false })
@@ -40,9 +40,22 @@ export async function GET(req: NextRequest) {
         .range(offset, offset + perPage - 1);
 
       if (query) {
-        queryBuilder = queryBuilder.or(
-          `name.ilike.%${query}%,description.ilike.%${query}%`
-        );
+        // Also match category names
+        const { data: matchingCats } = await supabase
+          .from("categories")
+          .select("id")
+          .ilike("name", `%${query}%`);
+        const catIds = (matchingCats || []).map((c: any) => c.id);
+
+        if (catIds.length > 0) {
+          queryBuilder = queryBuilder.or(
+            `name.ilike.%${query}%,description.ilike.%${query}%,category_id.in.(${catIds.join(",")})`
+          );
+        } else {
+          queryBuilder = queryBuilder.or(
+            `name.ilike.%${query}%,description.ilike.%${query}%`
+          );
+        }
       }
       if (category) {
         queryBuilder = queryBuilder.eq("categories.slug", category);

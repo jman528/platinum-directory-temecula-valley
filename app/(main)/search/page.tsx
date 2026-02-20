@@ -20,6 +20,13 @@ const ALL_CITIES = [
   "Lake Elsinore", "Perris", "Wildomar", "Sun City", "Winchester", "Canyon Lake",
 ];
 
+const TIER_PRIORITY: Record<string, number> = {
+  platinum_elite: 4,
+  platinum_partner: 3,
+  verified_platinum: 2,
+  free: 1,
+};
+
 function getTierBadge(tier: string) {
   switch (tier) {
     case "platinum_elite":
@@ -155,8 +162,24 @@ export default async function SearchPage({
     .order("average_rating", { ascending: false })
     .range((page - 1) * perPage, page * perPage - 1);
 
+  // Also search by category name — resolve matching category IDs first
+  let matchingCategoryIds: string[] = [];
   if (query) {
-    bizQuery = bizQuery.or(`name.ilike.%${query}%,description.ilike.%${query}%,city.ilike.%${query}%`);
+    const { data: matchingCats } = await supabase
+      .from("categories")
+      .select("id")
+      .ilike("name", `%${query}%`);
+    matchingCategoryIds = (matchingCats || []).map((c: any) => c.id);
+  }
+
+  if (query) {
+    if (matchingCategoryIds.length > 0) {
+      bizQuery = bizQuery.or(
+        `name.ilike.%${query}%,description.ilike.%${query}%,city.ilike.%${query}%,category_id.in.(${matchingCategoryIds.join(",")})`
+      );
+    } else {
+      bizQuery = bizQuery.or(`name.ilike.%${query}%,description.ilike.%${query}%,city.ilike.%${query}%`);
+    }
   }
   if (city) {
     bizQuery = bizQuery.eq("city", city);
@@ -179,7 +202,12 @@ export default async function SearchPage({
   }
 
   const { data: businesses } = await bizQuery;
-  const bizList = (businesses as any[]) || [];
+  // Sort by tier priority (Elite > Partner > Verified > Free), then rating DESC
+  const bizList = ((businesses as any[]) || []).sort((a, b) => {
+    const tierDiff = (TIER_PRIORITY[b.tier] || 0) - (TIER_PRIORITY[a.tier] || 0);
+    if (tierDiff !== 0) return tierDiff;
+    return (b.average_rating || 0) - (a.average_rating || 0);
+  });
   const catList = (categories as Category[]) || [];
 
   return (
@@ -258,7 +286,11 @@ export default async function SearchPage({
                   <Link
                     key={biz.id}
                     href={`/business/${biz.slug}`}
-                    className="glass-card glow-effect group relative flex gap-4 overflow-hidden p-4"
+                    className={`glass-card glow-effect group relative flex gap-4 overflow-hidden p-4 ${
+                      biz.tier === "platinum_elite"
+                        ? "border-pd-gold/40 shadow-[0_0_15px_rgba(201,168,76,0.15)]"
+                        : ""
+                    }`}
                   >
                     {biz.is_featured && <div className="featured-ribbon">FEATURED</div>}
 

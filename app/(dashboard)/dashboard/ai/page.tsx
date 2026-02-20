@@ -15,6 +15,7 @@ export default function AIAssistantPage() {
   const [loading, setLoading] = useState(false);
   const [creditBalance, setCreditBalance] = useState<number | null>(null);
   const [tier, setTier] = useState("free");
+  const [userType, setUserType] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -24,12 +25,13 @@ export default function AIAssistantPage() {
       if (!user) return;
 
       const [{ data: profile }, { data: biz }] = await Promise.all([
-        supabase.from("profiles").select("ai_credits_balance").eq("id", user.id).single(),
+        supabase.from("profiles").select("ai_credits_balance, user_type").eq("id", user.id).single(),
         supabase.from("businesses").select("tier").eq("owner_user_id", user.id).limit(1).single(),
       ]);
 
       setCreditBalance(profile?.ai_credits_balance ?? 0);
       setTier(biz?.tier || "free");
+      setUserType(profile?.user_type || "");
     }
     loadData();
   }, []);
@@ -80,7 +82,8 @@ export default function AIAssistantPage() {
     }
   }
 
-  const isPaidTier = tier !== "free";
+  const isAdmin = userType === "super_admin" || userType === "admin";
+  const isPaidTier = isAdmin || tier !== "free";
 
   return (
     <div className="flex h-[calc(100vh-3rem)] flex-col">

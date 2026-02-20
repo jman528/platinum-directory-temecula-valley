@@ -11,6 +11,43 @@ function slugify(text: string) {
     .replace(/^-|-$/g, "");
 }
 
+// Decode HTML entities like &#8211; &amp; etc.
+function decodeHTMLEntities(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&ndash;/g, "\u2013")
+    .replace(/&mdash;/g, "\u2014")
+    .replace(/&nbsp;/g, " ");
+}
+
+// Strip HTML tags
+function stripHTML(text: string): string {
+  return text.replace(/<[^>]+>/g, "").trim();
+}
+
+// Format phone as (XXX) XXX-XXXX
+function formatPhoneNumber(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  // Strip leading 1 for US numbers
+  const d = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+  if (d.length === 10) {
+    return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+  }
+  return raw; // Return original if not 10 digits
+}
+
+// Validate that a string looks like a street address, not a description
+function looksLikeAddress(text: string): boolean {
+  // An address typically starts with a number followed by a street name
+  return /^\d+\s+\w/.test(text.trim()) && text.length < 200;
+}
+
 // Extract business metadata from HTML
 function extractMeta(html: string) {
   const get = (pattern: RegExp) => {
@@ -65,7 +102,20 @@ function extractMeta(html: string) {
     address = addressMatch?.[1]?.trim() || "";
   }
 
-  return { name, description, phone, address, city, state };
+  // Sanitize all fields
+  const cleanName = decodeHTMLEntities(stripHTML(name));
+  const cleanDescription = decodeHTMLEntities(stripHTML(description));
+  const cleanPhone = phone ? formatPhoneNumber(phone) : "";
+  const cleanAddress = address && looksLikeAddress(address) ? decodeHTMLEntities(address) : "";
+
+  return {
+    name: cleanName,
+    description: cleanDescription,
+    phone: cleanPhone,
+    address: cleanAddress,
+    city: city ? decodeHTMLEntities(city) : "",
+    state: state || "",
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -164,7 +214,7 @@ export async function POST(req: NextRequest) {
           terms_accepted_at: new Date().toISOString(),
           average_rating: 0,
           review_count: 0,
-          outreach_status: "pending_verification",
+          outreach_status: "not_contacted",
         })
         .select("id, slug")
         .single();
