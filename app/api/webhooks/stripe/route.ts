@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Stripe from 'stripe'
 import { logWebhookEvent } from '@/lib/webhook-logger'
+import { sendEmail } from '@/lib/email'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
@@ -69,6 +70,18 @@ export async function POST(req: NextRequest) {
               .from('businesses')
               .update(updateData)
               .eq('id', businessId)
+
+            // Send upgrade confirmation email
+            if (session.customer_email) {
+              const tierNames: Record<string, string> = {
+                verified_platinum: 'Verified Platinum',
+                platinum_partner: 'Platinum Partner',
+                platinum_elite: 'Platinum Elite',
+              }
+              sendEmail('tier-upgrade-confirmation', session.customer_email, {
+                tier_name: tierNames[tier] || tier,
+              }).catch(() => {})
+            }
           }
         } else if (session.metadata?.offer_id) {
           // Smart Offer purchase — increment claim count
@@ -150,6 +163,13 @@ export async function POST(req: NextRequest) {
         await logWebhookEvent(event, { business_id: businessId })
 
         if (businessId) {
+          // Get owner email before downgrading
+          const { data: bizInfo } = await adminClient
+            .from('businesses')
+            .select('owner_id, tier')
+            .eq('id', businessId)
+            .single()
+
           await adminClient
             .from('businesses')
             .update({
@@ -158,6 +178,20 @@ export async function POST(req: NextRequest) {
               subscription_stripe_id: null,
             })
             .eq('id', businessId)
+
+          // Send downgrade email
+          if (bizInfo?.owner_id) {
+            const { data: profile } = await adminClient
+              .from('profiles')
+              .select('email')
+              .eq('id', bizInfo.owner_id)
+              .single()
+            if (profile?.email) {
+              sendEmail('tier-downgrade-notice', profile.email, {
+                previous_tier: (bizInfo.tier || '').replace(/_/g, ' '),
+              }).catch(() => {})
+            }
+          }
         }
         break
       }
@@ -169,10 +203,9 @@ export async function POST(req: NextRequest) {
         await logWebhookEvent(event)
 
         if (subscriptionId) {
-          // Find business by subscription ID
           const { data: biz } = await adminClient
             .from('businesses')
-            .select('id, owner_id')
+            .select('id, owner_id, tier')
             .eq('subscription_stripe_id', subscriptionId)
             .single()
 
@@ -181,6 +214,22 @@ export async function POST(req: NextRequest) {
               .from('businesses')
               .update({ subscription_status: 'active' })
               .eq('id', biz.id)
+
+            // Send receipt email
+            if (biz.owner_id) {
+              const { data: profile } = await adminClient
+                .from('profiles')
+                .select('email')
+                .eq('id', biz.owner_id)
+                .single()
+              if (profile?.email) {
+                sendEmail('payment-receipt', profile.email, {
+                  amount: ((invoice.amount_paid || 0) / 100).toFixed(2),
+                  tier_name: (biz.tier || '').replace(/_/g, ' '),
+                  invoice_url: invoice.hosted_invoice_url || null,
+                }).catch(() => {})
+              }
+            }
           }
         }
         break
@@ -194,7 +243,7 @@ export async function POST(req: NextRequest) {
         if (subscriptionId) {
           const { data: biz } = await adminClient
             .from('businesses')
-            .select('id, owner_id')
+            .select('id, owner_id, tier')
             .eq('subscription_stripe_id', subscriptionId)
             .single()
 
@@ -203,6 +252,20 @@ export async function POST(req: NextRequest) {
               .from('businesses')
               .update({ subscription_status: 'past_due' })
               .eq('id', biz.id)
+
+            // Send payment failed email
+            if (biz.owner_id) {
+              const { data: profile } = await adminClient
+                .from('profiles')
+                .select('email')
+                .eq('id', biz.owner_id)
+                .single()
+              if (profile?.email) {
+                sendEmail('payment-failed', profile.email, {
+                  tier_name: (biz.tier || '').replace(/_/g, ' '),
+                }).catch(() => {})
+              }
+            }
           }
         }
         break
