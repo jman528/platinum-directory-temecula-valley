@@ -8,6 +8,7 @@ import {
   Loader2, Clock, FileText, Flame, Sparkles,
 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { formatPhoneUS } from "@/lib/utils/format-phone";
 
 const AIAssistantPanel = dynamic(() => import("@/components/admin/AIAssistantPanel"), { ssr: false });
 
@@ -52,6 +53,8 @@ export default function AdminDialerPage() {
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [followUpDate, setFollowUpDate] = useState("");
   const [skipReason, setSkipReason] = useState("");
+  const [roiTicket, setRoiTicket] = useState("100");
+  const [roiConversion, setRoiConversion] = useState("20");
   const supabase = createClient();
 
   // Ctrl+K to toggle AI panel
@@ -224,7 +227,7 @@ export default function AdminDialerPage() {
                 <div>
                   <p className="text-xs uppercase tracking-wider text-pd-gold">Now Calling</p>
                   <h3 className="mt-1 font-heading text-xl font-bold text-white">{current.name}</h3>
-                  <p className="text-sm text-gray-400">{current.phone} &middot; {current.city}</p>
+                  <p className="text-sm text-gray-400">{formatPhoneUS(current.phone)} &middot; {current.city}</p>
                   <div className="mt-1 flex items-center gap-2">
                     <span className="rounded-full bg-pd-gold/10 px-2 py-0.5 text-xs text-pd-gold">
                       {(current.categories?.name || current.tier || "").replace(/_/g, " ")}
@@ -316,7 +319,7 @@ export default function AdminDialerPage() {
                 >
                   <div>
                     <p className="text-sm font-medium text-white">{biz.name}</p>
-                    <p className="text-xs text-gray-500">{biz.phone} &middot; {biz.city}</p>
+                    <p className="text-xs text-gray-500">{formatPhoneUS(biz.phone)} &middot; {biz.city}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     {biz.lead_score > 60 && <Flame className="h-3.5 w-3.5 text-orange-400" />}
@@ -438,6 +441,79 @@ export default function AdminDialerPage() {
                   <p className="text-[10px] text-gray-500">{g.label}</p>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* ROI Calculator */}
+          <div className="glass-card p-4">
+            <p className="font-heading text-sm font-bold text-white">ROI Calculator</p>
+            <p className="mt-1 text-[10px] text-gray-500">Estimate monthly revenue from PD leads</p>
+            <div className="mt-3 space-y-2">
+              <div>
+                <label className="text-[10px] text-gray-500">Avg. Ticket Price ($)</label>
+                <input
+                  type="number"
+                  value={roiTicket}
+                  onChange={e => setRoiTicket(e.target.value)}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-gray-500">Conversion Rate (%)</label>
+                <input
+                  type="number"
+                  value={roiConversion}
+                  onChange={e => setRoiConversion(e.target.value)}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white focus:outline-none"
+                />
+              </div>
+              {(() => {
+                const tierLeads: Record<string, number> = {
+                  free: 0,
+                  verified_platinum: 10,
+                  platinum_partner: 35,
+                  platinum_elite: 75,
+                };
+                const tiers = [
+                  { key: "verified_platinum", label: "Verified", leads: 10 },
+                  { key: "platinum_partner", label: "Partner", leads: 35 },
+                  { key: "platinum_elite", label: "Elite", leads: 75 },
+                ];
+                const ticket = parseFloat(roiTicket) || 0;
+                const conversion = (parseFloat(roiConversion) || 0) / 100;
+                const currentTier = current?.tier || "free";
+                const currentLeads = tierLeads[currentTier] || 0;
+                const currentRevenue = currentLeads * conversion * ticket;
+
+                return (
+                  <div className="space-y-2 border-t border-white/10 pt-2">
+                    {currentLeads > 0 && current && (
+                      <div className="rounded-lg bg-pd-gold/10 p-2 text-center">
+                        <p className="text-[10px] text-gray-400">
+                          At {current.tier?.replace(/_/g, " ")} ({currentLeads} leads/mo)
+                        </p>
+                        <p className="text-lg font-bold text-pd-gold">
+                          ${currentRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}/mo
+                        </p>
+                      </div>
+                    )}
+                    {tiers.map(t => {
+                      const rev = t.leads * conversion * ticket;
+                      return (
+                        <div key={t.key} className="flex items-center justify-between rounded-lg bg-white/[0.03] px-2 py-1.5">
+                          <span className="text-xs text-gray-400">{t.label} ({t.leads} leads)</span>
+                          <span className="text-xs font-bold text-pd-gold">
+                            ${rev.toLocaleString(undefined, { maximumFractionDigits: 0 })}/mo
+                          </span>
+                        </div>
+                      );
+                    })}
+                    <p className="text-center text-[10px] text-gray-600">
+                      &ldquo;If we send you X leads and Y% convert at ${ticket} = revenue&rdquo;
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

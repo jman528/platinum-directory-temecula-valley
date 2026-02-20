@@ -42,10 +42,27 @@ function formatPhoneNumber(raw: string): string {
   return raw; // Return original if not 10 digits
 }
 
-// Validate that a string looks like a street address, not a description
+// Validate that a string looks like a real street address, not marketing text
 function looksLikeAddress(text: string): boolean {
-  // An address typically starts with a number followed by a street name
-  return /^\d+\s+\w/.test(text.trim()) && text.length < 200;
+  const trimmed = text.trim();
+  // Must start with a street number
+  if (!/^\d+\s+\w/.test(trimmed)) return false;
+  // Must be reasonable length (real addresses are short)
+  if (trimmed.length > 120) return false;
+  // Must contain a street suffix
+  const streetSuffixes = /\b(st|street|ave|avenue|blvd|boulevard|rd|road|dr|drive|way|ln|lane|ct|court|pkwy|parkway|hwy|highway|cir|circle|pl|place|ter|terrace|trl|trail|loop|sq|square)\b/i;
+  if (!streetSuffixes.test(trimmed)) return false;
+  // Reject if it contains marketing/business language
+  const marketingWords = /\b(million|billion|advertising|strategy|marketing|revenue|customers|clients|online|digital|campaign|solution|platform|services|experience|professional|business|industry|leading|premier)\b/i;
+  if (marketingWords.test(trimmed)) return false;
+  return true;
+}
+
+// Validate that a string looks like a phone number
+function looksLikePhone(text: string): boolean {
+  const digits = text.replace(/\D/g, "");
+  const d = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+  return d.length === 10 && /^[2-9]/.test(d);
 }
 
 // Extract business metadata from HTML
@@ -105,7 +122,7 @@ function extractMeta(html: string) {
   // Sanitize all fields
   const cleanName = decodeHTMLEntities(stripHTML(name));
   const cleanDescription = decodeHTMLEntities(stripHTML(description));
-  const cleanPhone = phone ? formatPhoneNumber(phone) : "";
+  const cleanPhone = phone && looksLikePhone(phone) ? formatPhoneNumber(phone) : "";
   const cleanAddress = address && looksLikeAddress(address) ? decodeHTMLEntities(address) : "";
 
   return {
@@ -230,6 +247,19 @@ export async function POST(req: NextRequest) {
           .from("businesses")
           .update({ owner_user_id: user.id })
           .eq("id", business.id);
+      }
+
+      // Add claimer as owner in business_members
+      if (business?.id) {
+        await admin
+          .from("business_members")
+          .upsert({
+            business_id: business.id,
+            profile_id: user.id,
+            role: "owner",
+            status: "active",
+            accepted_at: new Date().toISOString(),
+          }, { onConflict: "business_id,profile_id" });
       }
 
       // Update user profile to business_owner

@@ -8,6 +8,7 @@ import type { Business, Category } from "@/types";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { CountdownTimer } from "@/components/ui/countdown-timer";
+import { HotDealsTicker } from "@/components/ui/hot-deals-ticker";
 import AffiliateBanner from "@/components/banners/AffiliateBanner";
 
 const ICON_MAP: Record<string, any> = {
@@ -49,6 +50,7 @@ export default async function HomePage() {
     { data: categories },
     { data: featuredBusinesses },
     { count: businessCount },
+    { data: activeOffers },
   ] = await Promise.all([
     supabase
       .from("categories")
@@ -66,12 +68,27 @@ export default async function HomePage() {
       .from("businesses")
       .select("*", { count: "exact", head: true })
       .eq("is_active", true),
+    supabase
+      .from("offers")
+      .select("id, title, offer_price, original_price, businesses(name)")
+      .eq("is_active", true)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(20),
   ]);
 
   const allCategories = (categories as Category[]) || [];
   const displayCategories = allCategories.slice(0, 20);
   const catPills = allCategories.slice(0, 10);
   const bizList = (featuredBusinesses as any[]) || [];
+  const hotDeals = (activeOffers || []).map((o: any) => ({
+    id: o.id,
+    title: o.title,
+    offer_price: Number(o.offer_price),
+    original_price: o.original_price ? Number(o.original_price) : null,
+    business_name: (o.businesses as any)?.name || "Local Business",
+    slug: o.id,
+  }));
 
   return (
     <div className="premium-bg">
@@ -415,6 +432,9 @@ export default async function HomePage() {
           </div>
         </section>
       </ScrollReveal>
+
+      {/* HOT DEALS TICKER */}
+      <HotDealsTicker deals={hotDeals} />
 
       {/* CATEGORIES GRID */}
       <ScrollReveal>

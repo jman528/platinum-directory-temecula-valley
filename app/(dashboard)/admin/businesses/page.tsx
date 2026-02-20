@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { CITIES } from "@/lib/constants";
+import { formatPhoneUS } from "@/lib/utils/format-phone";
 
 const FILTER_TABS = [
   { key: "all", label: "All" },
@@ -476,7 +477,7 @@ export default function AdminBusinessesPage() {
                     {biz.category_name || "\u2014"}
                   </td>
                   <td className="hidden py-3 text-gray-400 lg:table-cell">
-                    {biz.phone || "\u2014"}
+                    {biz.phone ? formatPhoneUS(biz.phone) : "\u2014"}
                   </td>
                   <td className="hidden py-3 lg:table-cell">
                     {biz.average_rating > 0 ? (

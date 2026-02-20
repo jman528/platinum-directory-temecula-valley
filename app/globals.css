@@ -577,6 +577,19 @@ button, a, [role="button"], input[type="submit"], input[type="button"] {
   will-change: transform;
 }
 
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 30s linear infinite;
+}
+
+.animate-scroll-left:hover {
+  animation-play-state: paused;
+}
+
 /* ============================================
    Category Card Icon Scale
    ============================================ */

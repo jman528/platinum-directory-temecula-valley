@@ -6,10 +6,11 @@ import Link from "next/link";
 import {
   ArrowLeft, Save, Loader2, CheckCircle, AlertCircle, ExternalLink,
   Trash2, Bot, Building2, Phone, Clock, ImageIcon, ToggleLeft,
-  Share2, Target, CreditCard, MapPin, Sparkles, FileBarChart
+  Share2, Target, CreditCard, MapPin, Sparkles, FileBarChart, Upload
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import dynamic from "next/dynamic";
+import { formatPhoneUS, stripPhoneForStorage } from "@/lib/utils/format-phone";
 
 const TipTapEditor = dynamic(() => import("@/components/TipTapEditor"), { ssr: false });
 const AIAssistantPanel = dynamic(() => import("@/components/admin/AIAssistantPanel"), { ssr: false });
@@ -88,6 +89,8 @@ export default function AdminBusinessDetailPage({
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [auditLoading, setAuditLoading] = useState(false);
   const [auditHtml, setAuditHtml] = useState<string | null>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -169,6 +172,44 @@ export default function AdminBusinessDetailPage({
       return { ...prev, amenities: updated };
     });
     setSaved(false);
+  }
+
+  async function handleImageUpload(file: File, field: "cover_image_url" | "logo_url") {
+    const setUploading = field === "cover_image_url" ? setUploadingCover : setUploadingLogo;
+    setUploading(true);
+    setError("");
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setError("Only JPG, PNG, and WebP images are allowed.");
+      setUploading(false);
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be under 5MB.");
+      setUploading(false);
+      return;
+    }
+
+    const ext = file.name.split(".").pop() || "jpg";
+    const fileName = `${businessId}/${field.replace("_url", "")}-${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("business-images")
+      .upload(fileName, file, { upsert: true });
+
+    if (uploadError) {
+      setError(`Upload failed: ${uploadError.message}`);
+      setUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("business-images")
+      .getPublicUrl(fileName);
+
+    updateField(field, urlData.publicUrl);
+    setUploading(false);
   }
 
   async function handleSave() {
@@ -539,7 +580,10 @@ export default function AdminBusinessDetailPage({
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClass}>Phone</label>
-                <input type="tel" value={business?.phone || ""} onChange={e => updateField("phone", e.target.value)} placeholder="(951) 555-1234" className={inputClass} />
+                <input type="tel" value={business?.phone ? formatPhoneUS(business.phone) : ""} onChange={e => {
+                  const raw = e.target.value.replace(/\D/g, "");
+                  updateField("phone", raw);
+                }} placeholder="(951) 555-1234" className={inputClass} />
               </div>
               <div>
                 <label className={labelClass}>Email</label>
@@ -666,7 +710,20 @@ export default function AdminBusinessDetailPage({
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClass}>Cover Image URL</label>
-                <input type="url" value={business?.cover_image_url || ""} onChange={e => updateField("cover_image_url", e.target.value)} className={inputClass} />
+                <div className="flex gap-2">
+                  <input type="url" value={business?.cover_image_url || ""} onChange={e => updateField("cover_image_url", e.target.value)} className={inputClass + " flex-1"} />
+                  <label className="flex cursor-pointer items-center gap-1 rounded-lg bg-pd-purple/20 px-3 py-2 text-xs text-pd-purple-light hover:bg-pd-purple/30">
+                    {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    <span>{uploadingCover ? "..." : "Upload"}</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={e => { if (e.target.files?.[0]) handleImageUpload(e.target.files[0], "cover_image_url"); }}
+                      disabled={uploadingCover}
+                    />
+                  </label>
+                </div>
                 {business?.cover_image_url && (
                   <div className="mt-2 aspect-video overflow-hidden rounded-lg bg-white/5">
                     <img src={business.cover_image_url} alt="Cover" className="h-full w-full object-cover" />
@@ -675,7 +732,20 @@ export default function AdminBusinessDetailPage({
               </div>
               <div>
                 <label className={labelClass}>Logo URL</label>
-                <input type="url" value={business?.logo_url || ""} onChange={e => updateField("logo_url", e.target.value)} className={inputClass} />
+                <div className="flex gap-2">
+                  <input type="url" value={business?.logo_url || ""} onChange={e => updateField("logo_url", e.target.value)} className={inputClass + " flex-1"} />
+                  <label className="flex cursor-pointer items-center gap-1 rounded-lg bg-pd-purple/20 px-3 py-2 text-xs text-pd-purple-light hover:bg-pd-purple/30">
+                    {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    <span>{uploadingLogo ? "..." : "Upload"}</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={e => { if (e.target.files?.[0]) handleImageUpload(e.target.files[0], "logo_url"); }}
+                      disabled={uploadingLogo}
+                    />
+                  </label>
+                </div>
                 {business?.logo_url && (
                   <div className="mt-2 flex h-24 w-24 items-center justify-center overflow-hidden rounded-lg bg-white/5">
                     <img src={business.logo_url} alt="Logo" className="h-full w-full object-contain" />

@@ -7,6 +7,7 @@ import {
   CheckCircle, Filter,
 } from "lucide-react";
 import { CITIES } from "@/lib/constants";
+import { formatPhoneUS } from "@/lib/utils/format-phone";
 
 const PAGE_SIZE = 50;
 
@@ -233,7 +234,7 @@ export default function QueueManagementPage() {
                     <p className="font-medium text-white">{biz.name}</p>
                     <span className="text-xs text-gray-500 capitalize">{(biz.tier || "free").replace(/_/g, " ")}</span>
                   </td>
-                  <td className="py-3 text-gray-400">{biz.phone || "\u2014"}</td>
+                  <td className="py-3 text-gray-400">{biz.phone ? formatPhoneUS(biz.phone) : "\u2014"}</td>
                   <td className="hidden py-3 text-gray-400 md:table-cell">{biz.city || "\u2014"}</td>
                   <td className="hidden py-3 text-gray-400 md:table-cell">{biz.categories?.name || "\u2014"}</td>
                   <td className="py-3">

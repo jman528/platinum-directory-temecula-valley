@@ -149,16 +149,28 @@ async function callWithFallback(messages: ChatMessage[]) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, conversationHistory = [] } = await req.json()
-    if (!message?.trim()) return NextResponse.json({ error: 'Message required' }, { status: 400 })
+    const body = await req.json()
+    const { message, conversationHistory = [], messages: msgArray } = body
 
-    const messages: ChatMessage[] = [
-      { role: 'system', content: PD_ASSISTANT_SYSTEM_PROMPT },
-      ...conversationHistory.slice(-10),
-      { role: 'user', content: message },
-    ]
+    // Support both formats: { messages: [...] } and { message, conversationHistory }
+    let chatMessages: ChatMessage[]
+    if (msgArray && Array.isArray(msgArray)) {
+      // Dashboard AI page sends { messages: [...] }
+      chatMessages = [
+        { role: 'system', content: PD_ASSISTANT_SYSTEM_PROMPT },
+        ...msgArray.slice(-20),
+      ]
+    } else if (message?.trim()) {
+      chatMessages = [
+        { role: 'system', content: PD_ASSISTANT_SYSTEM_PROMPT },
+        ...conversationHistory.slice(-10),
+        { role: 'user', content: message },
+      ]
+    } else {
+      return NextResponse.json({ error: 'Message required' }, { status: 400 })
+    }
 
-    const result = await callWithFallback(messages)
+    const result = await callWithFallback(chatMessages)
 
     return NextResponse.json({
       reply: result.text,

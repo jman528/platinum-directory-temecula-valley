@@ -63,9 +63,11 @@ export async function POST(req: NextRequest) {
       .update({
         owner_user_id: user.id,
         is_claimed: true,
-        claimed_by: profile?.full_name || user.email || "",
+        claimed_by: user.id,
         claim_status: "pending",
         claimed_at: new Date().toISOString(),
+        terms_accepted: true,
+        terms_accepted_at: new Date().toISOString(),
       })
       .eq("id", businessId);
 
@@ -76,6 +78,17 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Add claimer as owner in business_members
+    await adminClient
+      .from("business_members")
+      .upsert({
+        business_id: businessId,
+        profile_id: user.id,
+        role: "owner",
+        status: "active",
+        accepted_at: new Date().toISOString(),
+      }, { onConflict: "business_id,profile_id" });
 
     // Set user profile to business_owner if they are currently a customer
     const { error: profileError } = await adminClient
