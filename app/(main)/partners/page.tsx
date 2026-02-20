@@ -1,21 +1,20 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   Handshake, Link2, Share2, DollarSign, ArrowRight,
-  TrendingUp, Users, Shield, ChevronDown,
+  TrendingUp, Users, Shield, ChevronDown, Clock, CreditCard, QrCode,
 } from "lucide-react";
 import type { Metadata } from "next";
+import AffiliateApplicationForm from "@/components/AffiliateApplicationForm";
 
 export const metadata: Metadata = {
   title: "Become a Partner | Platinum Directory",
   description: "Earn commissions by promoting Temecula Valley businesses. Join the Platinum Directory affiliate program.",
 };
 
-const COMMISSION_TIERS = [
-  { tier: "Starter", rate: "10%", desc: "0-10 referrals/month", color: "text-pd-blue-light", bg: "bg-pd-blue/10" },
-  { tier: "Growth", rate: "15%", desc: "11-50 referrals/month", color: "text-pd-purple-light", bg: "bg-pd-purple/10" },
-  { tier: "Pro", rate: "20%", desc: "51+ referrals/month", color: "text-pd-gold", bg: "bg-pd-gold/10" },
+const COMMISSION_TABLE = [
+  { tier: "Verified Platinum", price: "$99/mo", commission: "$4.95/mo", annual: "$59.40/yr" },
+  { tier: "Platinum Partner", price: "$799/mo", commission: "$39.95/mo", annual: "$479.40/yr" },
+  { tier: "Platinum Elite", price: "$3,500/mo", commission: "$175/mo", annual: "$2,100/yr" },
 ];
 
 const FAQS = [
@@ -26,14 +25,7 @@ const FAQS = [
   { q: "Do I earn recurring commissions?", a: "Yes! You earn recurring commissions for as long as the businesses you refer remain active subscribers." },
 ];
 
-export default async function PartnersPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (user) {
-    redirect("/dashboard");
-  }
-
+export default function PartnersPage() {
   return (
     <div className="premium-bg min-h-screen">
       {/* Hero */}
@@ -43,17 +35,17 @@ export default async function PartnersPage() {
             <Handshake className="h-8 w-8 text-pd-gold" />
           </div>
           <h1 className="mt-4 font-heading text-4xl font-bold text-white md:text-5xl">
-            Become a Platinum Directory <span className="text-gold-shimmer">Partner</span>
+            Earn Money Promoting Temecula Valley <span className="text-gold-shimmer">Businesses</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-gray-400">
-            Earn while you promote. Share Temecula Valley&apos;s best businesses and earn commissions on every referral.
+            Join our affiliate program and earn 5% recurring commissions on every paid subscription you refer.
           </p>
-          <Link
-            href="/sign-up?role=affiliate"
+          <a
+            href="#apply"
             className="btn-glow mt-8 inline-flex items-center gap-2 rounded-xl bg-pd-gold px-8 py-3 font-heading text-sm font-semibold text-pd-dark transition-colors hover:bg-pd-gold-light"
           >
-            Apply Now <ArrowRight className="h-4 w-4" />
-          </Link>
+            Apply Now — It&apos;s Free <ArrowRight className="h-4 w-4" />
+          </a>
         </div>
       </div>
 
@@ -65,9 +57,9 @@ export default async function PartnersPage() {
         </div>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {[
-            { step: "1", title: "Get Your Link", desc: "Sign up and receive your unique referral link and marketing materials.", icon: Link2 },
-            { step: "2", title: "Share With Your Audience", desc: "Promote the directory on social media, blogs, email, or in person.", icon: Share2 },
-            { step: "3", title: "Earn Commissions", desc: "Get paid every time someone subscribes through your referral link.", icon: DollarSign },
+            { step: "1", title: "Apply & Get Approved", desc: "Submit your application — review takes 24 hours.", icon: Link2 },
+            { step: "2", title: "Share Your Unique Links", desc: "We give you referral links for every page on the directory.", icon: Share2 },
+            { step: "3", title: "Earn 5% on Every Subscription", desc: "Recurring monthly, for the life of the customer.", icon: DollarSign },
           ].map((item) => (
             <div key={item.step} className="glass-card relative p-6 text-center">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-pd-gold px-3 py-0.5 text-xs font-bold text-pd-dark">
@@ -82,21 +74,52 @@ export default async function PartnersPage() {
           ))}
         </div>
 
-        {/* Commission Structure */}
+        {/* Commission Details */}
         <div className="mt-20 text-center">
-          <h2 className="font-heading text-3xl font-bold text-white">Commission Structure</h2>
-          <p className="mt-2 text-gray-400">The more you refer, the more you earn</p>
+          <h2 className="font-heading text-3xl font-bold text-white">Commission Details</h2>
+          <p className="mt-2 text-gray-400">5% recurring on every subscription you refer</p>
         </div>
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {COMMISSION_TIERS.map((tier) => (
-            <div key={tier.tier} className="glass-card flex flex-col items-center p-8 text-center">
-              <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${tier.bg}`}>
-                <TrendingUp className={`h-7 w-7 ${tier.color}`} />
+        <div className="mt-10 glass-card overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/10 text-left">
+                <th className="px-6 py-4 text-gray-400">Tier</th>
+                <th className="px-6 py-4 text-gray-400">Monthly Price</th>
+                <th className="px-6 py-4 text-gray-400">Your 5% Commission</th>
+                <th className="px-6 py-4 text-gray-400">Annual Earnings</th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMMISSION_TABLE.map((row) => (
+                <tr key={row.tier} className="border-b border-white/5">
+                  <td className="px-6 py-4 font-medium text-white">{row.tier}</td>
+                  <td className="px-6 py-4 text-gray-400">{row.price}</td>
+                  <td className="px-6 py-4 font-semibold text-pd-gold">{row.commission}</td>
+                  <td className="px-6 py-4 font-bold text-green-400">{row.annual}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Program Details */}
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { icon: Clock, title: "90-Day Cookie", desc: "Attribution window" },
+            { icon: Shield, title: "30-Day Hold", desc: "Refund protection" },
+            { icon: CreditCard, title: "$25 Minimum", desc: "Monthly payouts via Stripe" },
+            { icon: TrendingUp, title: "Real-Time Dashboard", desc: "Track clicks & conversions" },
+            { icon: Link2, title: "Pre-Built Links", desc: "For every page on the site" },
+            { icon: QrCode, title: "QR Codes", desc: "For in-person referrals" },
+          ].map((item) => (
+            <div key={item.title} className="glass-card p-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-pd-purple/15">
+                <item.icon className="h-5 w-5 text-pd-purple-light" />
               </div>
-              <h3 className="mt-4 font-heading text-lg font-bold text-white">{tier.tier}</h3>
-              <p className={`mt-2 text-4xl font-bold ${tier.color}`}>{tier.rate}</p>
-              <p className="mt-1 text-sm text-gray-500">{tier.desc}</p>
-              <p className="mt-3 text-xs text-gray-400">Recurring commissions on all subscription fees</p>
+              <div>
+                <p className="text-sm font-medium text-white">{item.title}</p>
+                <p className="text-xs text-gray-400">{item.desc}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -156,16 +179,13 @@ export default async function PartnersPage() {
           ))}
         </div>
 
-        {/* CTA */}
-        <div className="mt-20 glass-card p-10 text-center">
-          <h2 className="font-heading text-2xl font-bold text-white">Ready to Start Earning?</h2>
-          <p className="mt-2 text-gray-400">Join the Platinum Directory affiliate program today. It&apos;s free.</p>
-          <Link
-            href="/sign-up?role=affiliate"
-            className="btn-glow mt-6 inline-flex items-center gap-2 rounded-xl bg-pd-gold px-8 py-3 font-heading text-sm font-semibold text-pd-dark transition-colors hover:bg-pd-gold-light"
-          >
-            Apply Now <ArrowRight className="h-4 w-4" />
-          </Link>
+        {/* Application Form */}
+        <div id="apply" className="mt-20 glass-card p-10">
+          <h2 className="text-center font-heading text-2xl font-bold text-white">Apply to Become a Partner</h2>
+          <p className="mt-2 text-center text-gray-400">Free to join — we&apos;ll review within 24 hours</p>
+          <div className="mx-auto mt-8 max-w-lg">
+            <AffiliateApplicationForm />
+          </div>
         </div>
       </div>
     </div>
