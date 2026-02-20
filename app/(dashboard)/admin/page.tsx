@@ -226,16 +226,16 @@ export default async function AdminDashboardPage() {
         <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
           {[
             { label: 'Manage Businesses', icon: Store, href: '/admin/businesses', color: 'text-blue-400' },
-            { label: 'Banner Controls', icon: Palette, href: '/admin/banners', color: 'text-purple-400' },
-            { label: 'Feature Flags', icon: Settings, href: 'https://supabase.com/dashboard', color: 'text-gray-400', external: true },
-            { label: 'Revenue Dashboard', icon: DollarSign, href: '/admin/revenue', color: 'text-green-400' },
-            { label: 'AI Assistant (Ctrl+K)', icon: Sparkles, href: '/admin/dialer', color: 'text-cyan-400' },
-            { label: 'View All Listings', icon: List, href: '/search', color: 'text-pd-gold' },
+            { label: 'Manage Users', icon: Target, href: '/admin/users', color: 'text-purple-400' },
+            { label: 'Banner Controls', icon: Palette, href: '/admin/banners', color: 'text-yellow-400' },
+            { label: 'Smart Offers', icon: Sparkles, href: '/admin/offers', color: 'text-cyan-400' },
+            { label: 'Syndication Dashboard', icon: BarChart3, href: '/admin/syndication', color: 'text-green-400' },
+            { label: 'Revenue Dashboard', icon: DollarSign, href: '/admin/revenue-architecture', color: 'text-pd-gold' },
           ].map((action) => (
             <Link
               key={action.label}
               href={action.href}
-              target={action.external ? '_blank' : undefined}
+              target={undefined}
               className="glass-card flex items-center gap-3 p-4 transition-all hover:border-pd-purple/30"
             >
               <div className="rounded-lg bg-white/5 p-2.5">

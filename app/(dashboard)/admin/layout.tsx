@@ -48,6 +48,7 @@ const adminNav = [
   { href: "/admin/syndication", label: "Syndication", icon: Share2 },
   { href: "/admin/citations", label: "Citations", icon: FileText },
   { href: "/admin/dialer", label: "Dialer", icon: Phone },
+  { href: "/admin/dialer/queue", label: "Call Queue", icon: Phone },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

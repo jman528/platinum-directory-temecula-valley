@@ -12,12 +12,19 @@ import dynamic from "next/dynamic";
 const AIAssistantPanel = dynamic(() => import("@/components/admin/AIAssistantPanel"), { ssr: false });
 
 const DISPOSITIONS = [
-  { value: "appointment_set", label: "Appointment Set", color: "bg-green-500/20 text-green-400" },
-  { value: "follow_up", label: "Follow Up", color: "bg-yellow-500/20 text-yellow-400" },
+  { value: "interested", label: "Interested", color: "bg-green-500/20 text-green-400" },
+  { value: "appointment_set", label: "Callback Scheduled", color: "bg-blue-500/20 text-blue-400" },
   { value: "not_interested", label: "Not Interested", color: "bg-red-500/20 text-red-400" },
-  { value: "voicemail", label: "Voicemail", color: "bg-purple-500/20 text-purple-400" },
   { value: "no_answer", label: "No Answer", color: "bg-gray-500/20 text-gray-400" },
   { value: "wrong_number", label: "Wrong Number", color: "bg-orange-500/20 text-orange-400" },
+  { value: "dnc", label: "DNC (Do Not Call)", color: "bg-red-800/20 text-red-500" },
+];
+
+const SKIP_REASONS = [
+  { value: "not_interested", label: "Not interested" },
+  { value: "wrong_number", label: "Wrong number" },
+  { value: "callback_later", label: "Callback later" },
+  { value: "voicemail", label: "Left voicemail" },
 ];
 
 const OBJECTIONS = [
@@ -43,6 +50,8 @@ export default function AdminDialerPage() {
   const [openObjection, setOpenObjection] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
+  const [followUpDate, setFollowUpDate] = useState("");
+  const [skipReason, setSkipReason] = useState("");
   const supabase = createClient();
 
   // Ctrl+K to toggle AI panel
@@ -102,16 +111,30 @@ export default function AdminDialerPage() {
   async function submitDisposition(disposition: string) {
     const biz = queue[currentIndex];
     if (biz) {
+      const updateData: Record<string, any> = {
+        outreach_status: disposition,
+        outreach_last_contacted_at: new Date().toISOString(),
+      };
+      if (notes) updateData.outreach_notes = notes;
+      if (followUpDate) updateData.outreach_next_follow_up = followUpDate;
+
       await supabase
         .from("businesses")
-        .update({
-          outreach_status: disposition,
-          outreach_last_contacted_at: new Date().toISOString(),
-          outreach_notes: notes || undefined,
-        })
+        .update(updateData)
         .eq("id", biz.id);
+
+      // Increment call attempts
+      const { error: rpcError } = await supabase.rpc("increment_call_attempts", { business_id: biz.id });
+      if (rpcError) {
+        // Fallback: direct update if RPC doesn't exist
+        await supabase
+          .from("businesses")
+          .update({ total_call_attempts: (biz.total_call_attempts || 0) + 1 })
+          .eq("id", biz.id);
+      }
     }
     setNotes("");
+    setFollowUpDate("");
     setCallDuration(0);
     setCallState("idle");
 
@@ -127,7 +150,18 @@ export default function AdminDialerPage() {
     }
   }
 
-  function skip() {
+  async function skip(reason?: string) {
+    const biz = queue[currentIndex];
+    if (biz && reason) {
+      await supabase
+        .from("businesses")
+        .update({
+          outreach_status: reason === "voicemail" ? "voicemail" : reason === "callback_later" ? "follow_up" : reason,
+          outreach_last_contacted_at: new Date().toISOString(),
+        })
+        .eq("id", biz.id);
+    }
+    setSkipReason("");
     if (currentIndex < queue.length - 1) {
       setCurrentIndex(i => i + 1);
     }
@@ -217,13 +251,18 @@ export default function AdminDialerPage() {
 
               {/* Call Controls */}
               {callState === "in_call" && (
-                <div className="mt-4 flex gap-2">
+                <div className="mt-4 flex flex-wrap gap-2">
                   <button onClick={endCall} className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700">
                     <PhoneOff className="h-4 w-4" /> End Call
                   </button>
-                  <button onClick={skip} className="flex items-center gap-2 rounded-lg bg-white/5 px-4 py-2 text-sm text-gray-400 hover:bg-white/10">
-                    <SkipForward className="h-4 w-4" /> Skip
-                  </button>
+                  <select
+                    value={skipReason}
+                    onChange={e => { setSkipReason(e.target.value); if (e.target.value) skip(e.target.value); }}
+                    className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-gray-400 focus:outline-none"
+                  >
+                    <option value="">Skip...</option>
+                    {SKIP_REASONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                  </select>
                 </div>
               )}
 
@@ -249,6 +288,15 @@ export default function AdminDialerPage() {
                     rows={2}
                     className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none"
                   />
+                  <div>
+                    <label className="mb-1 block text-xs text-gray-400">Follow-up Date</label>
+                    <input
+                      type="date"
+                      value={followUpDate}
+                      onChange={e => setFollowUpDate(e.target.value)}
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none"
+                    />
+                  </div>
                 </div>
               )}
             </div>

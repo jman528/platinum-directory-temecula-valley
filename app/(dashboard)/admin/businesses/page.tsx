@@ -176,6 +176,66 @@ export default function AdminBusinessesPage() {
     }
   }
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState("");
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === businesses.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(businesses.map((b: any) => b.id)));
+    }
+  }
+
+  async function handleBulkAction() {
+    if (!bulkAction || selectedIds.size === 0) return;
+    setActionLoading("bulk");
+    const ids = Array.from(selectedIds);
+    for (const id of ids) {
+      const update: Record<string, any> = {};
+      if (bulkAction === "activate") update.is_active = true;
+      else if (bulkAction === "deactivate") update.is_active = false;
+      else update.tier = bulkAction;
+
+      await fetch(`/api/admin/businesses/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(update),
+      });
+    }
+    setActionLoading(null);
+    setSelectedIds(new Set());
+    setBulkAction("");
+    fetchBusinesses(0);
+  }
+
+  async function handleInlineTierChange(bizId: string, newTier: string) {
+    setActionLoading(bizId);
+    try {
+      const res = await fetch(`/api/admin/businesses/${bizId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier: newTier }),
+      });
+      if (res.ok) {
+        setBusinesses((prev) =>
+          prev.map((b) => (b.id === bizId ? { ...b, tier: newTier } : b))
+        );
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
   function getTierBadge(tier: string) {
     const colors: Record<string, string> = {
       free: "bg-gray-500/20 text-gray-400",
@@ -327,22 +387,62 @@ export default function AdminBusinessesPage() {
         </button>
       </div>
 
+      {/* Bulk Actions */}
+      {selectedIds.size > 0 && (
+        <div className="mt-4 flex items-center gap-3 rounded-lg border border-pd-purple/20 bg-pd-purple/5 p-3">
+          <span className="text-sm text-white">{selectedIds.size} selected</span>
+          <select
+            value={bulkAction}
+            onChange={(e) => setBulkAction(e.target.value)}
+            className="rounded-lg border border-white/10 bg-pd-dark px-3 py-1.5 text-sm text-white focus:outline-none"
+          >
+            <option value="">Bulk action...</option>
+            <option value="activate">Activate</option>
+            <option value="deactivate">Deactivate</option>
+            <option value="free">Set Free</option>
+            <option value="verified_platinum">Set Verified</option>
+            <option value="platinum_partner">Set Partner</option>
+            <option value="platinum_elite">Set Elite</option>
+          </select>
+          <button
+            onClick={handleBulkAction}
+            disabled={!bulkAction || actionLoading === "bulk"}
+            className="rounded-lg bg-pd-blue px-3 py-1.5 text-sm font-medium text-white hover:bg-pd-blue-dark disabled:opacity-50"
+          >
+            {actionLoading === "bulk" ? "Applying..." : "Apply"}
+          </button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="text-xs text-gray-400 hover:text-white"
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       {/* Glass-card Table */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-md">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 text-left">
-                <th className="pb-3 text-gray-400">Business</th>
-                <th className="hidden pb-3 text-gray-400 md:table-cell">
-                  Category
+                <th className="pb-3 pr-2">
+                  <input
+                    type="checkbox"
+                    checked={businesses.length > 0 && selectedIds.size === businesses.length}
+                    onChange={toggleSelectAll}
+                    className="h-3.5 w-3.5 rounded border-gray-600 bg-pd-dark"
+                  />
                 </th>
-                <th className="pb-3 text-gray-400">City</th>
+                <th className="pb-3 text-gray-400">Business</th>
+                <th className="hidden pb-3 text-gray-400 md:table-cell">City</th>
+                <th className="hidden pb-3 text-gray-400 md:table-cell">Category</th>
+                <th className="hidden pb-3 text-gray-400 lg:table-cell">Phone</th>
+                <th className="hidden pb-3 text-gray-400 lg:table-cell">Rating</th>
                 <th className="pb-3 text-gray-400">Tier</th>
                 <th className="pb-3 text-gray-400">Status</th>
-                <th className="hidden pb-3 text-gray-400 lg:table-cell">
-                  Created
-                </th>
+                <th className="hidden pb-3 text-gray-400 lg:table-cell">Hot Lead</th>
+                <th className="hidden pb-3 text-gray-400 lg:table-cell">Claimed</th>
                 <th className="pb-3 text-gray-400">Actions</th>
               </tr>
             </thead>
@@ -352,6 +452,14 @@ export default function AdminBusinessesPage() {
                   key={biz.id}
                   className="border-b border-white/5 transition-colors hover:bg-white/5"
                 >
+                  <td className="py-3 pr-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(biz.id)}
+                      onChange={() => toggleSelect(biz.id)}
+                      className="h-3.5 w-3.5 rounded border-gray-600 bg-pd-dark"
+                    />
+                  </td>
                   <td className="py-3">
                     <Link
                       href={`/admin/businesses/${biz.id}`}
@@ -363,11 +471,33 @@ export default function AdminBusinessesPage() {
                       )}
                     </Link>
                   </td>
+                  <td className="hidden py-3 text-gray-400 md:table-cell">{biz.city || "\u2014"}</td>
                   <td className="hidden py-3 text-gray-400 md:table-cell">
                     {biz.category_name || "\u2014"}
                   </td>
-                  <td className="py-3 text-gray-400">{biz.city || "\u2014"}</td>
-                  <td className="py-3">{getTierBadge(biz.tier)}</td>
+                  <td className="hidden py-3 text-gray-400 lg:table-cell">
+                    {biz.phone || "\u2014"}
+                  </td>
+                  <td className="hidden py-3 lg:table-cell">
+                    {biz.average_rating > 0 ? (
+                      <span className="text-pd-gold">{biz.average_rating}</span>
+                    ) : (
+                      <span className="text-gray-500">\u2014</span>
+                    )}
+                  </td>
+                  <td className="py-3">
+                    <select
+                      value={biz.tier || "free"}
+                      onChange={(e) => handleInlineTierChange(biz.id, e.target.value)}
+                      disabled={actionLoading === biz.id}
+                      className="rounded border border-white/10 bg-transparent px-1.5 py-0.5 text-xs text-white focus:outline-none"
+                    >
+                      <option value="free" className="bg-pd-dark">Free</option>
+                      <option value="verified_platinum" className="bg-pd-dark">Verified</option>
+                      <option value="platinum_partner" className="bg-pd-dark">Partner</option>
+                      <option value="platinum_elite" className="bg-pd-dark">Elite</option>
+                    </select>
+                  </td>
                   <td className="py-3">
                     {biz.is_active ? (
                       <span className="flex items-center gap-1 text-xs text-green-400">
@@ -379,8 +509,19 @@ export default function AdminBusinessesPage() {
                       </span>
                     )}
                   </td>
-                  <td className="hidden py-3 text-gray-500 lg:table-cell">
-                    {new Date(biz.created_at).toLocaleDateString()}
+                  <td className="hidden py-3 lg:table-cell">
+                    {biz.is_hot_lead ? (
+                      <Flame className="h-4 w-4 text-orange-400" />
+                    ) : (
+                      <span className="text-gray-600">\u2014</span>
+                    )}
+                  </td>
+                  <td className="hidden py-3 lg:table-cell">
+                    {biz.is_claimed ? (
+                      <span className="text-xs text-green-400">Yes</span>
+                    ) : (
+                      <span className="text-xs text-gray-500">No</span>
+                    )}
                   </td>
                   <td className="py-3">
                     <div className="flex items-center gap-1">

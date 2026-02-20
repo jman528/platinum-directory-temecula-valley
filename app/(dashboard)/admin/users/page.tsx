@@ -142,6 +142,30 @@ export default function AdminUsersPage() {
     setUsers(prev => prev.filter(u => u.id !== userId));
   }
 
+  async function handleRoleChange(userId: string, newRole: string) {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ user_type: newRole })
+      .eq("id", userId);
+    if (!error) {
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, user_type: newRole } : u));
+    }
+  }
+
+  async function handleTierChange(userId: string, newTier: string) {
+    // Update the user's first business tier
+    const { data: biz } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("owner_user_id", userId)
+      .limit(1)
+      .single();
+    if (biz) {
+      await supabase.from("businesses").update({ tier: newTier }).eq("id", biz.id);
+    }
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, _tier: newTier } : u));
+  }
+
   if (!authorized) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -209,11 +233,12 @@ export default function AdminUsersPage() {
               <th className="hidden pb-3 text-gray-400 md:table-cell">
                 Name
               </th>
-              <th className="pb-3 text-gray-400">Type</th>
+              <th className="pb-3 text-gray-400">Role</th>
               <th className="hidden pb-3 text-gray-400 lg:table-cell">
                 Points
               </th>
               <th className="pb-3 text-gray-400">Joined</th>
+              <th className="hidden pb-3 text-gray-400 lg:table-cell">Last Sign In</th>
               {(activeTab === "affiliates" || activeTab === "pending_affiliates") && (
                 <th className="pb-3 text-gray-400">Status</th>
               )}
@@ -232,12 +257,27 @@ export default function AdminUsersPage() {
                 <td className="hidden py-3 text-gray-400 md:table-cell">
                   {u.full_name || "\u2014"}
                 </td>
-                <td className="py-3">{getTypeBadge(u.user_type)}</td>
+                <td className="py-3">
+                  <select
+                    value={u.user_type || "customer"}
+                    onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                    className="rounded border border-white/10 bg-transparent px-1.5 py-0.5 text-xs text-white focus:outline-none"
+                  >
+                    <option value="customer" className="bg-pd-dark">Customer</option>
+                    <option value="business_owner" className="bg-pd-dark">Business Owner</option>
+                    <option value="affiliate" className="bg-pd-dark">Affiliate</option>
+                    <option value="admin" className="bg-pd-dark">Admin</option>
+                    <option value="super_admin" className="bg-pd-dark">Super Admin</option>
+                  </select>
+                </td>
                 <td className="hidden py-3 text-gray-400 lg:table-cell">
                   {u.points_balance || 0}
                 </td>
                 <td className="py-3 text-gray-500">
                   {new Date(u.created_at).toLocaleDateString()}
+                </td>
+                <td className="hidden py-3 text-gray-500 lg:table-cell">
+                  {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString() : "\u2014"}
                 </td>
                 {(activeTab === "affiliates" || activeTab === "pending_affiliates") && (
                   <td className="py-3">
