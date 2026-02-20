@@ -228,7 +228,8 @@ async function main() {
   for (const tier of subscriptionTiers) {
     tsLines.push(`  ${tier.key}: {`);
     for (const p of tier.prices) {
-      tsLines.push(`    ${p.label.toLowerCase().replace(/[^a-z0-9]/g, "_")}: ${p.constName},`);
+      const key = p.label.toLowerCase().replace(/[^a-z0-9]/g, "_").replace(/^(\d)/, "_$1");
+      tsLines.push(`    ${key}: ${p.constName},`);
     }
     tsLines.push(`  },`);
   }

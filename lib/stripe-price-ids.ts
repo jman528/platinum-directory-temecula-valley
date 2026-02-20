@@ -43,19 +43,19 @@ export const SUBSCRIPTION_PRICES = {
   verified: {
     monthly: PRICE_VERIFIED_MONTHLY,
     quarterly: PRICE_VERIFIED_QUARTERLY,
-    6_month: PRICE_VERIFIED_6MONTH,
+    six_month: PRICE_VERIFIED_6MONTH,
     annual: PRICE_VERIFIED_ANNUAL,
   },
   partner: {
     monthly: PRICE_PARTNER_MONTHLY,
     quarterly: PRICE_PARTNER_QUARTERLY,
-    6_month: PRICE_PARTNER_6MONTH,
+    six_month: PRICE_PARTNER_6MONTH,
     annual: PRICE_PARTNER_ANNUAL,
   },
   elite: {
     monthly: PRICE_ELITE_MONTHLY,
     quarterly: PRICE_ELITE_QUARTERLY,
-    6_month: PRICE_ELITE_6MONTH,
+    six_month: PRICE_ELITE_6MONTH,
     annual: PRICE_ELITE_ANNUAL,
   },
 } as const;
