@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const TRACKING_PARAMS = [
+  "ref", "aff",
   "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
   "gclid", "wbraid", "gbraid", "fbclid", "ttclid", "msclkid",
   "sclid", "li_fat_id", "epik",
@@ -48,7 +49,7 @@ export async function middleware(request: NextRequest) {
 
   if (Object.keys(trackingData).length > 0) {
     supabaseResponse.cookies.set("pd_tracking", JSON.stringify(trackingData), {
-      httpOnly: true,
+      httpOnly: false, // JS needs to read this for UTM persistence
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 30, // 30 days
@@ -60,10 +61,22 @@ export async function middleware(request: NextRequest) {
   const refCode = searchParams.get("ref");
   if (refCode) {
     supabaseResponse.cookies.set("pd_ref", refCode, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 90, // 90 days
+      path: "/",
+    });
+  }
+
+  // --- Capture affiliate code (?aff=CODE) into pd_aff cookie ---
+  const affCode = searchParams.get("aff");
+  if (affCode) {
+    supabaseResponse.cookies.set("pd_aff", affCode, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 30, // 30 days
       path: "/",
     });
   }
