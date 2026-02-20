@@ -12,6 +12,8 @@ import { getTierFeatures } from "@/lib/features";
 import { formatPhone } from "@/lib/utils/format-phone";
 import { BusinessStructuredData } from "@/components/seo/StructuredData";
 import VideoPlayTracker from "@/components/VideoPlayTracker";
+import ShareSection from "@/components/ShareSection";
+import MobileBottomBar from "@/components/MobileBottomBar";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -419,6 +421,15 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
             </div>
           )}
 
+          {/* Share Section */}
+          <ShareSection
+            url={`/business/${biz.slug}`}
+            title={`Share ${biz.name} & Earn Points`}
+            subtitle="Earn 25 points every time someone visits your link"
+            variant="listing"
+            businessId={biz.id}
+          />
+
           {/* Amenities */}
           {features.showDescription && biz.amenities && biz.amenities.length > 0 && (
             <div className="glass-card p-6">
@@ -527,6 +538,16 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
           )}
         </div>
       </div>
+
+      {/* Mobile Bottom Bar */}
+      <MobileBottomBar
+        phone={biz.phone}
+        address={biz.address ? `${biz.address}, ${biz.city || ''} ${biz.state || ''}` : undefined}
+        hasDeals={bizOffers.length > 0}
+        dealsHref={`/business/${biz.slug}#offers`}
+        shareUrl={`/business/${biz.slug}`}
+        shareText={biz.name}
+      />
     </div>
   );
 }

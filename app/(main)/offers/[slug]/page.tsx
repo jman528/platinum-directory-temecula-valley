@@ -10,6 +10,7 @@ import {
   ArrowLeft, Star, CheckCircle, AlertTriangle, Share2,
 } from "lucide-react";
 import { BuyButton } from "./buy-button";
+import ShareSection from "@/components/ShareSection";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -267,14 +268,15 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ sl
               </div>
 
               {/* Share */}
-              <div className="mt-4 flex justify-center">
-                <button
-                  data-share-title={o.title}
-                  data-share-url={`/offers/${o.slug}`}
-                  className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-xs text-gray-400 transition-colors hover:border-white/20 hover:text-white"
-                >
-                  <Share2 className="h-3.5 w-3.5" /> Share This Deal
-                </button>
+              <div className="mt-4">
+                <ShareSection
+                  url={`/offers/${o.slug}`}
+                  title="Share This Deal & Earn!"
+                  incentive={o.offer_price ? `Earn $${(o.offer_price * 0.05).toFixed(2)} per friend who buys` : undefined}
+                  variant="offer"
+                  offerId={o.id}
+                  businessId={o.business_id}
+                />
               </div>
             </div>
 
