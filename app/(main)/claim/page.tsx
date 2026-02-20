@@ -122,13 +122,13 @@ export default function ClaimSearchPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setSubmitError(data.error || "Failed to add business.");
+        setSubmitError(data.error || "Failed to submit. Please try again or contact support.");
         setSubmitting(false);
         return;
       }
       setSubmitSuccess(true);
     } catch {
-      setSubmitError("Network error. Please try again.");
+      setSubmitError("Network error. Please try again or contact support.");
     } finally {
       setSubmitting(false);
     }
@@ -142,22 +142,26 @@ export default function ClaimSearchPage() {
   if (submitSuccess) {
     return (
       <div className="container py-12">
-        <div className="mx-auto max-w-lg glass-card p-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
-            <CheckCircle className="h-8 w-8 text-green-400" />
+        <div className="mx-auto max-w-lg space-y-6">
+          <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-green-400">
+            Business submitted successfully! We&apos;ll verify and publish your listing within 24-48 hours. Check your email for confirmation.
           </div>
-          <h2 className="font-heading text-2xl font-bold text-white">Business Submitted!</h2>
-          <p className="mt-2 text-gray-400">
-            Your business <span className="font-medium text-white">{formData.name}</span> has been submitted for verification.
-            We&apos;ll review it shortly and notify you once it&apos;s live.
-          </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Link href="/dashboard" className="btn-glow rounded-xl bg-pd-blue px-8 py-3 font-semibold text-white hover:bg-pd-blue-dark">
-              Go to Dashboard
-            </Link>
-            <Link href="/" className="rounded-xl border border-pd-purple/20 px-8 py-3 text-sm text-gray-300 hover:border-pd-gold/40 hover:text-white">
-              Back to Home
-            </Link>
+          <div className="glass-card p-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
+              <CheckCircle className="h-8 w-8 text-green-400" />
+            </div>
+            <h2 className="font-heading text-2xl font-bold text-white">Business Submitted!</h2>
+            <p className="mt-2 text-gray-400">
+              Your business <span className="font-medium text-white">{formData.name}</span> is under review.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Link href="/dashboard" className="btn-glow rounded-xl bg-pd-blue px-8 py-3 font-semibold text-white hover:bg-pd-blue-dark">
+                Go to Dashboard
+              </Link>
+              <Link href="/" className="rounded-xl border border-pd-purple/20 px-8 py-3 text-sm text-gray-300 hover:border-pd-gold/40 hover:text-white">
+                Back to Home
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -270,9 +274,8 @@ export default function ClaimSearchPage() {
                 required
               />
               {submitError && (
-                <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
-                  <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-400" />
-                  <p className="text-sm text-red-300">{submitError}</p>
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-red-400">
+                  {submitError}
                 </div>
               )}
               <div className="flex gap-3">
@@ -408,9 +411,8 @@ export default function ClaimSearchPage() {
               </div>
 
               {submitError && (
-                <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
-                  <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-400" />
-                  <p className="text-sm text-red-300">{submitError}</p>
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-red-400">
+                  {submitError}
                 </div>
               )}
 
