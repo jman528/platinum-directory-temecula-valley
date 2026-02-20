@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     // Build query — service role sees ALL rows (bypasses RLS)
     let query = adminClient
       .from("businesses")
-      .select("id, name, slug, city, tier, is_active, is_claimed, claim_status, phone, email, created_at, category_id, categories(name)", { count: "exact" });
+      .select("id, name, slug, city, tier, is_active, is_claimed, is_verified, is_hot_lead, lead_score, average_rating, review_count, phone, email, created_at, category_id, categories(name)", { count: "exact" });
 
     // Tab filters
     if (tab === "pending") {
