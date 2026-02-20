@@ -20,19 +20,21 @@ function EmptyState({
   return (
     <div
       className={cn(
-        "text-center py-16 border rounded-lg bg-muted/50",
+        "glass-card text-center py-16 px-6",
         className,
       )}
     >
       {Icon && (
-        <Icon
-          className="h-12 w-12 mx-auto text-muted-foreground mb-4"
-          aria-hidden="true"
-        />
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-pd-purple/10">
+          <Icon
+            className="h-8 w-8 text-pd-purple-light"
+            aria-hidden="true"
+          />
+        </div>
       )}
-      <h2 className="text-xl font-semibold mb-2">{title}</h2>
+      <h2 className="text-xl font-heading font-bold text-white mb-2">{title}</h2>
       {description && (
-        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+        <p className="text-gray-400 mb-6 max-w-md mx-auto text-sm">
           {description}
         </p>
       )}
