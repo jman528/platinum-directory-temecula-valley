@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import * as postmark from "postmark";
 
 function slugify(text: string) {
   return text
@@ -65,6 +66,12 @@ function looksLikePhone(text: string): boolean {
   return d.length === 10 && /^[2-9]/.test(d);
 }
 
+// Strip tagline from business name — split on separators like |, –, —, :, or " - "
+function stripTagline(text: string): string {
+  // Split on: pipe, en-dash, em-dash, colon, or spaced hyphen (" - ")
+  return text.split(/\s*[|–—:]\s*|\s+-\s+/)[0]?.trim() || text;
+}
+
 // Extract business metadata from HTML
 function extractMeta(html: string) {
   const get = (pattern: RegExp) => {
@@ -72,33 +79,40 @@ function extractMeta(html: string) {
     return match?.[1]?.trim() || "";
   };
 
-  // BUSINESS NAME — prefer og:site_name, then og:title, then <title> (first segment)
-  const ogSiteName = get(
-    /<meta[^>]+property="og:site_name"[^>]+content="([^"]+)"/i
-  );
-  const ogTitle = get(
-    /<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i
-  );
+  // Also support reversed attribute order: content="..." property="..."
+  const getMeta = (prop: string, attr: string = "property") => {
+    return get(new RegExp(`<meta[^>]+${attr}="${prop}"[^>]+content="([^"]+)"`, "i"))
+      || get(new RegExp(`<meta[^>]+content="([^"]+)"[^>]+${attr}="${prop}"`, "i"));
+  };
+
+  // BUSINESS NAME — prefer og:site_name, then og:title, then <title>
+  // Strip taglines from ALL sources
+  const ogSiteName = stripTagline(getMeta("og:site_name"));
+  const ogTitle = stripTagline(getMeta("og:title"));
   const titleTag = get(/<title[^>]*>([^<]+)<\/title>/i);
-  const nameFromTitle = titleTag?.split(/[|–—-]/)[0]?.trim() || "";
+  const nameFromTitle = stripTagline(titleTag);
   const name = (ogSiteName || ogTitle || nameFromTitle).slice(0, 100);
 
   // DESCRIPTION — from og:description or meta description, capped at 500 chars
-  const ogDescription = get(
-    /<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i
-  );
-  const metaDescription = get(
-    /<meta[^>]+name="description"[^>]+content="([^"]+)"/i
-  );
+  const ogDescription = getMeta("og:description");
+  const metaDescription = getMeta("description", "name");
   const description = (ogDescription || metaDescription).slice(0, 500);
 
-  // PHONE — handles (951) 462-7023, 951-462-7023, 9514627023, +1 951 462 7023
-  const phoneRegex =
-    /(?:\+1[\s.-]?)?\(?([2-9]\d{2})\)?[\s.-]?(\d{3})[\s.-]?(\d{4})/;
-  const phoneMatch = html.match(phoneRegex);
-  const phone = phoneMatch ? phoneMatch[0] : "";
+  // PHONE — prefer tel: links (most reliable), then general regex
+  const telLinkMatch = html.match(/href="tel:([^"]+)"/i);
+  let phone = "";
+  if (telLinkMatch) {
+    phone = telLinkMatch[1].replace(/\s/g, "");
+  }
+  if (!phone || !looksLikePhone(phone)) {
+    // Fallback: regex for phone patterns
+    const phoneRegex =
+      /(?:\+1[\s.-]?)?\(?([2-9]\d{2})\)?[\s.-]?(\d{3})[\s.-]?(\d{4})/;
+    const phoneMatch = html.match(phoneRegex);
+    phone = phoneMatch ? phoneMatch[0] : "";
+  }
 
-  // ADDRESS — try schema.org structured data first, then street pattern fallback
+  // ADDRESS — try schema.org structured data first
   const schemaAddress = get(/"streetAddress"\s*:\s*"([^"]+)"/i);
   const schemaCity = get(/"addressLocality"\s*:\s*"([^"]+)"/i);
   const schemaState = get(/"addressRegion"\s*:\s*"([^"]+)"/i);
@@ -112,11 +126,23 @@ function extractMeta(html: string) {
     city = schemaCity;
     state = schemaState;
   } else {
-    // Fallback: regex for common street address patterns
-    const addressMatch = html.match(
-      /(\d+\s+[\w\s]+(?:St|Ave|Blvd|Rd|Dr|Way|Ln|Ct|Pkwy|Hwy)[.,]?\s*(?:Suite|Ste|#)?\s*\d*)/i
-    );
-    address = addressMatch?.[1]?.trim() || "";
+    // Try <address> HTML tag content
+    const addressTagMatch = html.match(/<address[^>]*>([\s\S]*?)<\/address>/i);
+    if (addressTagMatch) {
+      const addrText = stripHTML(addressTagMatch[1]).replace(/\s+/g, " ").trim();
+      const streetMatch = addrText.match(
+        /(\d+\s+[\w\s]+(?:St|Street|Ave|Avenue|Blvd|Boulevard|Rd|Road|Dr|Drive|Way|Ln|Lane|Ct|Court|Pkwy|Parkway|Hwy|Highway)[.,]?\s*(?:Suite|Ste|#)?\s*\d*)/i
+      );
+      if (streetMatch) address = streetMatch[1].trim();
+    }
+
+    // Fallback: regex for common street address patterns in body
+    if (!address) {
+      const addressMatch = html.match(
+        /(\d+\s+[\w\s]+(?:St|Street|Ave|Avenue|Blvd|Boulevard|Rd|Road|Dr|Drive|Way|Ln|Lane|Ct|Court|Pkwy|Parkway|Hwy|Highway)[.,]?\s*(?:Suite|Ste|#)?\s*\d*)/i
+      );
+      address = addressMatch?.[1]?.trim() || "";
+    }
   }
 
   // Sanitize all fields
@@ -268,6 +294,51 @@ export async function POST(req: NextRequest) {
         .update({ user_type: "business_owner" })
         .eq("id", user.id)
         .eq("user_type", "customer");
+
+      // Send Postmark email notifications (fire-and-forget, don't block response)
+      if (process.env.POSTMARK_SERVER_TOKEN) {
+        const pmClient = new postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN);
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://platinumdirectorytemeculavalley.com";
+        const submittedDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+        // Email to submitting user
+        pmClient.sendEmail({
+          From: "noreply@platinumdirectorytemeculavalley.com",
+          To: user.email || "",
+          Subject: "Your business has been submitted to Platinum Directory",
+          HtmlBody: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+              <h2 style="color: #1a1a2e;">Your Business Has Been Submitted!</h2>
+              <p>Thank you for submitting <strong>${name.trim()}</strong> to Platinum Directory Temecula Valley.</p>
+              <p><strong>Submitted:</strong> ${submittedDate}</p>
+              <p>Our team will review your listing within <strong>24-48 hours</strong>. Once approved, your business will be live in the directory.</p>
+              <p><a href="${siteUrl}/dashboard" style="display: inline-block; background: #C9A84C; color: #1a1a2e; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">View Your Dashboard</a></p>
+              <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
+              <p style="font-size: 12px; color: #888;">Platinum Directory Temecula Valley</p>
+            </div>
+          `,
+          TextBody: `Your business "${name.trim()}" has been submitted to Platinum Directory. Submitted: ${submittedDate}. We'll review within 24-48 hours. View your dashboard: ${siteUrl}/dashboard`,
+        }).catch((err: any) => console.error("Postmark user email error:", err));
+
+        // Email to admin
+        pmClient.sendEmail({
+          From: "noreply@platinumdirectorytemeculavalley.com",
+          To: "jesse@platinumdirectorytemeculavalley.com",
+          Subject: `New business submission: ${name.trim()}`,
+          HtmlBody: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+              <h2 style="color: #1a1a2e;">New Business Submission</h2>
+              <p><strong>Business:</strong> ${name.trim()}</p>
+              <p><strong>Submitted by:</strong> ${user.email}</p>
+              <p><strong>Date:</strong> ${submittedDate}</p>
+              ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ""}
+              ${website ? `<p><strong>Website:</strong> ${website}</p>` : ""}
+              <p><a href="${siteUrl}/admin/moderation" style="display: inline-block; background: #C9A84C; color: #1a1a2e; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Review in Moderation Queue</a></p>
+            </div>
+          `,
+          TextBody: `New business submission: ${name.trim()}. Submitted by: ${user.email}. Review at: ${siteUrl}/admin/moderation`,
+        }).catch((err: any) => console.error("Postmark admin email error:", err));
+      }
 
       return NextResponse.json({ success: true, business });
     }

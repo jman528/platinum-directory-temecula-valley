@@ -74,7 +74,7 @@ export default async function MyListingsPage() {
                   <span
                     className={`rounded-full px-3 py-1 text-xs ${biz.is_active ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}
                   >
-                    {biz.is_active ? "active" : "inactive"}
+                    {biz.is_active ? "Active" : "Pending Verification"}
                   </span>
                   <Link
                     href={`/business/${biz.slug}`}
