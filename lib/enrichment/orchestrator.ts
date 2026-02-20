@@ -72,6 +72,15 @@ export interface EnrichmentResult {
   confidence_score: number
 }
 
+function formatPhoneUS(raw: string | undefined): string | undefined {
+  if (!raw) return undefined
+  const digits = raw.replace(/\D/g, '')
+  // Remove leading +1 or 1 for US numbers
+  const normalized = digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits
+  if (normalized.length !== 10) return raw // return as-is if not a valid 10-digit US number
+  return `(${normalized.slice(0, 3)}) ${normalized.slice(3, 6)}-${normalized.slice(6)}`
+}
+
 export async function enrichBusiness(
   _businessId: string,
   websiteUrl: string,
@@ -98,7 +107,7 @@ export async function enrichBusiness(
     Object.assign(results, {
       name: fc.name,
       description: fc.description,
-      phone: fc.phone,
+      phone: formatPhoneUS(fc.phone),
       email: fc.email,
       address: fc.address,
       hours: fc.hours,
@@ -122,7 +131,7 @@ export async function enrichBusiness(
         url: gp.maps_url,
       })
     }
-    if (!results.phone && gp.phone) results.phone = gp.phone
+    if (!results.phone && gp.phone) results.phone = formatPhoneUS(gp.phone)
     if (!results.address && gp.address) results.address = gp.address
     if (!results.hours?.length && gp.hours?.length) results.hours = gp.hours
     if (gp.images?.length) results.images!.push(...gp.images)

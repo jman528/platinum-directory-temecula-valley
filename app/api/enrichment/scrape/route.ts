@@ -114,7 +114,18 @@ export async function PATCH(req: NextRequest) {
 
   for (const [field, value] of Object.entries(approvedFields)) {
     const dbField = fieldMap[field]
-    if (dbField) update[dbField] = value
+    if (dbField) {
+      // Format phone numbers
+      if (field === 'phone' && typeof value === 'string') {
+        const digits = value.replace(/\D/g, '')
+        const normalized = digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits
+        update[dbField] = normalized.length === 10
+          ? `(${normalized.slice(0, 3)}) ${normalized.slice(3, 6)}-${normalized.slice(6)}`
+          : value
+      } else {
+        update[dbField] = value
+      }
+    }
   }
 
   update.enriched_at = new Date().toISOString()
