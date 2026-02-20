@@ -6,12 +6,13 @@ import Link from "next/link";
 import {
   ArrowLeft, Save, Loader2, CheckCircle, AlertCircle, ExternalLink,
   Trash2, Bot, Building2, Phone, Clock, ImageIcon, ToggleLeft,
-  Share2, Target, CreditCard, MapPin
+  Share2, Target, CreditCard, MapPin, Sparkles
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import dynamic from "next/dynamic";
 
 const TipTapEditor = dynamic(() => import("@/components/TipTapEditor"), { ssr: false });
+const AIAssistantPanel = dynamic(() => import("@/components/admin/AIAssistantPanel"), { ssr: false });
 
 const TIERS = [
   { value: "free", label: "Free" },
@@ -84,8 +85,21 @@ export default function AdminBusinessDetailPage({
   const [setupFeeDiscountCode, setSetupFeeDiscountCode] = useState("");
   const [setupFeeValidating, setSetupFeeValidating] = useState(false);
   const [setupFeeDiscount, setSetupFeeDiscount] = useState<any>(null);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  // Ctrl+K to toggle AI panel
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setAiPanelOpen(prev => !prev);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     params.then((p) => setBusinessId(p.id));
@@ -351,6 +365,13 @@ export default function AdminBusinessDetailPage({
           )}
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => setAiPanelOpen(true)}
+            className="flex items-center gap-2 rounded-lg border border-pd-gold/30 px-3 py-2 text-sm text-pd-gold hover:bg-pd-gold/10"
+            title="Ctrl+K"
+          >
+            <Sparkles className="h-4 w-4" /> AI Assistant
+          </button>
           <button
             onClick={handleAiCheck}
             disabled={aiChecking}
@@ -916,6 +937,14 @@ export default function AdminBusinessDetailPage({
           </div>
         </div>
       )}
+
+      {/* AI Assistant Panel */}
+      <AIAssistantPanel
+        business={business}
+        mode="general"
+        isOpen={aiPanelOpen}
+        onClose={() => setAiPanelOpen(false)}
+      />
     </div>
   );
 }

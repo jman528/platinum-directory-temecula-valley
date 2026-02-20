@@ -5,8 +5,11 @@ import { createClient } from "@/lib/supabase/client";
 import {
   Phone, PhoneOff, Play, Pause, SkipForward,
   ChevronDown, ChevronRight, Copy, CheckCircle,
-  Loader2, Clock, FileText, Flame,
+  Loader2, Clock, FileText, Flame, Sparkles,
 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const AIAssistantPanel = dynamic(() => import("@/components/admin/AIAssistantPanel"), { ssr: false });
 
 const DISPOSITIONS = [
   { value: "appointment_set", label: "Appointment Set", color: "bg-green-500/20 text-green-400" },
@@ -39,7 +42,20 @@ export default function AdminDialerPage() {
   const [scriptOpen, setScriptOpen] = useState(false);
   const [openObjection, setOpenObjection] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const supabase = createClient();
+
+  // Ctrl+K to toggle AI panel
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setAiPanelOpen(prev => !prev);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     async function init() {
@@ -138,6 +154,13 @@ export default function AdminDialerPage() {
           <p className="mt-1 text-gray-400">{queue.length} businesses in queue</p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => setAiPanelOpen(true)}
+            className="flex items-center gap-2 rounded-lg border border-pd-gold/30 px-3 py-2 text-sm text-pd-gold hover:bg-pd-gold/10"
+            title="Ctrl+K"
+          >
+            <Sparkles className="h-4 w-4" /> AI Assistant
+          </button>
           {!dialerActive ? (
             <button
               onClick={startDialer}
@@ -371,6 +394,23 @@ export default function AdminDialerPage() {
           </div>
         </div>
       </div>
+
+      {/* AI Assistant Panel */}
+      <AIAssistantPanel
+        business={current ? {
+          id: current.id,
+          name: current.name,
+          phone: current.phone,
+          city: current.city,
+          tier: current.tier,
+          lead_score: current.lead_score,
+          outreach_status: current.outreach_status,
+          categories: current.categories,
+        } : null}
+        mode={callState === "in_call" ? "during-call" : callState === "wrap_up" ? "post-call" : "pre-call"}
+        isOpen={aiPanelOpen}
+        onClose={() => setAiPanelOpen(false)}
+      />
     </div>
   );
 }
