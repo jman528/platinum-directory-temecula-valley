@@ -41,12 +41,10 @@ export default function ModerationPage() {
         .in("status", ["pending", "flagged"])
         .order("created_at", { ascending: false })
         .limit(20),
-      supabase
-        .from("businesses")
-        .select("id, name, slug, city, tier, created_at, owner_user_id, phone, website")
-        .eq("is_active", false)
-        .order("created_at", { ascending: false })
-        .limit(20),
+      // Use admin API route to bypass RLS (browser client can't read inactive businesses)
+      fetch("/api/admin/businesses?tab=pending&limit=20").then(r => r.json()).then(d => ({
+        data: d.businesses || [],
+      })).catch(() => ({ data: [] })),
       supabase
         .from("profiles")
         .select("id, full_name, email, points_balance, created_at, user_type")
@@ -86,27 +84,31 @@ export default function ModerationPage() {
   }
 
   async function approveBusiness(bizId: string) {
-    const { error } = await supabase
-      .from("businesses")
-      .update({
-        is_active: true,
-        is_verified: true,
-        claim_status: "approved",
-      })
-      .eq("id", bizId);
-    if (error) { showToast("Failed to approve business", "error"); return; }
-    setPendingList(prev => prev.filter(b => b.id !== bizId));
-    showToast("Business approved and now live in directory");
+    try {
+      const res = await fetch(`/api/admin/businesses/${bizId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: true, is_verified: true }),
+      });
+      if (!res.ok) { showToast("Failed to approve business", "error"); return; }
+      setPendingList(prev => prev.filter(b => b.id !== bizId));
+      showToast("Business approved and now live in directory");
+    } catch {
+      showToast("Failed to approve business", "error");
+    }
   }
 
   async function rejectBusiness(bizId: string) {
-    const { error } = await supabase
-      .from("businesses")
-      .update({ claim_status: "rejected" })
-      .eq("id", bizId);
-    if (error) { showToast("Failed to reject business", "error"); return; }
-    setPendingList(prev => prev.filter(b => b.id !== bizId));
-    showToast("Business rejected");
+    try {
+      const res = await fetch(`/api/admin/businesses/${bizId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) { showToast("Failed to reject business", "error"); return; }
+      setPendingList(prev => prev.filter(b => b.id !== bizId));
+      showToast("Business rejected");
+    } catch {
+      showToast("Failed to reject business", "error");
+    }
   }
 
   async function resetPoints(userId: string) {

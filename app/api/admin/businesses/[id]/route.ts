@@ -53,7 +53,7 @@ export async function PATCH(
       "is_active",
       "is_claimed",
       "is_featured",
-      "claim_status",
+      "is_verified",
       "admin_notes",
       "category_id",
     ];
