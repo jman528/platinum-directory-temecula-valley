@@ -7,19 +7,22 @@ const client = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://platinumdirectorytemeculavalley.com'
+const BASE_URL = 'https://platinumdirectorytemeculavalley.com'
 
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    { url: `${baseUrl}/search`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/deals`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/giveaway`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${baseUrl}/pricing`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/partners`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/rewards`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${baseUrl}/smart-offers`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    { url: BASE_URL, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
+    { url: `${BASE_URL}/directory`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    { url: `${BASE_URL}/offers`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    { url: `${BASE_URL}/categories`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${BASE_URL}/search`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${BASE_URL}/deals`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${BASE_URL}/smart-offers`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    { url: `${BASE_URL}/giveaway`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/pricing`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/partners`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/rewards`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
   ]
 
   // Dynamic business pages
@@ -32,10 +35,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .limit(10000)
 
   const businessPages: MetadataRoute.Sitemap = (businesses || []).map(b => ({
-    url: `${baseUrl}/business/${b.slug}`,
+    url: `${BASE_URL}/business/${b.slug}`,
     lastModified: new Date(b.updated_at),
     changeFrequency: 'weekly' as const,
-    priority: 0.8,
+    priority: 0.7,
   }))
 
   // Category pages
@@ -46,7 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryPages: MetadataRoute.Sitemap = (categories || [])
     .filter(c => c.slug)
     .map(c => ({
-      url: `${baseUrl}/category/${c.slug}`,
+      url: `${BASE_URL}/category/${c.slug}`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.7,
@@ -55,7 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // City pages
   const cities = ['temecula', 'murrieta', 'hemet', 'menifee', 'fallbrook', 'lake-elsinore', 'perris', 'wildomar']
   const cityPages: MetadataRoute.Sitemap = cities.map(c => ({
-    url: `${baseUrl}/city/${c}`,
+    url: `${BASE_URL}/city/${c}`,
     lastModified: new Date(),
     changeFrequency: 'daily' as const,
     priority: 0.7,
@@ -72,7 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     offerPages = (offers || [])
       .filter(o => o.slug)
       .map(o => ({
-        url: `${baseUrl}/offers/${o.slug}`,
+        url: `${BASE_URL}/offers/${o.slug}`,
         lastModified: new Date(o.updated_at),
         changeFrequency: 'daily' as const,
         priority: 0.8,
