@@ -9,6 +9,9 @@ import {
   Share2, Target, CreditCard, MapPin
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import dynamic from "next/dynamic";
+
+const TipTapEditor = dynamic(() => import("@/components/TipTapEditor"), { ssr: false });
 
 const TIERS = [
   { value: "free", label: "Free" },
@@ -428,12 +431,10 @@ export default function AdminBusinessDetailPage({
               </div>
             </div>
             <div>
-              <label className={labelClass}>Description <span className="text-gray-500">({(business?.description || "").length}/500)</span></label>
-              <textarea
-                value={business?.description || ""}
-                onChange={e => updateField("description", e.target.value.slice(0, 500))}
-                rows={4}
-                className={inputClass}
+              <label className={labelClass}>Description</label>
+              <TipTapEditor
+                content={business?.description || ""}
+                onChange={(html) => updateField("description", html)}
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">

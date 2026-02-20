@@ -11,6 +11,7 @@ import type { Metadata } from "next";
 import { getTierFeatures } from "@/lib/features";
 import { formatPhone } from "@/lib/utils/format-phone";
 import { BusinessStructuredData } from "@/components/seo/StructuredData";
+import VideoPlayTracker from "@/components/VideoPlayTracker";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -379,13 +380,14 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
                   return (
                     <div key={i} className="aspect-video overflow-hidden rounded-xl">
                       <iframe
-                        src={embedUrl}
+                        src={`${embedUrl}?enablejsapi=1&origin=${process.env.NEXT_PUBLIC_BASE_URL || ''}`}
                         className="h-full w-full"
                         allow="autoplay; fullscreen; picture-in-picture"
                         allowFullScreen
                         loading="lazy"
                         title={v.title || `${biz.name} video ${i + 1}`}
                       />
+                      <VideoPlayTracker businessId={biz.id} videoUrl={v.url} />
                     </div>
                   );
                 })}

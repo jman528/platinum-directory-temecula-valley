@@ -6,6 +6,7 @@ import type { Category } from "@/types";
 import { formatPhone } from "@/lib/utils/format-phone";
 import MobileFilterToggle from "@/components/ui/mobile-filter-toggle";
 import AISearchBar from "@/components/search/AISearchBar";
+import SearchMapToggle from "@/components/search/SearchMapToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -236,8 +237,10 @@ export default async function SearchPage({
           </div>
         </aside>
 
-        {/* Results Grid */}
+        {/* Results with Map */}
         <div className="flex-1">
+          <SearchMapToggle businesses={bizList} />
+
           {bizList.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <Search className="mx-auto h-12 w-12 text-gray-600" />
