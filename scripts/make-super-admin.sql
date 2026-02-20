@@ -1,19 +1,24 @@
--- Set Jesse as super_admin and Frank as admin
--- Run this in Supabase SQL editor ONCE after first signup
+-- Run this in Supabase SQL Editor AFTER Jesse has signed up/in at least once
+-- This sets Jesse's account to super_admin
 
--- Replace email if needed — use the email they signed up with
+-- First find the user ID:
+-- SELECT id, email FROM auth.users ORDER BY created_at LIMIT 10;
+
+-- Then update the profile (replace the email below with Jesse's actual email):
 UPDATE profiles
 SET user_type = 'super_admin'
-WHERE email = 'jesse@platinumdirectorytemeculavalley.com';
+WHERE id = (
+  SELECT id FROM auth.users WHERE email = 'jesse@platinumdirectorytemeculavalley.com'
+);
 
--- Also Frank
+-- Also Frank as admin
 UPDATE profiles
 SET user_type = 'admin'
-WHERE email = 'frank@platinumdirectorytemeculavalley.com';
-
--- Verify
-SELECT id, email, user_type FROM profiles
-WHERE email IN (
-  'jesse@platinumdirectorytemeculavalley.com',
-  'frank@platinumdirectorytemeculavalley.com'
+WHERE id = (
+  SELECT id FROM auth.users WHERE email = 'frank@platinumdirectorytemeculavalley.com'
 );
+
+-- Verify it worked:
+SELECT id, email, user_type FROM profiles
+JOIN auth.users ON profiles.id = auth.users.id
+WHERE user_type IN ('super_admin', 'admin');
