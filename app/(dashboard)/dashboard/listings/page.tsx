@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Plus, Shield, ExternalLink } from "lucide-react";
+import { Plus, Shield, ExternalLink, Sparkles } from "lucide-react";
 
 export default async function ListingsPage() {
   const supabase = await createClient();
@@ -50,6 +50,9 @@ export default async function ListingsPage() {
                   <span className={`rounded-full px-3 py-1 text-xs ${biz.is_active ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
                     {biz.is_active ? "active" : "inactive"}
                   </span>
+                  <Link href={`/dashboard/listings/${biz.id}/enrich`} className="flex items-center gap-1 rounded-md bg-purple-500/10 px-2.5 py-1 text-xs text-purple-400 hover:bg-purple-500/20" title="AI Enrich">
+                    <Sparkles className="h-3 w-3" /> Enrich
+                  </Link>
                   <Link href={`/business/${biz.slug}`} className="text-gray-400 hover:text-white">
                     <ExternalLink className="h-4 w-4" />
                   </Link>
