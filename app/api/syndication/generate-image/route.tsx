@@ -24,17 +24,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Business not found" }, { status: 404 });
     }
 
-    const tierLabel = {
+    const tierLabels: Record<string, string> = {
       verified_platinum: "Verified",
       platinum_partner: "Partner",
       platinum_elite: "Elite",
-    }[biz.tier] || "Member";
+    };
+    const tierLabel = tierLabels[biz.tier as string] || "Member";
 
-    const tierEmoji = {
+    const tierEmojis: Record<string, string> = {
       verified_platinum: "✓",
       platinum_partner: "⭐",
       platinum_elite: "👑",
-    }[biz.tier] || "✓";
+    };
+    const tierEmoji = tierEmojis[biz.tier as string] || "✓";
 
     const category = (biz.categories as any)?.name || "Local Business";
     const description = (biz.description || "").slice(0, 120);
