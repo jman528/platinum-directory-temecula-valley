@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   ArrowLeft, Save, Loader2, CheckCircle, AlertCircle, ExternalLink,
   Trash2, Bot, Building2, Phone, Clock, ImageIcon, ToggleLeft,
-  Share2, Target, CreditCard, MapPin, Sparkles
+  Share2, Target, CreditCard, MapPin, Sparkles, FileBarChart
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import dynamic from "next/dynamic";
@@ -86,6 +86,8 @@ export default function AdminBusinessDetailPage({
   const [setupFeeValidating, setSetupFeeValidating] = useState(false);
   const [setupFeeDiscount, setSetupFeeDiscount] = useState<any>(null);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditHtml, setAuditHtml] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -259,6 +261,34 @@ export default function AdminBusinessDetailPage({
     }
   }
 
+  async function handleGenerateAudit() {
+    setAuditLoading(true);
+    setAuditHtml(null);
+    try {
+      const res = await fetch("/api/admin/audit/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ business_id: businessId }),
+      });
+      const data = await res.json();
+      if (data.audit_html) {
+        setAuditHtml(data.audit_html);
+        // Open in new window for printing
+        const w = window.open("", "_blank");
+        if (w) {
+          w.document.write(data.audit_html);
+          w.document.close();
+        }
+      } else {
+        setAiResult(data.error || "Failed to generate audit");
+      }
+    } catch {
+      setAiResult("Audit generation failed. Try again.");
+    } finally {
+      setAuditLoading(false);
+    }
+  }
+
   const SETUP_FEES: Record<string, number> = {
     verified_platinum: 199,
     platinum_partner: 499,
@@ -365,6 +395,14 @@ export default function AdminBusinessDetailPage({
           )}
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={handleGenerateAudit}
+            disabled={auditLoading}
+            className="flex items-center gap-2 rounded-lg border border-green-500/30 px-3 py-2 text-sm text-green-400 hover:bg-green-500/10 disabled:opacity-50"
+          >
+            {auditLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileBarChart className="h-4 w-4" />}
+            {auditLoading ? "Generating..." : "Audit PDF"}
+          </button>
           <button
             onClick={() => setAiPanelOpen(true)}
             className="flex items-center gap-2 rounded-lg border border-pd-gold/30 px-3 py-2 text-sm text-pd-gold hover:bg-pd-gold/10"
