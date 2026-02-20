@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   Gift, Award, Trophy, Star, Crown, Loader2,
   ArrowRight, Copy, CheckCircle, Zap,
+  Share2, Facebook, Twitter, Linkedin, ExternalLink,
 } from "lucide-react";
 
 interface Redemption {
@@ -31,11 +32,26 @@ const EARN_TIPS = [
   { label: "Purchase a smart offer", points: "25 pts" },
 ];
 
+const SOCIAL_ACTIONS = [
+  { key: "share_facebook", label: "Share on Facebook", points: 100, group: "Share Us", url: "https://facebook.com/sharer/sharer.php?u=https://platinumdirectorytemeculavalley.com" },
+  { key: "share_twitter", label: "Share on Twitter/X", points: 100, group: "Share Us", url: "https://twitter.com/intent/tweet?text=Check%20out%20Platinum%20Directory&url=https://platinumdirectorytemeculavalley.com" },
+  { key: "share_linkedin", label: "Share on LinkedIn", points: 100, group: "Share Us", url: "https://linkedin.com/shareArticle?mini=true&url=https://platinumdirectorytemeculavalley.com" },
+  { key: "review_google", label: "Review on Google", points: 250, group: "Review Us", url: "https://g.page/r/review" },
+  { key: "review_yelp", label: "Review on Yelp", points: 250, group: "Review Us", url: "https://yelp.com" },
+  { key: "review_tripadvisor", label: "Review on TripAdvisor", points: 250, group: "Review Us", url: "https://tripadvisor.com" },
+  { key: "follow_facebook", label: "Follow on Facebook", points: 50, group: "Follow Us", url: "https://facebook.com/platinumdirectory" },
+  { key: "follow_instagram", label: "Follow on Instagram", points: 50, group: "Follow Us", url: "https://instagram.com/platinumdirectory" },
+  { key: "follow_tiktok", label: "Follow on TikTok", points: 50, group: "Follow Us", url: "https://tiktok.com/@platinumdirectory" },
+  { key: "follow_youtube", label: "Follow on YouTube", points: 50, group: "Follow Us", url: "https://youtube.com/@platinumdirectory" },
+];
+
 export default function RewardsDashboardPage() {
   const [profile, setProfile] = useState<any>(null);
   const [redemptions, setRedemptions] = useState<Redemption[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [claimedActions, setClaimedActions] = useState<Set<string>>(new Set());
+  const [claiming, setClaiming] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -44,7 +60,7 @@ export default function RewardsDashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [{ data: prof }, { data: redeemed }] = await Promise.all([
+      const [{ data: prof }, { data: redeemed }, { data: claimed }] = await Promise.all([
         supabase
           .from("profiles")
           .select("points_balance, points_pending, total_points_earned, referral_code")
@@ -56,10 +72,15 @@ export default function RewardsDashboardPage() {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(20),
+        supabase
+          .from("social_actions")
+          .select("action_type")
+          .eq("user_id", user.id),
       ]);
 
       setProfile(prof);
       setRedemptions((redeemed as Redemption[]) || []);
+      setClaimedActions(new Set((claimed || []).map((c: any) => c.action_type)));
       setLoading(false);
     }
     load();
@@ -71,6 +92,30 @@ export default function RewardsDashboardPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  }
+
+  async function claimSocialAction(action: typeof SOCIAL_ACTIONS[0]) {
+    if (claimedActions.has(action.key) || claiming) return;
+    // Open the social link
+    window.open(action.url, "_blank");
+    setClaiming(action.key);
+    try {
+      const res = await fetch("/api/social-actions/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action_type: action.key }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setClaimedActions(prev => new Set([...prev, action.key]));
+        setProfile((prev: any) => ({
+          ...prev,
+          points_balance: data.new_balance ?? (prev?.points_balance || 0) + action.points,
+          total_points_earned: (prev?.total_points_earned || 0) + action.points,
+        }));
+      }
+    } catch { /* ignore */ }
+    setClaiming(null);
   }
 
   if (loading) {
@@ -163,6 +208,92 @@ export default function RewardsDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Invite Friends */}
+      <div className="mt-6 glass-card p-5">
+        <h3 className="font-heading text-lg font-bold text-white">Invite Friends</h3>
+        <p className="mt-1 text-sm text-gray-400">Earn 500 points for every friend who signs up!</p>
+        {profile?.referral_code && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a
+              href={`https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/sign-up?ref=${profile.referral_code}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-lg bg-blue-600/20 px-3 py-2 text-xs text-blue-400 hover:bg-blue-600/30"
+            >
+              <Facebook className="h-3.5 w-3.5" /> Facebook
+            </a>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out Platinum Directory — the best local business guide for Temecula Valley!')}&url=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/sign-up?ref=${profile.referral_code}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-lg bg-sky-500/20 px-3 py-2 text-xs text-sky-400 hover:bg-sky-500/30"
+            >
+              <Twitter className="h-3.5 w-3.5" /> Twitter/X
+            </a>
+            <a
+              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out Platinum Directory! ${typeof window !== 'undefined' ? window.location.origin : ''}/sign-up?ref=${profile.referral_code}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-lg bg-green-600/20 px-3 py-2 text-xs text-green-400 hover:bg-green-600/30"
+            >
+              <Share2 className="h-3.5 w-3.5" /> WhatsApp
+            </a>
+            <a
+              href={`mailto:?subject=${encodeURIComponent('Check out Platinum Directory')}&body=${encodeURIComponent(`I found this great local business directory for Temecula Valley: ${typeof window !== 'undefined' ? window.location.origin : ''}/sign-up?ref=${profile.referral_code}`)}`}
+              className="flex items-center gap-1.5 rounded-lg bg-pd-purple/20 px-3 py-2 text-xs text-pd-purple-light hover:bg-pd-purple/30"
+            >
+              <ExternalLink className="h-3.5 w-3.5" /> Email
+            </a>
+          </div>
+        )}
+      </div>
+
+      {/* Social Actions */}
+      <div className="mt-6">
+        <h2 className="font-heading text-lg font-bold text-white">Earn Points with Social Actions</h2>
+        <p className="mt-1 text-sm text-gray-400">One-time claims — complete each action to earn points</p>
+        <div className="mt-4 space-y-4">
+          {["Share Us", "Review Us", "Follow Us"].map(group => (
+            <div key={group}>
+              <h3 className="mb-2 text-sm font-medium text-gray-400">{group} (earn {group === "Review Us" ? "250" : group === "Share Us" ? "100" : "50"} pts each)</h3>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {SOCIAL_ACTIONS.filter(a => a.group === group).map(action => {
+                  const isClaimed = claimedActions.has(action.key);
+                  return (
+                    <button
+                      key={action.key}
+                      onClick={() => claimSocialAction(action)}
+                      disabled={isClaimed || claiming === action.key}
+                      className={`flex items-center justify-between rounded-lg p-3 text-left text-sm transition-colors ${
+                        isClaimed
+                          ? "bg-green-500/10 border border-green-500/20"
+                          : "glass-card hover:border-pd-gold/30"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isClaimed ? (
+                          <CheckCircle className="h-4 w-4 text-green-400" />
+                        ) : claiming === action.key ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-pd-gold" />
+                        ) : (
+                          <ExternalLink className="h-4 w-4 text-gray-400" />
+                        )}
+                        <span className={isClaimed ? "text-green-400" : "text-white"}>{action.label}</span>
+                      </div>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                        isClaimed ? "bg-green-500/20 text-green-400" : "bg-pd-gold/15 text-pd-gold"
+                      }`}>
+                        {isClaimed ? "Claimed" : `+${action.points}`}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* How to Earn */}
       <div className="mt-8">
