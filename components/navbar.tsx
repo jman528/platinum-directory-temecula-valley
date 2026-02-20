@@ -80,6 +80,7 @@ export function Navbar() {
           <Link href="/deals" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Deals</Link>
           <Link href="/giveaway" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Giveaway</Link>
           <Link href="/pricing" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Pricing</Link>
+          <Link href="/partners" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Partners</Link>
           <Link href="/legal/business-terms" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">For Businesses</Link>
         </div>
 
@@ -153,6 +154,7 @@ export function Navbar() {
             <Link href="/deals" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Deals</Link>
             <Link href="/giveaway" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Giveaway</Link>
             <Link href="/pricing" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Pricing</Link>
+            <Link href="/partners" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">Partners</Link>
             <Link href="/legal/business-terms" onClick={() => setMenuOpen(false)} className="text-gray-300 hover:text-white">For Businesses</Link>
           </div>
         </div>
