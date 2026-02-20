@@ -141,11 +141,8 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (insertError) {
-        console.error("Business create error:", insertError);
-        return NextResponse.json(
-          { error: "Failed to create business" },
-          { status: 500 }
-        );
+        console.error("Business insert error:", insertError);
+        return NextResponse.json({ error: insertError.message }, { status: 500 });
       }
 
       // Update user profile to business_owner
