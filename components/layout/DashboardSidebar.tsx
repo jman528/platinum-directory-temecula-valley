@@ -162,7 +162,7 @@ export default function DashboardSidebar({
             </p>
             <Link
               href="/pricing"
-              className="mt-2 block rounded-md bg-pd-gold px-3 py-1.5 text-center text-xs font-medium text-pd-dark transition-colors hover:bg-pd-gold-light"
+              className="btn-gold btn-premium mt-2 block rounded-md px-3 py-1.5 text-center text-xs"
             >
               View Plans
             </Link>

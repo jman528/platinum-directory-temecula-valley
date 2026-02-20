@@ -305,18 +305,18 @@ button, a, [role="button"], input[type="submit"], input[type="button"] {
    ============================================ */
 
 .text-gold-shimmer {
-  background: linear-gradient(90deg, #D4AF37, #F5D060, #D4AF37);
-  background-size: 200% auto;
+  background: linear-gradient(90deg, #B8860B 0%, #D4AF37 20%, #F5D060 40%, #FFE8A0 50%, #F5D060 60%, #D4AF37 80%, #B8860B 100%);
+  background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 3s ease-in-out infinite;
+  animation: shimmer 4s ease-in-out infinite;
   will-change: background-position;
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0% { background-position: -300% center; }
+  100% { background-position: 300% center; }
 }
 
 /* ============================================
@@ -684,4 +684,103 @@ button, a, [role="button"], input[type="submit"], input[type="button"] {
     radial-gradient(circle at 70% 60%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
     radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
   pointer-events: none;
+}
+
+/* ============================================
+   Premium Metallic Gold Button
+   ============================================ */
+
+.btn-gold {
+  background: linear-gradient(135deg, #B8860B 0%, #D4AF37 25%, #F5D060 50%, #D4AF37 75%, #B8860B 100%);
+  background-size: 200% 200%;
+  color: #0A0F1A;
+  font-weight: 700;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  box-shadow: 0 2px 12px rgba(212, 175, 55, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 10px 24px;
+  cursor: pointer;
+}
+
+.btn-gold:hover {
+  background-position: 100% 100%;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   Gold Glow Pulse for Tier Badges
+   ============================================ */
+
+.badge-gold-glow {
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+  animation: goldPulse 3s ease-in-out infinite;
+}
+
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(212, 175, 55, 0.6); }
+}
+
+/* ============================================
+   Premium Sweep Shine on Buttons
+   ============================================ */
+
+.btn-premium {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-premium::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: skewX(-25deg);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+
+.btn-premium:hover::after {
+  left: 120%;
+}
+
+/* ============================================
+   Metallic Gold Gradient Border
+   ============================================ */
+
+.border-gold-gradient {
+  border: 1px solid transparent;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-image: linear-gradient(rgba(15,23,42,0.9), rgba(15,23,42,0.9)),
+                    linear-gradient(135deg, #B8860B, #D4AF37, #F5D060, #D4AF37, #B8860B);
+}
+
+/* ============================================
+   Nav Link Animated Underline
+   ============================================ */
+
+.nav-link-animated {
+  position: relative;
+}
+
+.nav-link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #D4AF37, #F5D060);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link-animated:hover::after {
+  width: 100%;
 }

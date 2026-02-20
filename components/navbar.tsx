@@ -76,12 +76,12 @@ export function Navbar() {
 
         {/* Desktop Nav Links */}
         <div className="hidden items-center gap-4 lg:flex">
-          <Link href="/search" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Directory</Link>
-          <Link href="/deals" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Deals</Link>
-          <Link href="/giveaway" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Giveaway</Link>
-          <Link href="/pricing" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Pricing</Link>
-          <Link href="/partners" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Partners</Link>
-          <Link href="/legal/business-terms" className="whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">For Businesses</Link>
+          <Link href="/search" className="nav-link-animated whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Directory</Link>
+          <Link href="/deals" className="nav-link-animated whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Deals</Link>
+          <Link href="/giveaway" className="nav-link-animated whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Giveaway</Link>
+          <Link href="/pricing" className="nav-link-animated whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Pricing</Link>
+          <Link href="/partners" className="nav-link-animated whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">Partners</Link>
+          <Link href="/legal/business-terms" className="nav-link-animated whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-white">For Businesses</Link>
         </div>
 
         {/* Right side */}
