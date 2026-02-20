@@ -11,39 +11,61 @@ function slugify(text: string) {
     .replace(/^-|-$/g, "");
 }
 
-// Simple metadata extraction from HTML
+// Extract business metadata from HTML
 function extractMeta(html: string) {
   const get = (pattern: RegExp) => {
     const match = html.match(pattern);
     return match?.[1]?.trim() || "";
   };
 
-  const title =
-    get(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i) ||
-    get(/<title[^>]*>([^<]+)<\/title>/i);
-
-  const description =
-    get(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i) ||
-    get(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i);
-
-  // Try to find phone numbers
-  const phoneMatch = html.match(
-    /(?:tel:|phone|call)[^"]*?(\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4})/i
-  ) || html.match(/(\(\d{3}\)\s?\d{3}-\d{4})/);
-  const phone = phoneMatch?.[1] || "";
-
-  // Try to find address
-  const addressMatch = html.match(
-    /(\d+\s+[\w\s]+(?:St|Ave|Blvd|Rd|Dr|Way|Ln|Ct|Pkwy|Hwy)[.,]?\s*(?:Suite|Ste|#)?\s*\d*)/i
+  // BUSINESS NAME — prefer og:site_name, then og:title, then <title> (first segment)
+  const ogSiteName = get(
+    /<meta[^>]+property="og:site_name"[^>]+content="([^"]+)"/i
   );
-  const address = addressMatch?.[1] || "";
+  const ogTitle = get(
+    /<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i
+  );
+  const titleTag = get(/<title[^>]*>([^<]+)<\/title>/i);
+  const nameFromTitle = titleTag?.split(/[|–—-]/)[0]?.trim() || "";
+  const name = (ogSiteName || ogTitle || nameFromTitle).slice(0, 100);
 
-  return {
-    name: title.replace(/\s*[-|–—].*$/, "").slice(0, 100),
-    description: description.slice(0, 500),
-    phone,
-    address,
-  };
+  // DESCRIPTION — from og:description or meta description, capped at 500 chars
+  const ogDescription = get(
+    /<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i
+  );
+  const metaDescription = get(
+    /<meta[^>]+name="description"[^>]+content="([^"]+)"/i
+  );
+  const description = (ogDescription || metaDescription).slice(0, 500);
+
+  // PHONE — handles (951) 462-7023, 951-462-7023, 9514627023, +1 951 462 7023
+  const phoneRegex =
+    /(?:\+1[\s.-]?)?\(?([2-9]\d{2})\)?[\s.-]?(\d{3})[\s.-]?(\d{4})/;
+  const phoneMatch = html.match(phoneRegex);
+  const phone = phoneMatch ? phoneMatch[0] : "";
+
+  // ADDRESS — try schema.org structured data first, then street pattern fallback
+  const schemaAddress = get(/"streetAddress"\s*:\s*"([^"]+)"/i);
+  const schemaCity = get(/"addressLocality"\s*:\s*"([^"]+)"/i);
+  const schemaState = get(/"addressRegion"\s*:\s*"([^"]+)"/i);
+
+  let address = "";
+  let city = "";
+  let state = "";
+
+  if (schemaAddress) {
+    address = schemaAddress;
+    city = schemaCity;
+    state = schemaState;
+  } else {
+    // Fallback: regex for common street address patterns
+    const addressMatch = html.match(
+      /(\d+\s+[\w\s]+(?:St|Ave|Blvd|Rd|Dr|Way|Ln|Ct|Pkwy|Hwy)[.,]?\s*(?:Suite|Ste|#)?\s*\d*)/i
+    );
+    address = addressMatch?.[1]?.trim() || "";
+  }
+
+  return { name, description, phone, address, city, state };
 }
 
 export async function POST(req: NextRequest) {
@@ -77,7 +99,14 @@ export async function POST(req: NextRequest) {
         const html = await res.text();
         const meta = extractMeta(html);
 
-        return NextResponse.json(meta);
+        return NextResponse.json({
+          name: meta.name,
+          description: meta.description,
+          phone: meta.phone,
+          address: meta.address,
+          city: meta.city || "Temecula",
+          website: url.replace(/\/$/, ""),
+        });
       } catch {
         return NextResponse.json(
           { error: "Could not fetch that URL. Check the address and try again." },
