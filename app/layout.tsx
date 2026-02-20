@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/sonner";
 import { OrganizationSchema } from "@/components/seo/StructuredData";
-import { GTMHead, GTMBody, MetaPixel, TikTokPixel } from "@/components/AnalyticsPixels";
+import { GTMHead, GTMBody, GA4Script, MetaPixel, TikTokPixel } from "@/components/AnalyticsPixels";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -78,6 +78,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://api.mapbox.com" />
         <GTMHead />
+        <GA4Script />
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <GTMBody />
