@@ -145,6 +145,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: insertError.message }, { status: 500 });
       }
 
+      // Ensure owner_user_id is set (guard against RLS/triggers stripping it)
+      if (user?.id && business?.id) {
+        await admin
+          .from("businesses")
+          .update({ owner_user_id: user.id })
+          .eq("id", business.id);
+      }
+
       // Update user profile to business_owner
       await admin
         .from("profiles")
