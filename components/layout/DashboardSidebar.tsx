@@ -16,25 +16,48 @@ import {
   ShieldCheck,
   Wallet,
   Gift,
+  Bot,
+  DollarSign,
+  Link2,
+  Coins,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/dashboard/listings", label: "My Listings", icon: Store },
   { href: "/dashboard/leads", label: "Leads", icon: Users },
   { href: "/dashboard/messages", label: "Messages", icon: MessageSquare },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/dashboard/promotions", label: "Smart Offers", icon: Tag },
-  { href: "/dashboard/wallet", label: "Wallet", icon: Wallet },
-  { href: "/dashboard/rewards", label: "Rewards", icon: Gift },
-  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
+  { href: "/dashboard/offers", label: "Smart Offers", icon: Tag },
+  { href: "/dashboard/earnings", label: "Earnings", icon: DollarSign },
+  { href: "/dashboard/stripe-connect", label: "Stripe Connect", icon: CreditCard },
+  { href: "/dashboard/wallet", label: "Wallet & Points", icon: Wallet },
+  { href: "/dashboard/rewards", label: "Referrals & Rewards", icon: Gift },
+  { href: "/dashboard/ai", label: "AI Assistant", icon: Bot },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
-export default function DashboardSidebar({ tier, userType }: { tier: string; userType?: string }) {
+export default function DashboardSidebar({
+  tier,
+  userType,
+  pointsBalance,
+  userName,
+}: {
+  tier: string;
+  userType?: string;
+  pointsBalance?: number;
+  userName?: string;
+}) {
   const isAdmin = userType === "admin" || userType === "super_admin";
   const pathname = usePathname();
+
+  const tierLabels: Record<string, string> = {
+    free: "Free",
+    verified_platinum: "Verified",
+    platinum_partner: "Partner",
+    platinum_elite: "Elite",
+  };
 
   return (
     <aside className="hidden w-64 flex-shrink-0 border-r border-pd-purple/20 bg-[#0D1321] lg:block">
@@ -47,16 +70,17 @@ export default function DashboardSidebar({ tier, userType }: { tier: string; use
           <h2 className="mt-3 font-heading text-lg font-bold text-white">Dashboard</h2>
           <div className="mt-1 flex items-center gap-1">
             <Shield className="h-3 w-3 text-pd-gold" />
-            <span className="text-xs text-pd-gold capitalize">
-              {tier.replace(/_/g, " ")}
+            <span className="text-xs text-pd-gold">
+              {tierLabels[tier] || tier.replace(/_/g, " ")} Member
             </span>
           </div>
         </div>
 
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {navItems.map((item) => {
-            const isActive = pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            const isActive = item.exact
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
@@ -92,6 +116,21 @@ export default function DashboardSidebar({ tier, userType }: { tier: string; use
             </>
           )}
         </nav>
+
+        {/* User Info Footer */}
+        <div className="border-t border-pd-purple/20 p-4">
+          {userName && (
+            <p className="truncate text-sm font-medium text-white">{userName}</p>
+          )}
+          {typeof pointsBalance === "number" && (
+            <div className="mt-1 flex items-center gap-1">
+              <Coins className="h-3 w-3 text-pd-gold" />
+              <span className="text-xs text-gray-400">
+                {pointsBalance.toLocaleString()} pts
+              </span>
+            </div>
+          )}
+        </div>
 
         {tier === "free" && (
           <div className="m-3 rounded-lg border border-pd-gold/30 bg-pd-gold/5 p-3">

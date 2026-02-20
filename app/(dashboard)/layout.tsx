@@ -13,7 +13,7 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("user_type")
+    .select("user_type, full_name, points_balance")
     .eq("id", user.id)
     .single();
 
@@ -30,7 +30,12 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-pd-dark">
-      <DashboardSidebar tier={tier} userType={userType} />
+      <DashboardSidebar
+        tier={tier}
+        userType={userType}
+        userName={profile?.full_name || undefined}
+        pointsBalance={profile?.points_balance ?? 0}
+      />
       <main className="flex-1 overflow-auto p-6">{children}</main>
     </div>
   );
